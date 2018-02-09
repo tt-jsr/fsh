@@ -1,0 +1,176 @@
+ls -l
+ps -ef
+
+j = ls 
+
+
+#define function ht takes one argument
+headtail = [head -n 1 $file | cut -c -30
+tail -n 1 $file | cut -c -30]
+
+#Execute ls command and store result in files
+files = ListFiles[/var/log/debesys/OC_cme*,{sort=ctime}] 
+
+# Define function 'Foo'
+foo = For [f in $files, ht[$f, 1]]
+# Foo caled with no arguments, $files is taken from the current context
+foo[]
+
+#Foo called with file list, $files is taken from parameter
+foo[files]
+foo[{log1, log2, log3}]
+
+# Define function that requires an arg
+foo = For [f in $arg1, ht[$f, 1]]
+
+foo[] # error
+foo[{log1, log2, log3}] #ok
+
+
+# neither the echo or the command execution is captured, output
+# goes to the screen
+ListFiles[OC_*, {sortby=atime}] 
+For[f in ListFiles[OC*, {sortby=atime}], 
+    echo $f.fullpath
+    headtail[$f.basename]
+]
+For[f in $ListFiles.return, 
+    echo $f.fullpath
+    headtail[$f.basename]
+]
+
+# All output is captured and stored in file 'tmp'
+For[f in $files, 
+    echo $f.fullpath
+    ht[$f.basename, 1]
+] > tmp
+
+# All output is captured and stored in variable 'tmp'
+For[f in $files, 
+    echo $f.fullpath
+    ht[$f.basename, 1]
+] $> tmp
+
+# All output is captured and piped into grep
+For[f in $files, 
+    echo $f.fullpath
+    ht[$f.basename, 1]
+] | grep ExecutionReport
+
+# Capture and write to file 'junk' in current directory
+# and return a value to 'var'
+var = For[f in $files, 
+    Print[$f.fullpath]
+    ht[$f.basename, 1]
+    return[12] 
+] > junk 
+
+option = Select[$files]
+
+files = PartitionFile[OC_cme.log, 3,{partitionBy=Lines|Bytes}] 
+For[f in $files, 
+    $f | System[logclean > log${For.iteration}.log]
+]
+
+########################################
+# Support for currying/binding
+Foo = [PartitionFile[OC_cme.log, 3]]
+Foo[]
+Foo = [PartitionFile[OC_cme.log, _]]
+Foo[3]
+Foo = [PartitionFile[_, 3]]
+Foo[OC_cme.log]
+Foo = [PartitionFile[_, _]]
+Foo[OC_cme.log, 3]  # This form is somewhat useless
+
+#########################################
+# If expression
+If [$file == "log.txt", echo "true", echo "false"]
+
+#########################################
+# While
+While [$counter != 0, 
+    counter = $counter - 1
+]
+
+##########################################
+# Pipe to command
+For[f in $files,
+    If [Extension[$f] == ".gz", zcat $f, cat $f]
+] | System[grep ExecutionReport]
+
+#########################################
+# Using threads, partition a file and launch vim to
+# view all partitions
+ErFormat[outfile] = [
+]
+
+ViewReports[file] = [
+    UseReports = OptArg[-e]
+
+    size = Fstat[$file].size
+    nparts = size/100000000 + 1
+    files = PartitionFile[$file, $nparts]
+    threadObj = None
+    For[f in $files,
+        Thread[$threadObj,
+            $f | System[erformat > er$(For.iteration).log ]
+        ]
+    ]
+    ThreadJoin[$threadObj]
+    files = ListFiles[er*.log]
+    vim Expand[$files]
+]
+
+###################################
+# Example of command line args
+If [FileTest[$file, "-e"], Print["true"], Print["false"]]
+
+####################################
+# Function that takes a function as an argument
+Foo[func] = [
+    func[]
+]
+
+##################################
+# Function that returns a function
+Foo[] = [
+   return ViewReport
+]
+
+#############################
+# Example of binding and calling Foo
+Example[] = [ViewReports[mylog.txt]]
+Foo[Example]
+
+############################
+# lambda
+Foo[
+    &[][System[grep "my pattern" log.txt]]
+]
+
+# Functions can piped together
+ht[/var/log/debesys/OC_cme*] | FooFunc[args]
+ht[/var/log/debesys/OC_cme*] | wc -l
+
+#########################
+ListFiles
+Used without assignment, uses default output of files
+When assigned, returns a list, each element of the list
+contains the fstat members
+
+If a member is not specified, name is used
+
+##############################
+For[var in list, body]
+For maintains a local variable called 'For.iteration' which is the interation count
+
+####################################
+ListPtr PartitionFile[filename, count]
+Returns a list of filepartitions. Each partition repesents a section of the file
+and when used as input, will only provide the input of that range.
+
+#############################
+Thread[threadid, body]
+ThreadJoin[threadid]
+ThreadJoin[{threadids}]
