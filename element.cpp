@@ -17,9 +17,9 @@ namespace fsh
         return StringPtr(new String(s));
     }
 
-    IntPtr MakeInt(int64_t n)
+    IntegerPtr MakeInteger(int64_t n)
     {
-        return IntPtr(new Int(n));
+        return IntegerPtr(new Integer(n));
     }
 
     ExpressionPtr MakeExpression()

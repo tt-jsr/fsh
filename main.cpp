@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     Machine m;
     Parser parser;
 
-    Instruction *inst = parser.parse("22 + 13");
+    instruction::Instruction *inst = parser.parse("22 + 13");
     assert(inst);
     inst->Execute(m);
 }

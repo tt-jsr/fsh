@@ -21,45 +21,46 @@ namespace fsh
     struct Operators
     {
         char buf[5];
+        int length;
         int token;
         int prec;
     } opTable[] = {
-       {"||", TOKEN_OR, 2}
-       ,{"!=", TOKEN_NEQ, 7}
-       ,{"&&", TOKEN_AND, 2}
-       ,{">=", TOKEN_GTE, 7}
-       ,{"<=", TOKEN_LTE, 7}
-       //,{"[[", TOKEN_OPEN_SUBSCRIPT, 0}
-       //,{"]]", TOKEN_CLOSE_SUBSCRIPT, 0}
-       //,{"in", TOKEN_IN, 2}
-       ,{">", TOKEN_GT, 7}
-       ,{"<", TOKEN_LT, 7}
-       ,{"=", TOKEN_ASSIGN, 1}
-       //,{"{", TOKEN_OPEN_BRACE, 0}
-       //,{"}", TOKEN_CLOSE_BRACE, 0}
-       //,{"[", TOKEN_OPEN_BRACKET, 0}
-       //,{"]", TOKEN_CLOSE_BRACKET, 0}
-       //,{"(", TOKEN_OPEN_PAREN, 0}
-       //,{")", TOKEN_CLOSE_PAREN, 0}
-       ,{",", TOKEN_COMMA, 0}
-       ,{"+", TOKEN_PLUS, 10}
-       ,{"-", TOKEN_MINUS, 10}
-       ,{"+", TOKEN_MULTIPLY, 20}
-       ,{"/", TOKEN_DIVIDE, 20}
-       ,{"%", TOKEN_MOD, 20}
+       {"||", 2, TOKEN_OR, 2}
+       ,{"!=", 2, TOKEN_NEQ, 7}
+       ,{"&&", 2, TOKEN_AND, 2}
+       ,{">=", 2, TOKEN_GTE, 7}
+       ,{"<=", 2, TOKEN_LTE, 7}
+       //,{"[[", 2, TOKEN_OPEN_SUBSCRIPT, 0}
+       //,{"]]", 2, TOKEN_CLOSE_SUBSCRIPT, 0}
+       //,{"in", 2, TOKEN_IN, 2}
+       ,{">", 1, TOKEN_GT, 7}
+       ,{"<", 1, TOKEN_LT, 7}
+       ,{"=", 1, TOKEN_ASSIGN, 1}
+       //,{"{", 1, TOKEN_OPEN_BRACE, 0}
+       //,{"}", 1, TOKEN_CLOSE_BRACE, 0}
+       //,{"[", 1, TOKEN_OPEN_BRACKET, 0}
+       //,{"]", 1, TOKEN_CLOSE_BRACKET, 0}
+       //,{"(", 1, TOKEN_OPEN_PAREN, 0}
+       //,{")", 1, TOKEN_CLOSE_PAREN, 0}
+       ,{",", 1, TOKEN_COMMA, 0}
+       ,{"+", 1, TOKEN_PLUS, 10}
+       ,{"-", 1, TOKEN_MINUS, 10}
+       ,{"*", 1, TOKEN_MULTIPLY, 20}
+       ,{"/", 1, TOKEN_DIVIDE, 20}
+       ,{"%", 1, TOKEN_MOD, 20}
        ,{0, 0, 0}
     };
 
     Parser::Parser()
     {}
 
-    Instruction * Parser::parse(const std::string& s)
+    instruction::Instruction * Parser::parse(const std::string& s)
     {
         input_ = s;
         pos_ = 0;
         while(true)
         {
-            Instruction *inst = parse_expression();
+            instruction::Instruction *inst = parse_expression();
             if (inst == nullptr)
             {
                 assert(stack_.size() == 1);
@@ -101,17 +102,17 @@ namespace fsh
         return c;
     }
 
-    void Parser::push(Instruction *p)
+    void Parser::push(instruction::Instruction *p)
     {
         stack_.push_back(p);
     }
 
-    Instruction *Parser::pop()
+    instruction::Instruction *Parser::pop()
     {
         assert(stack_.size() > 0);
         if (stack_.size() == 0)
             return nullptr;
-        Instruction *p = stack_.back();
+        instruction::Instruction *p = stack_.back();
         stack_.pop_back();
         return p;
     }
@@ -126,7 +127,7 @@ namespace fsh
         }
     }
 
-    BinaryOperator * Parser::parse_binary_operator()
+    instruction::BinaryOperator * Parser::parse_binary_operator()
     {
         skipWhiteSpace();
         Operators *op = opTable;
@@ -136,29 +137,23 @@ namespace fsh
             const char *buf = op->buf;
             while(true)
             {
-                if (*buf == 0)
+                if (strncmp(s, op->buf, op->length) == 0)
                 {
-                    BinaryOperator *bop = new BinaryOperator();
+                    instruction::BinaryOperator *bop = new instruction::BinaryOperator();
                     bop->op = op->token;
                     bop->prec = op->prec;
-                    advance(strlen(op->buf));
+                    advance(op->length);
                     return bop;
                 }
-                if (*s != *buf)
-                {
-                    return nullptr;
-                }
-                ++s;
-                ++buf;
+                ++op;
             }
-            ++op;
         }
         return nullptr;
     }
 
-    Instruction * Parser::parse_expression()
+    instruction::Instruction * Parser::parse_expression()
     {
-        Instruction *inst = parse_identifier();
+        instruction::Instruction *inst = parse_identifier();
         if (inst)
             return inst;
         inst = parse_number();
@@ -173,7 +168,7 @@ namespace fsh
             return inst;
         */
 
-        BinaryOperator *bop = parse_binary_operator();
+        instruction::BinaryOperator *bop = parse_binary_operator();
         if (bop)
         {
             bop->lhs = pop();
@@ -183,11 +178,11 @@ namespace fsh
         return nullptr;
     }
 
-    void Parser::parse_identifierSequence(std::vector<Identifier *>& vec)
+    void Parser::parse_identifierSequence(std::vector<instruction::Identifier *>& vec)
     {
         while(true)
         {
-            Identifier *ident = parse_identifier();
+            instruction::Identifier *ident = parse_identifier();
             if (ident == nullptr)
                 return;
             vec.push_back(ident);
@@ -198,7 +193,7 @@ namespace fsh
         }
     }
 
-    Identifier * Parser::parse_identifier()
+    instruction::Identifier * Parser::parse_identifier()
     {
         skipWhiteSpace();
         std::string s;
@@ -214,14 +209,14 @@ namespace fsh
         }
         if (s.size() > 0)
         {
-            Identifier *ident = new Identifier();
+            instruction::Identifier *ident = new instruction::Identifier();
             ident->name = std::move(s);
             return ident;
         }
         return nullptr;
     }
 
-    Integer * Parser::parse_number()
+    instruction::Integer * Parser::parse_number()
     {
         skipWhiteSpace();
 
@@ -235,15 +230,21 @@ namespace fsh
             advance(1);
             c = peekchar();
         }
-        while(c = peekchar())
+        if (!isdigit(c))
+        {
+            advance(-1);
+            return nullptr;
+        }
+        while(isdigit(c))
         {
             *p = c;
             ++p;
             advance(1);
+            c = peekchar();
         }
         if (p != buf)
         {
-            Integer *inter = new Integer();
+            instruction::Integer *inter = new instruction::Integer();
             inter->value = strtol(buf, nullptr, 0);
             return inter;
         }

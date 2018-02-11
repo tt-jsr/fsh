@@ -21,9 +21,9 @@ namespace fsh
             return Error("Part: invalid args");
         if (args->elements.size() == 2)
         {
-            if (args->elements[1]->IsInt() == false)
+            if (args->elements[1]->IsInteger() == false)
                 return Error("Part: invalid args, expected int");
-            IntPtr n = args->elements[1].cast<Int>();
+            IntegerPtr n = args->elements[1].cast<Integer>();
             if (n->value > 0)
             {
                 if (n->value >= list->size())
@@ -52,7 +52,7 @@ namespace fsh
 
     void List::Add(int64_t n)
     {
-        elements.push_back(MakeInt(n));
+        elements.push_back(MakeInteger(n));
     }
 
     void Dump(ElementPtr e)
@@ -67,7 +67,7 @@ namespace fsh
             break;
         case ELEMENT_TYPE_INTEGER:
             {
-                IntPtr ip = e.cast<Int>();
+                IntegerPtr ip = e.cast<Integer>();
                 std::cout << "INT: " << ip->value << std::endl;
             }
             break;

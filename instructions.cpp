@@ -7,25 +7,30 @@
 
 namespace fsh
 {
-    /*****************************************************/
-    void BinaryOperator::Execute(Machine& machine)
+    namespace instruction
     {
-    }
+        /*****************************************************/
+        void BinaryOperator::Execute(Machine& machine)
+        {
+            ElementPtr lhs = machine.pop_data();
+            ElementPtr rhs = machine.pop_data();
 
-    /*****************************************************/
-    void Function::Execute(Machine& machine)
-    {
-    }
+        }
 
-    /*****************************************************/
-    void Identifier::Execute(Machine& machine)
-    {
-    }
+        /*****************************************************/
+        void Function::Execute(Machine& machine)
+        {
+        }
 
-    /*****************************************************/
-    void Integer::Execute(Machine& machine)
-    {
-    }
+        /*****************************************************/
+        void Identifier::Execute(Machine& machine)
+        {
+        }
 
+        /*****************************************************/
+        void Integer::Execute(Machine& machine)
+        {
+        }
+    }
  }
 
