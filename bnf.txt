@@ -1,0 +1,40 @@
+letter = [a-zA-Z]
+digit = [0-9]
+
+number = ['-'], {digit}
+string = '"', {all characters - '"'}, '"'
+list = '{', expressionSequence, '}'
+variable = '$', {letter | digit | '_'}
+           | '$', '(', {letter | digit | '_'}, ')'
+
+identifier = letter, {letter | digit | '_' | variable}
+
+expression = identifier
+            | functionCall
+            | lambda
+            | expression MULTIPY expression
+            | expression DIVIDE expression
+            | expression ADD expression
+            | expression SUBTRACT expression
+            | expression GT expression
+            | expression LT expression
+            | expression AND expression
+            | expression OR expression
+            | expression EQUAL expression
+            | list
+            | number
+            | string
+            | variable
+            | True
+            | False
+            | None
+
+expressionSequence = expression, {',', expression}
+identifierSequence = identifier, {',', identifier}
+functionBody = '[', expression, ']'
+functionCall = identifier, '[', expressionSequence, ']'
+lambda = '&', '[', identifierSequence, ']''[', expressionSequence, ']'
+
+assignment = identifier, '=', (variable | string | number | functionCall)
+           | identifier, '[', (identifier | '_'), {',' (identifier | '_'}, ']', '=', identifier  # function bind
+           | identifier, '[', identifierSequence, ']', '=', functionBody

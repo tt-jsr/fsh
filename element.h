@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include <function>
+#include <functional>
 #include "instrusive_base.h"
 #include "instrusive_ptr.h"
 
@@ -89,7 +89,7 @@ namespace fsh
     {
         virtual ElementType type() {return ELEMENT_TYPE_EXPRESSION;}
         void Execute(ExecutionContextPtr) {}
-        std::vector<std::function<void(Machine&)> instructions;
+        std::vector<std::function<void(Machine&)>> instructions;
     };
 
     typedef instrusive_ptr<Expression> ExpressionPtr;

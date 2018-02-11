@@ -1,7 +1,11 @@
-#include "parser.h"
 #include <cctype>
 #include <cstdlib>
 #include <iostream>
+#include <cassert>
+#include <cstring>
+#include "common.h"
+#include "parser.h"
+#include "instructions.h"
 
 //#define PRINT_STACK 1
 
@@ -19,30 +23,28 @@ namespace fsh
         char buf[5];
         int token;
         int prec;
-    } opTable = {
-        {"$>", TOKEN_DOLLAR_GREATER, 2}   // Should this be zero?
-       ,{"||", TOKEN_OR, 2}
-       ,{"==", TOKEN_LTEEQUAL, 7}
-       ,{"!=", TOKEN_NOT_EQUAL, 7}
+    } opTable[] = {
+       {"||", TOKEN_OR, 2}
+       ,{"!=", TOKEN_NEQ, 7}
        ,{"&&", TOKEN_AND, 2}
        ,{">=", TOKEN_GTE, 7}
        ,{"<=", TOKEN_LTE, 7}
-       ,{"[[", TOKEN_OPEN_SUBSCRIPT, 0}
-       ,{"]]", TOKEN_CLOSE_SUBSCRIPT, 0}
-       ,{"in", TOKEN_IN, 2}
+       //,{"[[", TOKEN_OPEN_SUBSCRIPT, 0}
+       //,{"]]", TOKEN_CLOSE_SUBSCRIPT, 0}
+       //,{"in", TOKEN_IN, 2}
        ,{">", TOKEN_GT, 7}
        ,{"<", TOKEN_LT, 7}
        ,{"=", TOKEN_ASSIGN, 1}
-       ,{"{", TOKEN_OPEN_BRACE, 0}
-       ,{"}", TOKEN_CLOSE_BRACE, 0}
-       ,{"[", TOKEN_OPEN_BRACKET, 0}
-       ,{"]", TOKEN_CLOSE_BRACKET, 0}
-       ,{"(", TOKEN_OPEN_PAREN, 0}
-       ,{")", TOKEN_CLOSE_PAREN, 0}
+       //,{"{", TOKEN_OPEN_BRACE, 0}
+       //,{"}", TOKEN_CLOSE_BRACE, 0}
+       //,{"[", TOKEN_OPEN_BRACKET, 0}
+       //,{"]", TOKEN_CLOSE_BRACKET, 0}
+       //,{"(", TOKEN_OPEN_PAREN, 0}
+       //,{")", TOKEN_CLOSE_PAREN, 0}
        ,{",", TOKEN_COMMA, 0}
        ,{"+", TOKEN_PLUS, 10}
        ,{"-", TOKEN_MINUS, 10}
-       ,{"+", TOKEN_TIMES, 20}
+       ,{"+", TOKEN_MULTIPLY, 20}
        ,{"/", TOKEN_DIVIDE, 20}
        ,{"%", TOKEN_MOD, 20}
        ,{0, 0, 0}
@@ -51,282 +53,201 @@ namespace fsh
     Parser::Parser()
     {}
 
-    void Parser::skipWhiteSpace(const char *&s)
+    Instruction * Parser::parse(const std::string& s)
     {
-        while (*s == ' ' || *s == '\r' || *s == '\n' || *s == '\t')
-            ++s;
+        input_ = s;
+        pos_ = 0;
+        while(true)
+        {
+            Instruction *inst = parse_expression();
+            if (inst == nullptr)
+            {
+                assert(stack_.size() == 1);
+                return pop();
+            }
+            push(inst);
+        }
     }
 
-    bool Parser::parseOperator(const char *&s)
+
+    char Parser::peekchar()
     {
-        skipWhiteSpace(s);
-        const char *start = s;
-        Operator *op = opTable;
+        if (pos_ >= input_.size())
+            return 0;
+        return input_[pos_];
+    }
+
+    const char * Parser::peekstr()
+    {
+        if (pos_ >= input_.size())
+            return 0;
+        return &input_[pos_];
+    }
+
+    void Parser::advance(int n)
+    {
+        if (n < 0 && -n > pos_)
+            pos_ = 0;
+        else
+            pos_ += n;
+    }
+
+    char Parser::getchar()
+    {
+        if (pos_ >= input_.size())
+            return 0;
+        char c = input_[pos_];
+        ++pos_;
+        return c;
+    }
+
+    void Parser::push(Instruction *p)
+    {
+        stack_.push_back(p);
+    }
+
+    Instruction *Parser::pop()
+    {
+        assert(stack_.size() > 0);
+        if (stack_.size() == 0)
+            return nullptr;
+        Instruction *p = stack_.back();
+        stack_.pop_back();
+        return p;
+    }
+
+    void Parser::skipWhiteSpace()
+    {
+        char c = peekchar();
+        while (c == ' ' || c == '\r' || c == '\n' || c == '\t')
+        {
+            advance(1);
+            c = peekchar();
+        }
+    }
+
+    BinaryOperator * Parser::parse_binary_operator()
+    {
+        skipWhiteSpace();
+        Operators *op = opTable;
+        const char *s = peekstr();
         while(op->buf[0])
         {
-            start = s;
             const char *buf = op->buf;
             while(true)
             {
                 if (*buf == 0)
                 {
-                    Token token;
-                    token.token = op->token;
-                    ++start;
-                    token.prec = op->prec;
-                    token.category = CATEGORY_OPERATOR;
-                    input.push_back(token);
-                    s = start;
-                    return true;
+                    BinaryOperator *bop = new BinaryOperator();
+                    bop->op = op->token;
+                    bop->prec = op->prec;
+                    advance(strlen(op->buf));
+                    return bop;
                 }
-                if (*start != *buf)
-                    return false;
-                ++start;
+                if (*s != *buf)
+                {
+                    return nullptr;
+                }
+                ++s;
                 ++buf;
             }
             ++op;
         }
-        return false;
+        return nullptr;
     }
 
-    void Parser::parse(const std::string& expr, ExpressionPtr& exprPtr)
+    Instruction * Parser::parse_expression()
     {
-        expr = exprPtr;
-        op_stack.clear();
-        input.clear();
-        const char *s = expr.c_str();
-        while (*s)
+        Instruction *inst = parse_identifier();
+        if (inst)
+            return inst;
+        inst = parse_number();
+        if (inst)
+            return inst;
+        /*
+        inst = parse_string();
+        if (inst)
+            return list;
+        inst = parse_list();
+        if (inst)
+            return inst;
+        */
+
+        BinaryOperator *bop = parse_binary_operator();
+        if (bop)
         {
-            parse_operator(s);
-            parse_indentifier(s);
-            parse_number(s);
+            bop->lhs = pop();
+            bop->rhs = parse_expression();
+            return bop;
         }
-        infix2postfix();
+        return nullptr;
     }
 
-    void Parser::tok2rule(Token& tok)
+    void Parser::parse_identifierSequence(std::vector<Identifier *>& vec)
     {
-        switch (tok.token)
+        while(true)
         {
-            case TOKEN_IDENTIFIER:
-#if defined(PRINT_STACK)
-                std::cout << tok.str << std::endl;
-#endif
-                expr->add(LoadFieldValueByName(tok.str));
-                break;
-            case TOKEN_GT:
-#if defined(PRINT_STACK)
-                std::cout << ">" << std::endl;
-#endif
-                pRule->add(GreaterThan());
-                break;
-            case TOKEN_GTE:
-#if defined(PRINT_STACK)
-                std::cout << ">=" << std::endl;
-#endif
-                pRule->add(GreaterThanEQ());
-                break;
-            case TOKEN_LT:
-#if defined(PRINT_STACK)
-                std::cout << "<" << std::endl;
-#endif
-                pRule->add(LessThan());
-                break;
-            case TOKEN_LTE:
-#if defined(PRINT_STACK)
-                std::cout << "<=" << std::endl;
-#endif
-                pRule->add(LessThanEQ());
-                break;
-            case TOKEN_EQ:
-#if defined(PRINT_STACK)
-                std::cout << "==" << std::endl;
-#endif
-                pRule->add(Equal());
-                break;
-            case TOKEN_NEQ:
-#if defined(PRINT_STACK)
-                std::cout << "!=" << std::endl;
-#endif
-                pRule->add(NotEqual());
-                break;
-            case TOKEN_AND:
-#if defined(PRINT_STACK)
-                std::cout << "&&" << std::endl;
-#endif
-                pRule->add(And());
-                break;
-            case TOKEN_OR:
-#if defined(PRINT_STACK)
-                std::cout << "||" << std::endl;
-#endif
-                pRule->add(Or());
-                break;
-            case TOKEN_INT:
-#if defined(PRINT_STACK)
-                std::cout << tok.str << std::endl;
-#endif
-                pRule->add(Integer(strtoull(tok.str.c_str(), nullptr, 10)));
-                break;
-            case TOKEN_DOUBLE:
-#if defined(PRINT_STACK)
-                std::cout << tok.str << std::endl;
-#endif
-                pRule->add(Double(strtod(tok.str.c_str(), nullptr)));
-                break;
-            case TOKEN_VARIABLE:
-#if defined(PRINT_STACK)
-                std::cout << "$" << tok.str << std::endl;
-#endif
-                pRule->add(Variable(tok.str));
-                break;
-            case TOKEN_ASSIGN:
-#if defined(PRINT_STACK)
-                std::cout << "=" << std::endl;
-#endif
-                pRule->add(Assignment());
-                break;
-            case TOKEN_COMMA:
-#if defined(PRINT_STACK)
-                std::cout << "," << std::endl;
-#endif
-                pRule->add(Comma());
-                break;
+            Identifier *ident = parse_identifier();
+            if (ident == nullptr)
+                return;
+            vec.push_back(ident);
+            skipWhiteSpace();
+            if (peekchar() != ',')
+                return;
+            advance(1);
         }
     }
 
-    void Parser::infix2postfix()
+    Identifier * Parser::parse_identifier()
     {
-        std::vector<Token>::iterator it = input.begin();
-        while (it != input.end())
+        skipWhiteSpace();
+        std::string s;
+        while (char c = peekchar())
         {
-            infix2postfix(it);
-        }
-    }
-
-    void Parser::infix2postfix(std::vector<Token>::iterator& it)
-    {
-        for (; it != input.end(); ++it)
-        {
-            Token& tok = *it;
-            // Always just send an operand to the output
-            if (tok.category == CATEGORY_OPERAND)
+            if (isalnum(c) || c == '_' || c == '.' || c == '$' || c == '(' || c == ')')
             {
-                output.push_back(tok);
-            }
-            if (tok.category == CATEGORY_OPERATOR)
-            {
-                if (tok.token == TOKEN_COMMA)
-                {
-                    // end of statement, cleanup. There's probably another one to follow...
-                    ++it;
-                    break;
-                }
-                // If the operator stack is empty, push it
-                if (op_stack.empty())
-                {
-                    op_stack.push_back(tok);
-                }
-                // I'm not using precedence for these, so always just push
-                else if (tok.token == TOKEN_OPEN_PAREN
-                      || tok.token == TOKEN_OPEN_BRACKET
-                      || tok.token == TOKEN_OPEN_BRACE
-                      || tok.token == TOKEN_OPEN_SUBSCRIPT)
-                {
-                    op_stack.push_back(tok);
-                }
-                else if (tok.token == TOKEN_CLOSE_PAREN
-                      || tok.token == TOKEN_CLOSE_BRACKET
-                      || tok.token == TOKEN_CLOSE_BRACE
-                      || tok.token == TOKEN_CLOSE_SUBSCRIPT)
-                {
-                    // We just read a CLOSE, pop and output operators until we get to the OPEN
-                    while (!op_stack.empty() && op_stack.back().token != (tok.token - 1))
-                    {
-                        output.push_back(op_stack.back());
-                        op_stack.pop_back();
-                    }
-                    op_stack.pop_back();    // pop the OPEN
-                }
-                else
-                {   
-                    // Pop and output operators based on precedence
-                    while (!op_stack.empty() && op_stack.back().prec >= tok.prec)
-                    {
-                        output.push_back(op_stack.back());
-                        op_stack.pop_back();
-                    }
-                    op_stack.push_back(tok);
-                }
-            }
-        }
-        // No more input, pop whats left
-        while (!op_stack.empty())
-        {
-            output.push_back(op_stack.back());
-            op_stack.pop_back();
-        }
-    }
-
-    bool Parser::parse_identifier(const char *&start)
-    {
-        Token tok;
-        tok.token = TOKEN_IDENTIFIER;
-        tok.category = CATEGORY_OPERAND;
-
-        skipWhiteSpace(s);
-
-        const char *s = start;
-        while (*s)
-        {
-            if (isalnum(*s) || *s == '_' || *s == '.' || *s == '$' || *s == '(' || *s == ')')
-            {
-                tok.str.push_back(*s);
-                ++s;
+                s.push_back(c);
+                advance(1);
             }
             else
                 break;
         }
-        if (tok.str.empty())
+        if (s.size() > 0)
         {
-            return false;
+            Identifier *ident = new Identifier();
+            ident->name = std::move(s);
+            return ident;
         }
-        input.push_back(tok);
-        start = s;
-        return false;
+        return nullptr;
     }
 
-    bool Parser::parse_number(const char *&start)
+    Integer * Parser::parse_number()
     {
-        Token tok;
-        tok.token = TOKEN_INT;
-        tok.category = CATEGORY_OPERAND;
+        skipWhiteSpace();
 
-        skipWhiteSpace(s);
-
-        const char *s = start;
-        if (isdigit(*s) || *s == '+' || *s == '-' )
+        char buf[32];
+        char *p = buf;
+        char c = peekchar();
+        if (isdigit(c) || c == '-')
         {
-            tok.str.push_back(*s);
-            ++s;
+            *p = c;
+            ++p;
+            advance(1);
+            c = peekchar();
         }
-        while (*s)
+        while(c = peekchar())
         {
-            if (isdigit(*s))
-            {
-                tok.str.push_back(*s);
-                ++s;
-            }
-            else
-                break;
+            *p = c;
+            ++p;
+            advance(1);
         }
-        if (tok.str.empty())
+        if (p != buf)
         {
-            return false;
+            Integer *inter = new Integer();
+            inter->value = strtol(buf, nullptr, 0);
+            return inter;
         }
-        input.push_back(tok);
-        start = s;
-        return true;
+        return nullptr;
     }
 
 }

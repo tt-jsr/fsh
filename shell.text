@@ -4,6 +4,9 @@ ps -ef
 j = ls 
 
 
+var = "hello"
+var2 = var
+
 #define function ht takes one argument
 headtail = [head -n 1 $file | cut -c -30
 tail -n 1 $file | cut -c -30]
@@ -74,13 +77,13 @@ For[f in $files,
 
 ########################################
 # Support for currying/binding
-Foo = [PartitionFile[OC_cme.log, 3]]
+Foo["OC_cme.log", 3] = PartitionFile
 Foo[]
-Foo = [PartitionFile[OC_cme.log, _]]
+Foo["OC_cme.log", _] = PartitionFile
 Foo[3]
-Foo = [PartitionFile[_, 3]]
+Foo[_, 3] = PartitionFile
 Foo[OC_cme.log]
-Foo = [PartitionFile[_, _]]
+Foo[_, _] = PartitionFile
 Foo[OC_cme.log, 3]  # This form is somewhat useless
 
 #########################################
@@ -146,7 +149,11 @@ Foo[Example]
 ############################
 # lambda
 Foo[
-    &[][System[grep "my pattern" log.txt]]
+    [System[grep "my pattern" log.txt]]  # Lambda takes no arguments
+]
+
+Foo[
+    [_, System[grep "my pattern" log.txt]]  # Lambda takes one arguments
 ]
 
 # Functions can piped together

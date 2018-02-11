@@ -1,5 +1,4 @@
 #pragma once
-#include "data.h"
 
 namespace fsh
 {
@@ -11,45 +10,44 @@ namespace fsh
         virtual void Execute(Machine&) = 0;
     };
 
-    class Assignment : Instruction
+    class BinaryOperator : public Instruction
     {
     public:
+        BinaryOperator()
+        :lhs(nullptr)
+        ,rhs(nullptr)
+        {}
         void Execute(Machine&);
-        Instruction * lhs;
-        Instruction * rhs;
+        int op;
+        int prec;
+        Instruction *lhs;
+        Instruction *rhs;
     };
 
-    class FunctionCall
+    class Function : public Instruction
     {
     public:
+        Function()
+        : body(nullptr)
+        { }
         void Execute(Machine&);
-        std::vector<Instruction *> args;
-        std::string name;
+        std::vector<std::string> args;
+        Instruction *body;
     };
 
-    class In
+    class Identifier : public Instruction
     {
     public:
-        void Execute(Machine&);
-        std::string var;
-        Instruction * list;
-    };
-
-    class Identifier
-    {
-    public:
-        Identifier(const std::string& s)
-            :name(s)
+        Identifier()
         { }
         void Execute(Machine&);
         std::string name;
     };
 
-    class Integer
+    class Integer : public Instruction
     {
     public:
-        Integer(int64_t n)
-            :value(n)
+        Integer()
         { }
         void Execute(Machine&);
         int64_t value;

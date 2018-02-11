@@ -1,4 +1,5 @@
 #include "common.h"
+#include "machine.h"
 #include "for_cmd.h"
 
 namespace fsh
