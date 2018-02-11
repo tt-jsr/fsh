@@ -8,11 +8,22 @@
 
 namespace fsh
 {
+    namespace instruction
+    {
+        class Instruction;
+    }
+
     class Machine
     {
     public:
         Machine(void);
         ~Machine(void);
+
+        ElementPtr Execute(instruction::Instruction *);
+
+        // Substitute any $(..) variables if argument is a string
+        ElementPtr resolve(ElementPtr);
+        void verify(ElementPtr, int type, const char *msg);
 
         // Pops the tos and returns true if the value is an int and
         // != 0
@@ -24,7 +35,7 @@ namespace fsh
     private_impl:
         ElementPtr pop_data();
         ElementPtr peek_data();
-        void push_data(ElementPtr&);
+        void push_data(ElementPtr);
     };
 }
 

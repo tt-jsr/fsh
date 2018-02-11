@@ -4,10 +4,13 @@
 
 namespace fsh
 {
-    class Identifier;
-    class Instruction;
-    class BinaryOperator;
-    class Integer;
+    namespace instruction
+    {
+        class Identifier;
+        class Instruction;
+        class BinaryOperator;
+        class Integer;
+    }
 
     enum TokenType
     {
@@ -47,23 +50,23 @@ namespace fsh
     {
     public:
         Parser();
-        Instruction *parse(const std::string& s);
+        instruction::Instruction *parse(const std::string& s);
     private:
         char peekchar();
         char getchar();
         const char *peekstr();
         void advance(int);
         void skipWhiteSpace();
-        void push(Instruction *);
-        Instruction *pop();
-        BinaryOperator * parse_binary_operator();
-        Identifier *parse_identifier();
-        Integer *parse_number();
-        Instruction *parse_expression();
-        void parse_identifierSequence(std::vector<Identifier *>& vec);
+        void push(instruction::Instruction *);
+        instruction::Instruction *pop();
+        instruction::BinaryOperator * parse_binary_operator();
+        instruction::Identifier *parse_identifier();
+        instruction::Integer *parse_number();
+        instruction::Instruction *parse_expression();
+        void parse_identifierSequence(std::vector<instruction::Identifier *>& vec);
     private:
 
-        std::vector<Instruction *> stack_;
+        std::vector<instruction::Instruction *> stack_;
         std::string input_;
         size_t pos_;
     };

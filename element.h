@@ -17,14 +17,19 @@ namespace fsh
         ,ELEMENT_TYPE_EXPRESSION
     };
 
+    class Integer;
+    typedef instrusive_ptr<Integer> IntegerPtr;
+
     struct Element : public instrusive_base
     {
         virtual ElementType type() = 0;
-        bool IsInt() {return type() == ELEMENT_TYPE_INTEGER;}
+        bool IsInteger() {return type() == ELEMENT_TYPE_INTEGER;}
         bool IsString() {return type() == ELEMENT_TYPE_STRING;}
         bool IsList() {return type() == ELEMENT_TYPE_LIST;}
         bool IsHead() {return type() == ELEMENT_TYPE_HEAD;}
         bool IsExpression() {return type() == ELEMENT_TYPE_EXPRESSION;}
+
+        IntegerPtr ToInteger();
     };
 
     typedef instrusive_ptr<Element> ElementPtr;
@@ -59,16 +64,16 @@ namespace fsh
     };
     typedef instrusive_ptr<String> StringPtr;
 
-    struct Int : public Element
+    struct Integer : public Element
     {
-        Int(int64_t n)
+        Integer(int64_t n)
         : value(n)
         {}
 
         virtual ElementType type() {return ELEMENT_TYPE_INTEGER;}
         int64_t value;
     };
-    typedef instrusive_ptr<Int> IntPtr;
+    typedef instrusive_ptr<Integer> IntPtr;
 
     struct List : public Element
     {
@@ -95,7 +100,7 @@ namespace fsh
     typedef instrusive_ptr<Expression> ExpressionPtr;
 
     StringPtr MakeString(const std::string& s);
-    IntPtr MakeInt(int64_t);
+    IntegerPtr MakeInteger(int64_t);
     ListPtr MakeList(HeadType);
     ExpressionPtr MakeExpression();
 }
