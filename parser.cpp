@@ -66,6 +66,8 @@ namespace fsh
                 assert(stack_.size() == 1);
                 return pop();
             }
+            //inst->dump(std::cout);
+            //std::cout << std::endl << std::endl;
             push(inst);
         }
     }
@@ -132,21 +134,20 @@ namespace fsh
         skipWhiteSpace();
         Operators *op = opTable;
         const char *s = peekstr();
+        if (s == nullptr)
+            return nullptr;
         while(op->buf[0])
         {
             const char *buf = op->buf;
-            while(true)
+            if (strncmp(s, op->buf, op->length) == 0)
             {
-                if (strncmp(s, op->buf, op->length) == 0)
-                {
-                    instruction::BinaryOperator *bop = new instruction::BinaryOperator();
-                    bop->op = op->token;
-                    bop->prec = op->prec;
-                    advance(op->length);
-                    return bop;
-                }
-                ++op;
+                instruction::BinaryOperator *bop = new instruction::BinaryOperator();
+                bop->op = op->token;
+                bop->prec = op->prec;
+                advance(op->length);
+                return bop;
             }
+            ++op;
         }
         return nullptr;
     }
@@ -234,22 +235,23 @@ namespace fsh
         char buf[32];
         char *p = buf;
         char c = peekchar();
-        if (isdigit(c) || c == '-')
+        if (c && isdigit(c) || c == '-')
         {
             *p = c;
             ++p;
+            *p = '\0';
             advance(1);
-            c = peekchar();
         }
-        if (!isdigit(c))
+        else
         {
-            advance(-1);
             return nullptr;
         }
-        while(isdigit(c))
+        c = peekchar();
+        while(c && isdigit(c))
         {
             *p = c;
             ++p;
+            *p = '\0';
             advance(1);
             c = peekchar();
         }

@@ -1,6 +1,6 @@
 CC=gcc
 CDEBUG = -g
-CFLAGS = $(CDEBUG) -I.
+CPPFLAGS = $(CDEBUG) -I.
 LDFLAGS=-g
 LIBS = -lstdc++
 DEPS=list.h common.h element.h execution_context.h machine.h parser.h instructions.h 

@@ -11,6 +11,7 @@ namespace fsh
         public:
             virtual void Execute(Machine&) = 0;
             virtual bool lowerPrec(int) {return false;}
+            virtual void dump(std::ostream&) = 0;
         };
 
         class BinaryOperator : public Instruction
@@ -22,6 +23,7 @@ namespace fsh
             {}
             void Execute(Machine&);
             bool lowerPrec(int n) {return prec < n;}
+            void dump(std::ostream&);
             int op;
             int prec;
             Instruction *lhs;
@@ -35,6 +37,7 @@ namespace fsh
             : body(nullptr)
             { }
             void Execute(Machine&);
+            void dump(std::ostream&);
             std::vector<std::string> args;
             Instruction *body;
         };
@@ -45,6 +48,7 @@ namespace fsh
             Identifier()
             { }
             void Execute(Machine&);
+            void dump(std::ostream&);
             std::string name;
         };
 
@@ -54,6 +58,7 @@ namespace fsh
             Integer()
             { }
             void Execute(Machine&);
+            void dump(std::ostream&);
             int64_t value;
         };
     }
