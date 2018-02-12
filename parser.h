@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 
+class ParserTest;
+
 namespace fsh
 {
     namespace instruction
@@ -52,6 +54,7 @@ namespace fsh
         Parser();
         instruction::Instruction *parse(const std::string& s);
     private:
+        friend class ::ParserTest;
         char peekchar();
         char getchar();
         const char *peekstr();

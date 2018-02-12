@@ -197,12 +197,23 @@ namespace fsh
     {
         skipWhiteSpace();
         std::string s;
-        while (char c = peekchar())
+        char c = peekchar();
+        if (isalpha(c) || c == '_' || c == '$')
+        {
+            s.push_back(c);
+            advance(1);
+        }
+        else
+            return nullptr;
+
+        c = peekchar();
+        while (true)
         {
             if (isalnum(c) || c == '_' || c == '.' || c == '$' || c == '(' || c == ')')
             {
                 s.push_back(c);
                 advance(1);
+                c = peekchar();
             }
             else
                 break;
