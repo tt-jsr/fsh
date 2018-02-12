@@ -10,6 +10,7 @@ class ParserTest : public CppUnit::TestFixture
     CPPUNIT_TEST_SUITE(ParserTest);
         CPPUNIT_TEST(testParseIdentifier);
         CPPUNIT_TEST(testParseNumber);
+        CPPUNIT_TEST(testBinaryOperator);
     CPPUNIT_TEST_SUITE_END();
 public:
     void setUp();
@@ -17,5 +18,6 @@ public:
 
     void testParseIdentifier();
     void testParseNumber();
+    void testBinaryOperator();
 };
 

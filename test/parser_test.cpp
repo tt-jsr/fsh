@@ -56,3 +56,16 @@ void ParserTest::testParseNumber()
     
     CPPUNIT_ASSERT(p == nullptr);
 }
+
+void ParserTest::testBinaryOperator()
+{
+    fsh::Parser parser;
+    parser.pos_ = 0;
+    parser.input_ = "+";
+    fsh::instruction::BinaryOperator *p = parser.parse_binary_operator();
+    
+    CPPUNIT_ASSERT(p);
+
+    CPPUNIT_ASSERT(p->op == fsh::TOKEN_PLUS);
+
+}
