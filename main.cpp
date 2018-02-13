@@ -1,3 +1,4 @@
+#include <iostream>
 #include "common.h"
 #include "list.h"
 #include "machine.h"
@@ -28,5 +29,6 @@ int main(int argc, char *argv[])
 
     instruction::Instruction *inst = parser.parse("22 + 13");
     assert(inst);
+    inst->dump(std::cout);
     inst->Execute(m);
 }

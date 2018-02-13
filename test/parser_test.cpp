@@ -17,6 +17,7 @@ void ParserTest::tearDown()
 
 void ParserTest::testParseIdentifier()
 {
+    std::cout << "testParseIdentifier" << std::endl;
     fsh::Parser parser;
     parser.pos_ = 0;
     parser.input_ = "MyVariable junk";
@@ -35,6 +36,7 @@ void ParserTest::testParseIdentifier()
 
 void ParserTest::testParseNumber()
 {
+    std::cout << "testParseNumber" << std::endl;
     fsh::Parser parser;
     parser.pos_ = 0;
     parser.input_ = "  788678 ";
@@ -59,6 +61,7 @@ void ParserTest::testParseNumber()
 
 void ParserTest::testBinaryOperator()
 {
+    std::cout << "testBinaryOperator" << std::endl;
     fsh::Parser parser;
     parser.pos_ = 0;
     parser.input_ = "+junk";
@@ -71,6 +74,7 @@ void ParserTest::testBinaryOperator()
 
 void ParserTest::testParseCombo()
 {
+    std::cout << "testParseCombo" << std::endl;
     fsh::Parser parser;
     parser.pos_ = 0;
     parser.input_ = "78 + 128 - $var";
@@ -86,8 +90,9 @@ void ParserTest::testParseCombo()
     CPPUNIT_ASSERT(id->name == "$var");
 }
 
-void ParserTest::testParseExpression()
+void ParserTest::testParseParse()
 {
+    std::cout << "testParseParse" << std::endl;
     fsh::Parser parser;
     fsh::instruction::Instruction *inst = parser.parse("27 + 35");
     inst->dump(std::cout);

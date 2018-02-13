@@ -41,6 +41,7 @@ namespace fsh
         }
 
         /*****************************************************/
+        /*
         void Function::Execute(Machine& machine)
         {
         }
@@ -48,6 +49,7 @@ namespace fsh
         void Function::dump(std::ostream&)
         {
         }
+        */
 
         /*****************************************************/
         void Identifier::Execute(Machine& machine)

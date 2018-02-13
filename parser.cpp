@@ -54,22 +54,119 @@ namespace fsh
     Parser::Parser()
     {}
 
+    void Parser::HandleInstruction(instruction::BinaryOperator *bop)
+    {
+        if (bop == nullptr)
+            return;
+        instruction::InstructionType t = peektype();
+        switch(t)
+        {
+        case instruction::INSTRUCTION_IDENTIFIER:
+        case instruction::INSTRUCTION_INTEGER:
+            bop->lhs = pop();
+            push(bop);
+            break;
+        case instruction::INSTRUCTION_BINARY_OPERATOR:
+            {
+                instruction::BinaryOperator *op = static_cast<instruction::BinaryOperator *>(pop());
+                if (op->prec >= bop->prec)
+                {
+                    bop->lhs = op;
+                    push(bop);
+                }
+                else
+                {
+                    instruction::Instruction *inst = op->rhs;
+                    op->rhs = bop;
+                    bop->lhs = inst;
+                    push(bop);
+                }
+            }
+            break;
+        case instruction::INSTRUCTION_NONE:
+            //TODO throw exception
+            break;
+        }
+    }
+
+    void Parser::HandleInstruction(instruction::Integer *i)
+    {
+        if (i == nullptr)
+            return;
+        instruction::InstructionType t = peektype();
+        switch(t)
+        {
+        case instruction::INSTRUCTION_IDENTIFIER:
+        case instruction::INSTRUCTION_INTEGER:
+            push(i);
+            break;
+        case instruction::INSTRUCTION_BINARY_OPERATOR:
+            {
+                instruction::BinaryOperator *bop = static_cast<instruction::BinaryOperator *>(pop());
+                bop->rhs = i;
+                push(bop);
+            }
+            break;
+        case instruction::INSTRUCTION_NONE:
+            push(i);
+            break;
+        }
+    }
+
+    void Parser::HandleInstruction(instruction::Identifier *id)
+    {
+        if (id == nullptr)
+            return;
+        instruction::InstructionType t = peektype();
+        switch(t)
+        {
+        case instruction::INSTRUCTION_IDENTIFIER:
+        case instruction::INSTRUCTION_INTEGER:
+            push(id);
+            break;
+        case instruction::INSTRUCTION_BINARY_OPERATOR:
+            {
+                instruction::BinaryOperator *bop = static_cast<instruction::BinaryOperator *>(pop());
+                bop->rhs = id;
+                push(bop);
+            }
+            break;
+        case instruction::INSTRUCTION_NONE:
+            push(id);
+            break;
+        }
+    }
+
+    void Parser::HandleInstruction(instruction::Instruction *in)
+    {
+        if (in == nullptr)
+            return;
+        switch(in->type())
+        {
+        case instruction::INSTRUCTION_BINARY_OPERATOR:
+            HandleInstruction((instruction::BinaryOperator *)in);
+            break;
+        case instruction::INSTRUCTION_IDENTIFIER:
+            HandleInstruction((instruction::Identifier *)in);
+            break;
+        case instruction::INSTRUCTION_INTEGER:
+            HandleInstruction((instruction::Integer *)in);
+            break;
+        }
+    }
+
     instruction::Instruction * Parser::parse(const std::string& s)
     {
         input_ = s;
         pos_ = 0;
-        while(true)
+        while(peekchar() != 0)
         {
-            instruction::Instruction *inst = parse_expression();
-            if (inst == nullptr)
-            {
-                assert(stack_.size() == 1);
-                return pop();
-            }
-            //inst->dump(std::cout);
-            //std::cout << std::endl << std::endl;
-            push(inst);
+            HandleInstruction(parse_identifier());
+            HandleInstruction(parse_number());
+            HandleInstruction(parse_binary_operator());
         }
+        assert (stack_.size() == 1);
+        return pop();
     }
 
 
@@ -106,6 +203,8 @@ namespace fsh
 
     void Parser::push(instruction::Instruction *p)
     {
+        assert(p != nullptr);
+        //std::cout << "=== push " << p->type() << std::endl;
         stack_.push_back(p);
     }
 
@@ -116,7 +215,15 @@ namespace fsh
             return nullptr;
         instruction::Instruction *p = stack_.back();
         stack_.pop_back();
+        //std::cout << "=== pop " << p->type() << std::endl;
         return p;
+    }
+
+    instruction::InstructionType Parser::peektype()
+    {
+        if (stack_.size() == 0)
+            return instruction::INSTRUCTION_NONE;
+        return stack_.back()->type();
     }
 
     void Parser::skipWhiteSpace()
@@ -152,33 +259,6 @@ namespace fsh
         return nullptr;
     }
 
-    instruction::Instruction * Parser::parse_expression()
-    {
-        instruction::Instruction *inst = parse_identifier();
-        if (inst)
-            return inst;
-        inst = parse_number();
-        if (inst)
-            return inst;
-        /*
-        inst = parse_string();
-        if (inst)
-            return list;
-        inst = parse_list();
-        if (inst)
-            return inst;
-        */
-
-        instruction::BinaryOperator *bop = parse_binary_operator();
-        if (bop)
-        {
-            bop->lhs = pop();
-            bop->rhs = parse_expression();
-            return bop;
-        }
-        return nullptr;
-    }
-
     void Parser::parse_identifierSequence(std::vector<instruction::Identifier *>& vec)
     {
         while(true)
@@ -208,7 +288,7 @@ namespace fsh
             return nullptr;
 
         c = peekchar();
-        while (true)
+        while (c)
         {
             if (isalnum(c) || c == '_' || c == '.' || c == '$' || c == '(' || c == ')')
             {

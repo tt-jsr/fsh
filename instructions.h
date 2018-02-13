@@ -10,7 +10,7 @@ namespace fsh
         {
         public:
             virtual void Execute(Machine&) = 0;
-            virtual bool lowerPrec(int) {return false;}
+            virtual instruction::InstructionType type() = 0;
             virtual void dump(std::ostream&) = 0;
         };
 
@@ -22,7 +22,7 @@ namespace fsh
             ,rhs(nullptr)
             {}
             void Execute(Machine&);
-            bool lowerPrec(int n) {return prec < n;}
+            InstructionType type() {return INSTRUCTION_BINARY_OPERATOR;}
             void dump(std::ostream&);
             int op;
             int prec;
@@ -30,6 +30,7 @@ namespace fsh
             Instruction *rhs;
         };
 
+        /*
         class Function : public Instruction
         {
         public:
@@ -37,10 +38,12 @@ namespace fsh
             : body(nullptr)
             { }
             void Execute(Machine&);
+            InstructionType type() {return INSTRUCTION_BINARY_OPERATOR;}
             void dump(std::ostream&);
             std::vector<std::string> args;
             Instruction *body;
         };
+        */
 
         class Identifier : public Instruction
         {
@@ -48,6 +51,7 @@ namespace fsh
             Identifier()
             { }
             void Execute(Machine&);
+            InstructionType type() {return INSTRUCTION_IDENTIFIER;}
             void dump(std::ostream&);
             std::string name;
         };
@@ -58,6 +62,7 @@ namespace fsh
             Integer()
             { }
             void Execute(Machine&);
+            InstructionType type() {return INSTRUCTION_INTEGER;}
             void dump(std::ostream&);
             int64_t value;
         };
