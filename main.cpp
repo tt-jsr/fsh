@@ -27,8 +27,13 @@ int main(int argc, char *argv[])
     Machine m;
     Parser parser;
 
-    instruction::Instruction *inst = parser.parse("22 + 13");
-    assert(inst);
-    inst->dump(std::cout);
-    inst->Execute(m);
+    while(true)
+    {
+        std::string inbuf;
+        std::cout << "> ";
+        std::getline(std::cin, inbuf);
+        instruction::InstructionPtr inst = parser.parse(inbuf);
+        assert(inst);
+        inst->dump(std::cout);
+    }
 }

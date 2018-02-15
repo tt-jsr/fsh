@@ -11,6 +11,7 @@ namespace fsh
     namespace instruction
     {
         class Instruction;
+        typedef fsh::instrusive_ptr<Instruction> InstructionPtr;
     }
 
     class Machine
@@ -19,7 +20,7 @@ namespace fsh
         Machine(void);
         ~Machine(void);
 
-        ElementPtr Execute(instruction::Instruction *);
+        ElementPtr Execute(instruction::InstructionPtr);
 
         // Substitute any $(..) variables if argument is a string
         ElementPtr resolve(ElementPtr);

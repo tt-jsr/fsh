@@ -9,6 +9,8 @@
 
 //#define PRINT_STACK 1
 
+const int PREC_PAREN = 100;
+
 namespace fsh
 {
     /* Precendence
@@ -52,11 +54,23 @@ namespace fsh
     };
 
     Parser::Parser()
+    :pos_(0)
     {}
 
-    void Parser::HandleInstruction(instruction::BinaryOperator *bop)
+    Parser::~Parser()
     {
-        if (bop == nullptr)
+    }
+
+    void dump(instruction::InstructionPtr in)
+    {
+        std::cout << "**************************" << std::endl;
+        in->dump(std::cout);
+        std::cout << std::endl;
+    }
+
+    void Parser::HandleInstruction(instruction::BinaryOperatorPtr bop)
+    {
+        if (bop.get() == nullptr)
             return;
         instruction::InstructionType t = peektype();
         switch(t)
@@ -68,30 +82,39 @@ namespace fsh
             break;
         case instruction::INSTRUCTION_BINARY_OPERATOR:
             {
-                instruction::BinaryOperator *op = static_cast<instruction::BinaryOperator *>(pop());
-                if (op->prec >= bop->prec)
+                instruction::BinaryOperatorPtr op = pop().cast<instruction::BinaryOperator>();
+                if (bop->prec == PREC_PAREN)
                 {
-                    bop->lhs = op;
-                    push(bop);
+                    op->rhs = bop;
+                    push(op);
                 }
                 else
                 {
-                    instruction::Instruction *inst = op->rhs;
-                    op->rhs = bop;
-                    bop->lhs = inst;
-                    push(bop);
+                    if (op->prec >= bop->prec)
+                    {
+                        bop->lhs = op;
+                        push(bop);
+                    }
+                    else
+                    {
+                        instruction::InstructionPtr inst = op->rhs;
+                        op->rhs = bop;
+                        bop->lhs = inst;
+                        push(op);
+                        push(bop);
+                    }
                 }
             }
             break;
         case instruction::INSTRUCTION_NONE:
-            //TODO throw exception
+            push(bop);
             break;
         }
     }
 
-    void Parser::HandleInstruction(instruction::Integer *i)
+    void Parser::HandleInstruction(instruction::IntegerPtr i)
     {
-        if (i == nullptr)
+        if (i.get() == nullptr)
             return;
         instruction::InstructionType t = peektype();
         switch(t)
@@ -102,7 +125,7 @@ namespace fsh
             break;
         case instruction::INSTRUCTION_BINARY_OPERATOR:
             {
-                instruction::BinaryOperator *bop = static_cast<instruction::BinaryOperator *>(pop());
+                instruction::BinaryOperatorPtr bop = pop().cast<instruction::BinaryOperator>();
                 bop->rhs = i;
                 push(bop);
             }
@@ -113,9 +136,9 @@ namespace fsh
         }
     }
 
-    void Parser::HandleInstruction(instruction::Identifier *id)
+    void Parser::HandleInstruction(instruction::IdentifierPtr id)
     {
-        if (id == nullptr)
+        if (id.get() == nullptr)
             return;
         instruction::InstructionType t = peektype();
         switch(t)
@@ -126,7 +149,7 @@ namespace fsh
             break;
         case instruction::INSTRUCTION_BINARY_OPERATOR:
             {
-                instruction::BinaryOperator *bop = static_cast<instruction::BinaryOperator *>(pop());
+                instruction::BinaryOperatorPtr bop = pop().cast<instruction::BinaryOperator>();
                 bop->rhs = id;
                 push(bop);
             }
@@ -137,44 +160,57 @@ namespace fsh
         }
     }
 
-    void Parser::HandleInstruction(instruction::Instruction *in)
+    void Parser::HandleInstruction(instruction::InstructionPtr in)
     {
-        if (in == nullptr)
+        if (in.get() == nullptr)
             return;
         switch(in->type())
         {
         case instruction::INSTRUCTION_BINARY_OPERATOR:
-            HandleInstruction((instruction::BinaryOperator *)in);
+            HandleInstruction(in.cast<instruction::BinaryOperator>());
             break;
         case instruction::INSTRUCTION_IDENTIFIER:
-            HandleInstruction((instruction::Identifier *)in);
+            HandleInstruction(in.cast<instruction::Identifier>());
             break;
         case instruction::INSTRUCTION_INTEGER:
-            HandleInstruction((instruction::Integer *)in);
+            HandleInstruction(in.cast<instruction::Integer>());
             break;
         }
     }
 
-    instruction::Instruction * Parser::parse(const std::string& s)
+    instruction::InstructionPtr Parser::parse(const std::string& s)
     {
+        //std::cout << "enter parse for " << s << std::endl;
         input_ = s;
         pos_ = 0;
+        stack_.clear();
         while(peekchar() != 0)
         {
+            instruction::InstructionPtr in = parse_paren();
+            if (in.get() && in->type() == instruction::INSTRUCTION_BINARY_OPERATOR)
+            {
+                instruction::BinaryOperatorPtr bop = in.cast<instruction::BinaryOperator>();
+                // Artificially inflate precendence
+                bop->prec = PREC_PAREN;
+            }
+            HandleInstruction(in);
             HandleInstruction(parse_identifier());
             HandleInstruction(parse_number());
             HandleInstruction(parse_binary_operator());
         }
-        assert (stack_.size() == 1);
-        return pop();
+        //std::cout << "exit parse for " << s << std::endl;
+        assert (stack_.size() > 0);
+        //stack_.front()->dump(std::cout);
+        //std::cout << std::endl;
+        return stack_.front();
     }
 
 
-    char Parser::peekchar()
+    char Parser::peekchar(int n)
     {
-        if (pos_ >= input_.size())
+        if ((pos_+n) >= input_.size())
             return 0;
-        return input_[pos_];
+        return input_[pos_ + n];
     }
 
     const char * Parser::peekstr()
@@ -201,19 +237,19 @@ namespace fsh
         return c;
     }
 
-    void Parser::push(instruction::Instruction *p)
+    void Parser::push(instruction::InstructionPtr p)
     {
-        assert(p != nullptr);
+        assert(p.get() != nullptr);
         //std::cout << "=== push " << p->type() << std::endl;
         stack_.push_back(p);
     }
 
-    instruction::Instruction *Parser::pop()
+    instruction::InstructionPtr Parser::pop()
     {
         assert(stack_.size() > 0);
         if (stack_.size() == 0)
             return nullptr;
-        instruction::Instruction *p = stack_.back();
+        instruction::InstructionPtr p = stack_.back();
         stack_.pop_back();
         //std::cout << "=== pop " << p->type() << std::endl;
         return p;
@@ -236,7 +272,31 @@ namespace fsh
         }
     }
 
-    instruction::BinaryOperator * Parser::parse_binary_operator()
+    instruction::InstructionPtr Parser::parse_paren()
+    {
+        skipWhiteSpace();
+        if (peekchar() != '(')
+            return nullptr;
+        std::string buf;
+        int nest = 0;
+        advance(1);
+        char c = peekchar();
+        while (nest == 0 && c != ')')
+        {
+            if (c == '(')
+                ++nest;
+            if (c == ')')
+                --nest;
+            buf.push_back(c);
+            advance(1);
+            c = peekchar();
+        }
+        advance(1);
+        Parser parser;
+        return parser.parse(buf);
+    }
+
+    instruction::BinaryOperatorPtr Parser::parse_binary_operator()
     {
         skipWhiteSpace();
         Operators *op = opTable;
@@ -248,7 +308,7 @@ namespace fsh
             const char *buf = op->buf;
             if (strncmp(s, op->buf, op->length) == 0)
             {
-                instruction::BinaryOperator *bop = new instruction::BinaryOperator();
+                instruction::BinaryOperatorPtr bop(new instruction::BinaryOperator());
                 bop->op = op->token;
                 bop->prec = op->prec;
                 advance(op->length);
@@ -259,7 +319,8 @@ namespace fsh
         return nullptr;
     }
 
-    void Parser::parse_identifierSequence(std::vector<instruction::Identifier *>& vec)
+    /*
+    void Parser::parse_identifierSequence(std::vector<instruction::IdentifierPtr>& vec)
     {
         while(true)
         {
@@ -273,8 +334,9 @@ namespace fsh
             advance(1);
         }
     }
+    */
 
-    instruction::Identifier * Parser::parse_identifier()
+    instruction::IdentifierPtr Parser::parse_identifier()
     {
         skipWhiteSpace();
         std::string s;
@@ -301,26 +363,37 @@ namespace fsh
         }
         if (s.size() > 0)
         {
-            instruction::Identifier *ident = new instruction::Identifier();
+            instruction::IdentifierPtr ident(new instruction::Identifier());
             ident->name = std::move(s);
             return ident;
         }
         return nullptr;
     }
 
-    instruction::Integer * Parser::parse_number()
+    instruction::IntegerPtr Parser::parse_number()
     {
         skipWhiteSpace();
 
+        if (stack_.back()->type()  == instruction::INSTRUCTION_BINARY_OPERATOR
         char buf[32];
         char *p = buf;
         char c = peekchar();
-        if (c && isdigit(c) || c == '-')
+        if (c && (isdigit(c) || c == '-'))
         {
             *p = c;
             ++p;
             *p = '\0';
-            advance(1);
+            // Need to make sure next char is a digit, otherwise this is an operator
+            if (c == '-')
+            {
+                c = peekchar(1);
+                if (c==0 || isdigit(c) == 0)
+                {
+                    return nullptr;
+                }
+            }
+            else
+                advance(1);
         }
         else
         {
@@ -337,7 +410,7 @@ namespace fsh
         }
         if (p != buf)
         {
-            instruction::Integer *inter = new instruction::Integer();
+            instruction::IntegerPtr inter(new instruction::Integer());
             inter->value = strtol(buf, nullptr, 0);
             return inter;
         }

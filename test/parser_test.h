@@ -12,7 +12,9 @@ class ParserTest : public CppUnit::TestFixture
         CPPUNIT_TEST(testParseNumber);
         CPPUNIT_TEST(testBinaryOperator);
         CPPUNIT_TEST(testParseCombo);
+        CPPUNIT_TEST(testParseParen);
         CPPUNIT_TEST(testParseParse);
+        CPPUNIT_TEST(testExecuteBinaryOperator);
     CPPUNIT_TEST_SUITE_END();
 public:
     void setUp();
@@ -23,5 +25,8 @@ public:
     void testBinaryOperator();
     void testParseCombo();
     void testParseParse();
+    void testParseParen();
+    void testExecuteBinaryOperator();
+    void testExecuteBinaryOperator(const std::string& expr, int64_t expected);
 };
 

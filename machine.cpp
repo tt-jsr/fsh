@@ -16,8 +16,9 @@ namespace fsh
     {
     }
 
-    ElementPtr Machine::Execute(instruction::Instruction * i)
+    ElementPtr Machine::Execute(instruction::InstructionPtr i)
     {
+        datastack.clear();
         i->Execute(*this);
         assert(datastack.size() > 0);
         if (datastack.size() == 0)

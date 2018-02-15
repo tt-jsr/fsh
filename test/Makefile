@@ -1,5 +1,5 @@
 CC=gcc
-CDEBUG = -g
+CDEBUG = -g -O0
 CPPFLAGS = $(CDEBUG) -I. -I.. 
 LDFLAGS=-g
 LIBS = -lstdc++ -lcppunit

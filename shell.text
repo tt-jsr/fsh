@@ -9,13 +9,14 @@ var2 = var
 
 #define function ht takes one argument
 headtail = [head -n 1 $file | cut -c -30
+def headtail[arg1, body....]
 tail -n 1 $file | cut -c -30]
 
 #Execute ls command and store result in files
 files = ListFiles[/var/log/debesys/OC_cme*,{sort=ctime}] 
 
 # Define function 'Foo'
-foo = For [f in $files, ht[$f, 1]]
+def foo[files, For [f in $files, ht[$f, 1]]
 # Foo caled with no arguments, $files is taken from the current context
 foo[]
 
@@ -77,13 +78,13 @@ For[f in $files,
 
 ########################################
 # Support for currying/binding
-Foo["OC_cme.log", 3] = PartitionFile
+Foo = Bind[PartitionFile, "OC_cme.log", 3]
 Foo[]
-Foo["OC_cme.log", _] = PartitionFile
+Foo = Bind[PartitionFile, "OC_cme.log", _]
 Foo[3]
-Foo[_, 3] = PartitionFile
+Foo = Bind[PartitionFile, _, 3]
 Foo[OC_cme.log]
-Foo[_, _] = PartitionFile
+Foo = Bind[PartitionFile, _, _]
 Foo[OC_cme.log, 3]  # This form is somewhat useless
 
 #########################################
@@ -105,10 +106,7 @@ For[f in $files,
 #########################################
 # Using threads, partition a file and launch vim to
 # view all partitions
-ErFormat[outfile] = [
-]
-
-ViewReports[file] = [
+def ViewReports[file,
     UseReports = OptArg[-e]
 
     size = Fstat[$file].size

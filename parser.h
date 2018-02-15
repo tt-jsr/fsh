@@ -12,6 +12,11 @@ namespace fsh
         class Instruction;
         class BinaryOperator;
         class Integer;
+
+        typedef fsh::instrusive_ptr<Instruction> InstructionPtr;
+        typedef fsh::instrusive_ptr<BinaryOperator> BinaryOperatorPtr;
+        typedef fsh::instrusive_ptr<Identifier> IdentifierPtr;
+        typedef fsh::instrusive_ptr<Integer> IntegerPtr;
     }
 
 
@@ -19,31 +24,31 @@ namespace fsh
     {
     public:
         Parser();
-        instruction::Instruction *parse(const std::string& s);
+        ~Parser();
+        instruction::InstructionPtr parse(const std::string& s);
     private:
         friend class ::ParserTest;
-        char peekchar();
+        char peekchar(int n = 0);
         char getchar();
         const char *peekstr();
         void advance(int);
         void skipWhiteSpace();
 
-        void push(instruction::Instruction *);
-        instruction::Instruction *pop();
+        void push(instruction::InstructionPtr);
+        instruction::InstructionPtr pop();
         instruction::InstructionType peektype();
 
-        void HandleInstruction(instruction::Instruction *in);
-        void HandleInstruction(instruction::Identifier *id);
-        void HandleInstruction(instruction::Integer *id);
-        void HandleInstruction(instruction::BinaryOperator *bop);
-        instruction::BinaryOperator * parse_binary_operator();
-        instruction::Identifier *parse_identifier();
-        instruction::Integer *parse_number();
-        instruction::Instruction *parse_expression();
-        void parse_identifierSequence(std::vector<instruction::Identifier *>& vec);
+        void HandleInstruction(instruction::InstructionPtr in);
+        void HandleInstruction(instruction::IdentifierPtr id);
+        void HandleInstruction(instruction::IntegerPtr id);
+        void HandleInstruction(instruction::BinaryOperatorPtr bop);
+        instruction::BinaryOperatorPtr  parse_binary_operator();
+        instruction::IdentifierPtr parse_identifier();
+        instruction::IntegerPtr parse_number();
+        instruction::InstructionPtr parse_expression();
+        instruction::InstructionPtr parse_paren();
     private:
-
-        std::vector<instruction::Instruction *> stack_;
+        std::vector<instruction::InstructionPtr> stack_;
         std::string input_;
         size_t pos_;
     };
