@@ -37,7 +37,7 @@ namespace fsh
        //,{"in", 2, TOKEN_IN, 2}
        ,{">", 1, TOKEN_GT, 7}
        ,{"<", 1, TOKEN_LT, 7}
-       ,{"=", 1, TOKEN_ASSIGN, 1}
+       ,{"=", 1, TOKEN_ASSIGNMENT, 1}
        //,{"{", 1, TOKEN_OPEN_BRACE, 0}
        //,{"}", 1, TOKEN_CLOSE_BRACE, 0}
        //,{"[", 1, TOKEN_OPEN_BRACKET, 0}
@@ -52,6 +52,7 @@ namespace fsh
        ,{"%", 1, TOKEN_MOD, 20}
        ,{0, 0, 0}
     };
+
 
     Parser::Parser()
     :pos_(0)
@@ -68,6 +69,7 @@ namespace fsh
         std::cout << std::endl;
     }
 
+    /*
     void Parser::HandleInstruction(instruction::BinaryOperatorPtr bop)
     {
         if (bop.get() == nullptr)
@@ -204,7 +206,7 @@ namespace fsh
         //std::cout << std::endl;
         return stack_.front();
     }
-
+*/
 
     char Parser::peekchar(int n)
     {
@@ -237,6 +239,7 @@ namespace fsh
         return c;
     }
 
+    /*
     void Parser::push(instruction::InstructionPtr p)
     {
         assert(p.get() != nullptr);
@@ -261,161 +264,318 @@ namespace fsh
             return instruction::INSTRUCTION_NONE;
         return stack_.back()->type();
     }
+    */
+
+    void Parser::tokenize()
+    {
+        tokens_.clear();
+        while (pos_ != input_.size())
+        {
+            Token tok = get_token();
+            if (tok.token == TOKEN_NONE)
+                return;
+            tokens_.push_back(tok);
+        }
+    }
+
+    Token Parser::get_token()
+    {
+        Token tok = parse_identifier();
+        if (tok.token != TOKEN_NONE)
+            return tok;
+        tok = parse_integer();
+        if (tok.token != TOKEN_NONE)
+            return tok;
+        tok = parse_symbol();
+        if (tok.token != TOKEN_NONE)
+            return tok;
+        if (tok.token == TOKEN_NONE)
+        {
+            tok.token = TOKEN_UNKNOWN;
+            tok.text.push_back(peekchar());
+            advance(1);
+        }
+        return tok;
+    }
 
     void Parser::skipWhiteSpace()
     {
         char c = peekchar();
-        while (c == ' ' || c == '\r' || c == '\n' || c == '\t')
+        while (c == ' ' || c == '\r' || c == '\t')
         {
             advance(1);
             c = peekchar();
         }
     }
 
-    instruction::InstructionPtr Parser::parse_paren()
+    Token Parser::parse_symbol()
     {
+        Token tok;
         skipWhiteSpace();
-        if (peekchar() != '(')
-            return nullptr;
-        std::string buf;
-        int nest = 0;
-        advance(1);
         char c = peekchar();
-        while (nest == 0 && c != ')')
+        if (c == '+')
         {
-            if (c == '(')
-                ++nest;
-            if (c == ')')
-                --nest;
-            buf.push_back(c);
+            tok.text.push_back(c);
+            tok.token = TOKEN_PLUS;
             advance(1);
-            c = peekchar();
         }
-        advance(1);
-        Parser parser;
-        return parser.parse(buf);
-    }
-
-    instruction::BinaryOperatorPtr Parser::parse_binary_operator()
-    {
-        skipWhiteSpace();
-        Operators *op = opTable;
-        const char *s = peekstr();
-        if (s == nullptr)
-            return nullptr;
-        while(op->buf[0])
+        else if (c == '-')
         {
-            const char *buf = op->buf;
-            if (strncmp(s, op->buf, op->length) == 0)
-            {
-                instruction::BinaryOperatorPtr bop(new instruction::BinaryOperator());
-                bop->op = op->token;
-                bop->prec = op->prec;
-                advance(op->length);
-                return bop;
-            }
-            ++op;
+            tok.text.push_back(c);
+            tok.token = TOKEN_MINUS;
+            advance(1);
         }
-        return nullptr;
+        else if (c == '*')
+        {
+            tok.text.push_back(c);
+            tok.token = TOKEN_MULTIPLY;
+            advance(1);
+        }
+        else if (c == '/')
+        {
+            tok.text.push_back(c);
+            tok.token = TOKEN_DIVIDE;
+            advance(1);
+        }
+        else if (c == '%')
+        {
+            tok.text.push_back(c);
+            tok.token = TOKEN_MOD;
+            advance(1);
+        }
+        else if (c == '<')
+        {
+            tok.text.push_back(c);
+            tok.token = TOKEN_LT;
+            advance(1);
+            if ((c = peekchar())== '=')
+            {
+                tok.token = TOKEN_LTE;
+                tok.text.push_back(c);
+            advance(1);
+            }
+        }
+        else if (c == '=')
+        {
+            tok.text.push_back(c);
+            tok.token = TOKEN_ASSIGNMENT;
+            advance(1);
+            if ((c = peekchar())== '=')
+            {
+                tok.token = TOKEN_EQ;
+                tok.text.push_back(c);
+                advance(1);
+            }
+        }
+        else if (c == '>')
+        {
+            tok.text.push_back(c);
+            tok.token = TOKEN_GT;
+            advance(1);
+            if ((c = peekchar())== '=')
+            {
+                tok.token = TOKEN_GTE;
+                tok.text.push_back(c);
+                advance(1);
+            }
+        }
+        else if (c == '[')
+        {
+            return parse_sequence();
+        }
+        else if (c == '&')
+        {
+            tok.text.push_back(c);
+            tok.token = TOKEN_AMP;
+            advance(1);
+            if ((c = peekchar())== '&')
+            {
+                tok.token = TOKEN_AND;
+                tok.text.push_back(c);
+                advance(1);
+            }
+        }
+        else if (c == '(')
+        {
+            return parse_sequence();
+        }
+        else if (c == '{')
+        {
+            return parse_sequence();
+        }
+        else if (c == ',')
+        {
+            tok.text.push_back(c);
+            tok.token = TOKEN_COMMA;
+            advance(1);
+        }
+        else if (c == ':')
+        {
+            tok.text.push_back(c);
+            tok.token = TOKEN_COLON;
+            advance(1);
+        }
+        else if (c == '"')
+        {
+            return parse_sequence();
+        }
+        else if (c == '|')
+        {
+            tok.text.push_back(c);
+            tok.token = TOKEN_VERTICLE_BAR;
+            advance(1);
+            if ((c = peekchar()) == '|')
+            {
+                tok.text.push_back(c);
+                tok.token = TOKEN_OR;
+                advance(1);
+            }
+        }
+        else if (c == '\n')
+        {
+            tok.token = TOKEN_NL;
+            tok.text.push_back('\n');
+            advance(1);
+        }
+        return tok;
     }
 
-    /*
-    void Parser::parse_identifierSequence(std::vector<instruction::IdentifierPtr>& vec)
+    Token Parser::parse_sequence()
     {
+        Token tok;
+        int nest = 0;
         while(true)
         {
-            instruction::Identifier *ident = parse_identifier();
-            if (ident == nullptr)
-                return;
-            vec.push_back(ident);
-            skipWhiteSpace();
-            if (peekchar() != ',')
-                return;
-            advance(1);
+            char c = peekchar();
+            switch (c)
+            {
+            case '[':
+                if (nest == 0)
+                    tok.token = TOKEN_BRACKET;
+                if (nest > 0)
+                    tok.text.push_back(c);
+                ++nest;
+                advance(1);
+                if (peekchar() == '[')
+                {
+                    tok.token = TOKEN_SUBSCRIPT;
+                    ++nest;
+                    advance(1);
+                }
+                break;
+            case '{':
+                if (nest == 0)
+                    tok.token = TOKEN_BRACE;
+                if (nest > 0)
+                    tok.text.push_back(c);
+                advance(1);
+                ++nest;
+                break;
+            case '(':
+                if (nest == 0)
+                    tok.token = TOKEN_PAREN;
+                if (nest > 0)
+                    tok.text.push_back(c);
+                ++nest;
+                advance(1);
+                break;
+            case ']':
+                if (nest > 1)
+                    tok.text.push_back(c);
+                --nest;
+                advance(1);
+                break;
+            case '}':
+                if (nest > 1)
+                    tok.text.push_back(c);
+                --nest;
+                advance(1);
+                break;
+            case ')':
+                if (nest > 1)
+                    tok.text.push_back(c);
+                --nest;
+                advance(1);
+                break;
+            case '"':
+                advance(1);
+                tok.text.push_back(c);
+                c = peekchar();
+                while (c != '"')
+                {
+                    tok.text.push_back(c);
+                    advance(1);
+                    c = peekchar();
+                }
+                tok.text.push_back(c);
+                advance(1);
+                break;
+            case 0:
+                return tok;
+                break;
+            default:
+                tok.text.push_back(c);
+                advance(1);
+                break;
+            }
+            if (nest == 0)
+                return tok;
         }
     }
-    */
 
-    instruction::IdentifierPtr Parser::parse_identifier()
+    Token Parser::parse_identifier()
     {
+        Token tok;
         skipWhiteSpace();
-        std::string s;
+
         char c = peekchar();
         if (isalpha(c) || c == '_' || c == '$')
         {
-            s.push_back(c);
+            tok.text.push_back(c);
             advance(1);
         }
         else
-            return nullptr;
+            return tok;
 
         c = peekchar();
         while (c)
         {
+            //TODO: Should return NONE if '(' doesnot follow '$'
             if (isalnum(c) || c == '_' || c == '.' || c == '$' || c == '(' || c == ')')
             {
-                s.push_back(c);
+                tok.text.push_back(c);
                 advance(1);
                 c = peekchar();
             }
             else
                 break;
         }
-        if (s.size() > 0)
+        if (tok.text.size() > 0)
         {
-            instruction::IdentifierPtr ident(new instruction::Identifier());
-            ident->name = std::move(s);
-            return ident;
+            tok.token = TOKEN_IDENTIFIER;
         }
-        return nullptr;
+        if (tok.text == "def")
+            tok.token = TOKEN_DEFINE;
+        return tok;
     }
 
-    instruction::IntegerPtr Parser::parse_number()
+    Token Parser::parse_integer()
     {
+        Token tok;
         skipWhiteSpace();
 
-        if (stack_.back()->type()  == instruction::INSTRUCTION_BINARY_OPERATOR
-        char buf[32];
-        char *p = buf;
         char c = peekchar();
-        if (c && (isdigit(c) || c == '-'))
-        {
-            *p = c;
-            ++p;
-            *p = '\0';
-            // Need to make sure next char is a digit, otherwise this is an operator
-            if (c == '-')
-            {
-                c = peekchar(1);
-                if (c==0 || isdigit(c) == 0)
-                {
-                    return nullptr;
-                }
-            }
-            else
-                advance(1);
-        }
-        else
-        {
-            return nullptr;
-        }
-        c = peekchar();
         while(c && isdigit(c))
         {
-            *p = c;
-            ++p;
-            *p = '\0';
+            tok.text.push_back(c);
             advance(1);
             c = peekchar();
         }
-        if (p != buf)
+        if (tok.text.size())
         {
-            instruction::IntegerPtr inter(new instruction::Integer());
-            inter->value = strtol(buf, nullptr, 0);
-            return inter;
+            tok.token = TOKEN_INTEGER;
         }
-        return nullptr;
+        return tok;
     }
-
 }
 

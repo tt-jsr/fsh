@@ -22,6 +22,11 @@ namespace fsh
         return IntegerPtr(new Integer(n));
     }
 
+    FloatPtr MakeFloat(double f)
+    {
+        return FloatPtr(new Float(f));
+    }
+
     ExpressionPtr MakeExpression()
     {
         return ExpressionPtr(new Expression());

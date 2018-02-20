@@ -8,16 +8,17 @@ var = "hello"
 var2 = var
 
 #define function ht takes one argument
-headtail = [head -n 1 $file | cut -c -30
-def headtail[arg1, body....]
-tail -n 1 $file | cut -c -30]
+headtail = &[file : 
+    head -n 1 $file | cut -c -30
+    tail -n 1 $file | cut -c -30
+]
 
 #Execute ls command and store result in files
 files = ListFiles[/var/log/debesys/OC_cme*,{sort=ctime}] 
 
-# Define function 'Foo'
-def foo[files, For [f in $files, ht[$f, 1]]
-# Foo caled with no arguments, $files is taken from the current context
+# Define function 'Foo', takes no args
+foo = &[ For [f in $files, ht[$f, 1]]
+# Foo called with no arguments, $files is taken from the current context
 foo[]
 
 #Foo called with file list, $files is taken from parameter
@@ -106,21 +107,23 @@ For[f in $files,
 #########################################
 # Using threads, partition a file and launch vim to
 # view all partitions
-def ViewReports[file,
-    UseReports = OptArg[-e]
-
-    size = Fstat[$file].size
+ViewReports = &[file :
+    stat = Fstat[$file]
+    size = stat[[Fstat.size]]
     nparts = size/100000000 + 1
     files = PartitionFile[$file, $nparts]
-    threadObj = None
     For[f in $files,
-        Thread[$threadObj,
-            $f | System[erformat > er$(For.iteration).log ]
+        Thread[threadObj,
+            If [Extension[file] == "gz",
+                System[$f | System[erformat > er$(For.iteration).log] ],
+                System[zcat | erformat > er$(For.iteration).log]
+            ]
+
         ]
     ]
     ThreadJoin[$threadObj]
     files = ListFiles[er*.log]
-    vim Expand[$files]
+    System[vim Expand[$files]]
 ]
 
 ###################################
@@ -129,32 +132,26 @@ If [FileTest[$file, "-e"], Print["true"], Print["false"]]
 
 ####################################
 # Function that takes a function as an argument
-Foo[func] = [
-    func[]
-]
+Foo = &[func : func[] ]
 
 ##################################
 # Function that returns a function
-Foo[] = [
-   return ViewReport
-]
-
-#############################
-# Example of binding and calling Foo
-Example[] = [ViewReports[mylog.txt]]
-Foo[Example]
+Foo = &[return ViewReport ]
 
 ############################
-# lambda
-Foo[
-    [System[grep "my pattern" log.txt]]  # Lambda takes no arguments
+# lambda takes no arguments
+Foo = &[func : func[]]
+Foo[&[System[grep "my pattern" log.txt]]
+
+# lambda takes one arg
+Foo = &[func : func["execution report"]]
+Foo[ &[pat : System[grep $pat log.txt]]
 ]
 
-Foo[
-    [_, System[grep "my pattern" log.txt]]  # Lambda takes one arguments
-]
+var = &[4+5]
+var = &[x : x +3]
 
-# Functions can piped together
+# Functions can piped together - No they can't
 ht[/var/log/debesys/OC_cme*] | FooFunc[args]
 ht[/var/log/debesys/OC_cme*] | wc -l
 
@@ -179,3 +176,21 @@ and when used as input, will only provide the input of that range.
 Thread[threadid, body]
 ThreadJoin[threadid]
 ThreadJoin[{threadids}]
+
+
+******************************************************************************
+
+FileInfo = DefineRecord["FileInfo", "name", "size", "type]
+fi = FileInfo["oc_cme.log", 17889, "ascii"]
+fi["name"]
+
+mapData = Dict[]
+mapData["foo"] =3
+
+list = List["apple", "banana", "raspberry"]
+Append[list, "blackberry"]
+Insert[list, 3, "orange"]
+lst2 = Select[list, &[itm : RegEx[itm, ".+a"]]]
+list[1]
+list[1,4,5]
+list[1:5]

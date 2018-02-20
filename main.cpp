@@ -32,8 +32,12 @@ int main(int argc, char *argv[])
         std::string inbuf;
         std::cout << "> ";
         std::getline(std::cin, inbuf);
-        instruction::InstructionPtr inst = parser.parse(inbuf);
-        assert(inst);
-        inst->dump(std::cout);
+        parser.input_ = inbuf;
+        parser.pos_ = 0;
+        parser.tokenize();
+        for (auto& t : parser.tokens_)
+        {
+            std::cout << t.text << std::endl;
+        }
     }
 }

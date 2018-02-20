@@ -110,6 +110,18 @@ namespace fsh
         {
             strm << " " << value << " ";
         }
+
+        /*****************************************************/
+
+        void Float::Execute(Machine& machine)
+        {
+            machine.push_data(MakeFloat(value));
+        }
+
+        void Float::dump(std::ostream& strm)
+        {
+            strm << " " << value << " ";
+        }
     }
  }
 

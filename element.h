@@ -12,6 +12,7 @@ namespace fsh
     {
         ELEMENT_TYPE_STRING
         ,ELEMENT_TYPE_INTEGER
+        ,ELEMENT_TYPE_FLOAT
         ,ELEMENT_TYPE_LIST
         ,ELEMENT_TYPE_HEAD
         ,ELEMENT_TYPE_EXPRESSION
@@ -24,6 +25,7 @@ namespace fsh
     {
         virtual ElementType type() = 0;
         bool IsInteger() {return type() == ELEMENT_TYPE_INTEGER;}
+        bool IsFloat() {return type() == ELEMENT_TYPE_FLOAT;}
         bool IsString() {return type() == ELEMENT_TYPE_STRING;}
         bool IsList() {return type() == ELEMENT_TYPE_LIST;}
         bool IsHead() {return type() == ELEMENT_TYPE_HEAD;}
@@ -73,7 +75,18 @@ namespace fsh
         virtual ElementType type() {return ELEMENT_TYPE_INTEGER;}
         int64_t value;
     };
-    typedef instrusive_ptr<Integer> IntPtr;
+    typedef instrusive_ptr<Integer> IntegerPtr;
+
+    struct Float : public Element
+    {
+        Float(double f)
+        : value(f)
+        {}
+
+        virtual ElementType type() {return ELEMENT_TYPE_FLOAT;}
+        double value;
+    };
+    typedef instrusive_ptr<Float> FloatPtr;
 
     struct List : public Element
     {
@@ -101,6 +114,7 @@ namespace fsh
 
     StringPtr MakeString(const std::string& s);
     IntegerPtr MakeInteger(int64_t);
+    FloatPtr MakeFloat(double);
     ListPtr MakeList(HeadType);
     ExpressionPtr MakeExpression();
 }

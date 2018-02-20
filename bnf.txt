@@ -1,13 +1,14 @@
 letter = [a-zA-Z]
-digit = [0-9]
+DIGITS = [0-9]
+INTEGER = ['-' | '+'], {DIGITS}
+STRING = '"', {all characters - '"'}, '"'
 
-number = ['-' | '+'], {digit}
-string = '"', {all characters - '"'}, '"'
 list = '{', expressionSequence, '}'
-variable = '$', {letter | digit | '_'}
-           | '$', '(', {letter | digit | '_'}, ')'
 
 identifier = letter, {letter | digit | '_' | variable}
+
+func = identifier, '['
+bop = identifier, ['+'|'-'|'*'|'/'|'%']
 
 expression = identifier
             | functionCall

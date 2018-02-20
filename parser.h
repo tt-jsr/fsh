@@ -25,30 +25,31 @@ namespace fsh
     public:
         Parser();
         ~Parser();
-        instruction::InstructionPtr parse(const std::string& s);
-    private:
+    public:
         friend class ::ParserTest;
         char peekchar(int n = 0);
         char getchar();
         const char *peekstr();
         void advance(int);
         void skipWhiteSpace();
+        void tokenize();
 
-        void push(instruction::InstructionPtr);
-        instruction::InstructionPtr pop();
-        instruction::InstructionType peektype();
+        //void push(instruction::InstructionPtr);
+        //instruction::InstructionPtr pop();
+        //instruction::InstructionType peektype();
 
-        void HandleInstruction(instruction::InstructionPtr in);
-        void HandleInstruction(instruction::IdentifierPtr id);
-        void HandleInstruction(instruction::IntegerPtr id);
-        void HandleInstruction(instruction::BinaryOperatorPtr bop);
-        instruction::BinaryOperatorPtr  parse_binary_operator();
-        instruction::IdentifierPtr parse_identifier();
-        instruction::IntegerPtr parse_number();
-        instruction::InstructionPtr parse_expression();
-        instruction::InstructionPtr parse_paren();
-    private:
+        //void HandleInstruction(instruction::InstructionPtr in);
+        //void HandleInstruction(instruction::IdentifierPtr id);
+        //void HandleInstruction(instruction::IntegerPtr id);
+        //void HandleInstruction(instruction::BinaryOperatorPtr bop);
+        Token get_token();
+        Token parse_symbol();
+        Token parse_identifier();
+        Token parse_integer();
+        Token parse_sequence();
+    public:
         std::vector<instruction::InstructionPtr> stack_;
+        std::vector<Token> tokens_;
         std::string input_;
         size_t pos_;
     };

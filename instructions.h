@@ -70,6 +70,11 @@ namespace fsh
         public:
             Integer()
             { }
+
+            Integer(int64_t n)
+            :value(n)
+            {}
+
             ~Integer() {}
             void Execute(Machine&);
             InstructionType type() {return INSTRUCTION_INTEGER;}
@@ -78,6 +83,25 @@ namespace fsh
         };
 
         typedef fsh::instrusive_ptr<Integer> IntegerPtr;
+
+        class Float : public Instruction
+        {
+        public:
+            Float()
+            { }
+
+            Float(double n)
+            :value(n)
+            {}
+
+            ~Float() {}
+            void Execute(Machine&);
+            InstructionType type() {return INSTRUCTION_FLOAT;}
+            void dump(std::ostream&);
+            double value;
+        };
+
+        typedef fsh::instrusive_ptr<Float> FloatPtr;
     }
 }
 
