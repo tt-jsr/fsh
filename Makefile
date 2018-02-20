@@ -5,19 +5,19 @@ LDFLAGS=-g
 LIBS = -lstdc++ -lfl
 DEPS=list.h common.h element.h execution_context.h machine.h parser.h instructions.h 
 
-SRC		= main.cpp list.cpp execution_context.cpp element.cpp machine.cpp parser.cpp instructions.cpp fsh.tab.cpp lex.yy.cpp
+SRC		= list.cpp execution_context.cpp element.cpp machine.cpp parser.cpp instructions.cpp fsh.tab.cpp lex.yy.cpp
 
 fsh.tab.o : fsh.y
-	bison fsh.y
+	bison -d fsh.y
 	mv fsh.tab.c fsh.tab.cpp
-	$(CC) $(CPPFLAGS) fsh.tab.cpp -o fsh.tab.o
+	$(CC) -c $(CPPFLAGS) fsh.tab.cpp 
 
 lex.yy.o : fsh.l
 	flex fsh.l
 	mv lex.yy.c lex.yy.cpp
-	$(CC) $(CPPFLAGS) lex.yy.cpp -o lex.yy.o
+	$(CC) -c $(CPPFLAGS) lex.yy.cpp
 
-OBJS	= $(SRC:.cpp=.o) lex.yy.o fsh.tab.o
+OBJS	= $(SRC:.cpp=.o) 
 
 fsh : $(OBJS) $(DEPS)
 	$(CC) $(CPPFLAGS) -o $@ $(OBJS) $(LIBS)

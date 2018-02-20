@@ -65,6 +65,12 @@ namespace fsh
             return *this;
         }
 
+        instrusive_ptr& operator=(T *t)
+        {
+            reset(t);
+            return *this;
+        }
+
         // assignment from a derived type
         template<typename U>
         instrusive_ptr& operator=(const instrusive_ptr<U>& rhs)

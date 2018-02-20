@@ -56,6 +56,11 @@ namespace fsh
         public:
             Identifier()
             { }
+
+            Identifier(const char *p)
+            :name(p)
+            { }
+
             ~Identifier() {}
             void Execute(Machine&);
             InstructionType type() {return INSTRUCTION_IDENTIFIER;}
