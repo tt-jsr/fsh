@@ -120,15 +120,39 @@ namespace fsh
         }
 
         /*****************************************************/
-        /*
-        void Function::Execute(Machine& machine)
+        void FunctionCall::Execute(Machine& machine)
         {
+            fsh::ElementPtr e;
+            if (machine.get_variable(name, e) == false)
+            {
+                std::stringstream strm;
+                strm << "Function \"" << name << "\" not found";
+                throw std::runtime_error(strm.str());
+            }
+            if (e->IsFunctionBuiltIn() == false)
+            {
+                std::stringstream strm;
+                strm << "Function \"" << name << "\" is not a function";
+                throw std::runtime_error(strm.str());
+            }
+
+            fsh::FunctionBuiltInPtr func = e.cast<FunctionBuiltIn>();
+
+            if (args)
+            {
+                for (auto& in : args->expressions)
+                {
+                    in->Execute(machine);
+                    func->args.push_back(machine.pop_data());
+                }
+            }
+            func->Execute(machine);
+            machine.push_data(func->returnVal);
         }
 
-        void Function::dump(std::ostream&)
+        void FunctionCall::dump(std::ostream&)
         {
         }
-        */
 
         /*****************************************************/
         void Identifier::Execute(Machine& machine)
@@ -177,6 +201,19 @@ namespace fsh
         void Float::dump(std::ostream& strm)
         {
             strm << " " << value << " ";
+        }
+
+        /**************************************************/
+        void ExpressionList::Execute(Machine& machine)
+        {
+            for (auto &in : expressions)
+            {
+                in->Execute(machine);
+            }
+        }
+
+        void ExpressionList::dump(std::ostream& strm)
+        {
         }
     }
  }

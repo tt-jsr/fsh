@@ -21,6 +21,7 @@ void yyerror(const char *s);
 %token IDENTIFIER
 %token INT
 %token FLOAT
+%left ','
 %left '='
 %left '+' '-'
 %left '*' '/'
@@ -53,7 +54,21 @@ exp:
         bop->rhs = (fsh::instruction::Instruction *)$3;
         $$ = bop;
     }
-    //| FNCT '(' exp ')' { $$ = (*($1->value.fnctptr))($3); }
+    | IDENTIFIER '[' exp_list ']' { 
+        fsh::instruction::FunctionCall *pCall = new fsh::instruction::FunctionCall();
+        fsh::instruction::Identifier *id = (fsh::instruction::Identifier *)$1;
+        pCall->name = id->name;
+        delete id;
+        pCall->args = (fsh::instruction::ExpressionList *)$3;
+        $$ = pCall;
+    }
+    | IDENTIFIER '[' ']' { 
+        fsh::instruction::FunctionCall *pCall = new fsh::instruction::FunctionCall();
+        fsh::instruction::Identifier *id = (fsh::instruction::Identifier *)$1;
+        pCall->name = id->name;
+        delete id;
+        $$ = pCall;
+    }
     | exp '+' exp { 
         fsh::instruction::BinaryOperator *bop = new fsh::instruction::BinaryOperator();
         bop->op = fsh::TOKEN_PLUS;
@@ -95,8 +110,25 @@ exp:
         }
         $$ = p; 
     }
-    //| exp '^' exp { $$ = pow ($1, $3); }
     | '(' exp ')' { $$ = $2; }
+    ;
+exp_list:
+    exp     {
+        fsh::instruction::ExpressionList *el = new fsh::instruction::ExpressionList();
+        el->expressions.push_back((fsh::instruction::Instruction *)$1);
+        $$ = el;
+    }
+    | exp ',' exp   {
+        fsh::instruction::ExpressionList *el = new fsh::instruction::ExpressionList();
+        el->expressions.push_back((fsh::instruction::Instruction *)$1);
+        el->expressions.push_back((fsh::instruction::Instruction *)$3);
+        $$ = el;
+    }
+    | exp_list ',' exp {
+        fsh::instruction::ExpressionList *el = (fsh::instruction::ExpressionList *)$1;
+        el->expressions.push_back((fsh::instruction::Instruction *)$3);
+        $$ = el;
+    }
     ;
 /* End of grammar. */
 %%
@@ -127,10 +159,51 @@ void Execute(fsh::instruction::Instruction *pInst)
             std::cout << ep->msg << std::endl;
         }
         break;
+    case fsh::ELEMENT_TYPE_IDENTIFIER:
+        {
+            fsh::IdentifierPtr id = e.cast<fsh::Identifier>();
+            std::cout << id->name << std::endl;
+        }
+        break;
+    case fsh::ELEMENT_TYPE_NONE:
+        {
+            std::cout << "None" << std::endl;
+        }
+        break;
     default:
         std::cout << "Unhandled return from Execute!" << std::endl;
+        std::cout << "type: " << e->type() << std::endl;
         break;
     }
+}
+
+fsh::ElementPtr TestFuncBody(fsh::Machine& machine, std::vector<fsh::ElementPtr>& args)
+{
+    std::cout << "Testfunc: ";
+    for (auto& e : args)
+    {
+        switch(e->type())
+        {
+        case fsh::ELEMENT_TYPE_INTEGER:
+            {
+                fsh::IntegerPtr n = e.cast<fsh::Integer>();
+                std::cout << " " << n->value;
+            }
+            break;
+        case fsh::ELEMENT_TYPE_FLOAT:
+            {
+                fsh::FloatPtr f = e.cast<fsh::Float>();
+                std::cout << " " << f->value;
+            }
+            break;
+        default:
+            std::cout << " TestFunc no handler ";
+            break;
+        }
+    }
+    std::cout << std::endl;
+    fsh::ElementPtr e = fsh::MakeInteger(43);
+    return e;
 }
 
 int main(int, char**) {
@@ -144,6 +217,7 @@ int main(int, char**) {
 	// set flex to read from it instead of defaulting to STDIN:
 	yyin = myfile;
 
+    machine.register_builtin("TestFunc", TestFuncBody);
 	// parse through the input until there is no more:
 	do {
 		yyparse();

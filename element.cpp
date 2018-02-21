@@ -2,6 +2,7 @@
 #include <cassert>
 #include <iostream>
 #include "common.h"
+#include "machine.h"
 
 namespace fsh
 {
@@ -37,8 +38,25 @@ namespace fsh
         return FloatPtr(new Float(f));
     }
 
-    ExpressionPtr MakeExpression()
+    FunctionBuiltInPtr MakeFunctionBuiltIn()
     {
-        return ExpressionPtr(new Expression());
+        return FunctionBuiltInPtr(new FunctionBuiltIn());
+    }
+
+    NonePtr MakeNone()
+    {
+        return NonePtr(new None());
+    }
+
+    /****************************************************/
+    void FunctionBuiltIn::Execute(Machine& machine)
+    {
+        machine.push_context();
+        returnVal = execute(machine, args);
+        if (!returnVal)
+        {
+            returnVal = MakeNone();
+        }
+        machine.pop_context();
     }
 }

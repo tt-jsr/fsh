@@ -8,6 +8,8 @@
 
 namespace fsh
 {
+    class Machine;
+
     enum ElementType
     {
         ELEMENT_TYPE_STRING
@@ -18,6 +20,8 @@ namespace fsh
         ,ELEMENT_TYPE_EXPRESSION
         ,ELEMENT_TYPE_ERROR
         ,ELEMENT_TYPE_IDENTIFIER
+        ,ELEMENT_TYPE_FUNCTION_BUILTIN
+        ,ELEMENT_TYPE_NONE
     };
 
     struct Element : public instrusive_base
@@ -31,6 +35,8 @@ namespace fsh
         bool IsExpression() {return type() == ELEMENT_TYPE_EXPRESSION;}
         bool IsError() {return type() == ELEMENT_TYPE_ERROR;}
         bool IsIdentifier() {return type() == ELEMENT_TYPE_IDENTIFIER;}
+        bool IsFunctionBuiltIn() {return type() == ELEMENT_TYPE_FUNCTION_BUILTIN;}
+        bool IsNone() {return type() == ELEMENT_TYPE_NONE;}
     };
 
     typedef instrusive_ptr<Element> ElementPtr;
@@ -52,6 +58,14 @@ namespace fsh
         HeadType value;
     };
     typedef instrusive_ptr<Head> HeadPtr;
+
+    struct None : public Element
+    {
+        None() {}
+
+        virtual ElementType type() {return ELEMENT_TYPE_NONE;}
+    };
+    typedef instrusive_ptr<None> NonePtr;
 
     struct String : public Element
     {
@@ -122,25 +136,27 @@ namespace fsh
 
     typedef instrusive_ptr<List> ListPtr;
 
-    struct ExecutionContext;
-    class Machine;
-    typedef instrusive_ptr<ExecutionContext> ExecutionContextPtr;
-
-    struct Expression : public Element
+    struct FunctionBuiltIn : public Element
     {
-        virtual ElementType type() {return ELEMENT_TYPE_EXPRESSION;}
-        void Execute(ExecutionContextPtr) {}
-        std::vector<std::function<void(Machine&)>> instructions;
+        virtual ElementType type() {return ELEMENT_TYPE_FUNCTION_BUILTIN;}
+        void Execute(Machine&);
+        std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> execute;
+        std::vector<ElementPtr> args;
+        ElementPtr returnVal;
     };
 
-    typedef instrusive_ptr<Expression> ExpressionPtr;
+    typedef instrusive_ptr<FunctionBuiltIn> FunctionBuiltInPtr;
+
+    struct ExecutionContext;
+    typedef instrusive_ptr<ExecutionContext> ExecutionContextPtr;
 
     StringPtr MakeString(const std::string& s);
     ErrorPtr MakeError(const std::string& s);
     IntegerPtr MakeInteger(int64_t);
     FloatPtr MakeFloat(double);
     ListPtr MakeList(HeadType);
-    ExpressionPtr MakeExpression();
     IdentifierPtr MakeIdentifier(const std::string&);
+    FunctionBuiltInPtr MakeFunctionBuiltIn();
+    NonePtr MakeNone();
 }
 

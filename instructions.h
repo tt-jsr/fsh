@@ -36,21 +36,6 @@ namespace fsh
 
         typedef fsh::instrusive_ptr<BinaryOperator> BinaryOperatorPtr;
 
-        /*
-        class Function : public Instruction
-        {
-        public:
-            Function()
-            : body(nullptr)
-            { }
-            void Execute(Machine&);
-            InstructionType type() {return INSTRUCTION_BINARY_OPERATOR;}
-            void dump(std::ostream&);
-            std::vector<std::string> args;
-            Instruction *body;
-        };
-        */
-
         class Identifier : public Instruction
         {
         public:
@@ -107,6 +92,36 @@ namespace fsh
         };
 
         typedef fsh::instrusive_ptr<Float> FloatPtr;
+
+        class ExpressionList : public Instruction
+        {
+        public:
+            ExpressionList()
+            { }
+
+            ~ExpressionList() {}
+            void Execute(Machine&);
+            InstructionType type() {return INSTRUCTION_EXPRESSION_LIST;}
+            void dump(std::ostream&);
+            std::vector<InstructionPtr> expressions;
+        };
+
+        typedef fsh::instrusive_ptr<ExpressionList> ExpressionListPtr;
+
+        class FunctionCall : public Instruction
+        {
+        public:
+            FunctionCall()
+            { }
+            void Execute(Machine&);
+            InstructionType type() {return INSTRUCTION_FUNCTION_CALL;}
+            void dump(std::ostream&);
+            ExpressionListPtr args;
+            std::string name;
+        };
+
+        typedef fsh::instrusive_ptr<FunctionCall> FunctionCallPtr;
+
     }
 }
 

@@ -52,6 +52,11 @@ namespace fsh
         }
     }
 
+    size_t Machine::size_data()
+    {
+        return datastack.size();
+    }
+
     ElementPtr Machine::pop_data()
     {
         if (datastack.size() < 1)
@@ -93,5 +98,30 @@ namespace fsh
         if (out)
             return true;
         return false;
+    }
+
+    void Machine::register_builtin(const std::string& name, 
+            std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> func)
+    {
+        FunctionBuiltInPtr f = MakeFunctionBuiltIn();
+        f->execute = func;
+        ElementPtr e = f.cast<Element>();
+        store_variable(name, e);
+    }
+
+    void Machine::push_context()
+    {
+        ExecutionContextPtr ctx = MakeExecutionContext();
+        ctx->parent = executionContext;
+        executionContext = ctx;
+    }
+
+    void Machine::pop_context()
+    {
+        ExecutionContextPtr ec = executionContext->parent;
+        executionContext = ec;
+
+        // This crashes for some reason
+        //executionContext = executionContext->parent;
     }
 }

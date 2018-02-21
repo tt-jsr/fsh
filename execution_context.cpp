@@ -10,7 +10,7 @@ namespace fsh
 
     ElementPtr GetVariableImpl(ExecutionContextPtr ctx, const std::string& s)
     {
-        if (ctx == false)
+        if (ctx.get() == nullptr)
             return ElementPtr();
 
         auto it = ctx->variables_.find(s);
@@ -21,7 +21,7 @@ namespace fsh
 
     bool AddVariableImpl(ExecutionContextPtr ctx, const std::string& s, ElementPtr value)
     {
-        if (ctx == false)
+        if (ctx.get() == nullptr)
             return false;
 
         auto it = ctx->variables_.find(s);
