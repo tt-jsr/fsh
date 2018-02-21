@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include "element.h"
+#include "execution_context.h"
 
 #define private_impl public
 
@@ -33,6 +34,7 @@ namespace fsh
         bool get_variable(const std::string& name, ElementPtr& out);
     private:
         std::vector<ElementPtr> datastack;
+        ExecutionContextPtr executionContext;
     private_impl:
         ElementPtr pop_data();
         ElementPtr peek_data();

@@ -17,6 +17,16 @@ namespace fsh
         return StringPtr(new String(s));
     }
 
+    ErrorPtr MakeError(const std::string& s)
+    {
+        return ErrorPtr(new Error(s));
+    }
+
+    IdentifierPtr MakeIdentifier(const std::string& s)
+    {
+        return IdentifierPtr(new Identifier(s));
+    }
+
     IntegerPtr MakeInteger(int64_t n)
     {
         return IntegerPtr(new Integer(n));

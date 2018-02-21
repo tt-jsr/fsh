@@ -13,8 +13,10 @@ using namespace std;
 \*             {return '*';}
 \/             {return '/';}
 =             {return '=';}
-[0-9]+\.[0-9]+ { yylval = new fsh::instruction::Float(strtod(yytext, nullptr)); return FSH_FLOAT; }
--?[0-9]+         { yylval = new fsh::instruction::Integer(atoi(yytext)); return FSH_INT; }
-[a-zA-Z0-9]+   { yylval = new fsh::instruction::Identifier(yytext); return FSH_IDENTIFIER; }
+\(             {return '(';}
+\)             {return ')';}
+[0-9]+\.[0-9]+ { yylval = new fsh::instruction::Float(strtod(yytext, nullptr)); return FLOAT; }
+[0-9]+         { yylval = new fsh::instruction::Integer(atoi(yytext)); return INT; }
+\$?[a-zA-Z0-9_]+   { yylval = new fsh::instruction::Identifier(yytext); return IDENTIFIER; }
 %%
 

@@ -9,6 +9,7 @@ namespace fsh
 {
     Machine::Machine(void)
     {
+        executionContext = MakeExecutionContext();
     }
 
 
@@ -18,14 +19,21 @@ namespace fsh
 
     ElementPtr Machine::Execute(instruction::InstructionPtr i)
     {
-        datastack.clear();
-        i->Execute(*this);
-        assert(datastack.size() > 0);
-        if (datastack.size() == 0)
+        try
         {
-            return ElementPtr();
+            datastack.clear();
+            i->Execute(*this);
+            assert(datastack.size() > 0);
+            if (datastack.size() == 0)
+            {
+                return ElementPtr();
+            }
+            return pop_data();
         }
-        return pop_data();
+        catch (std::runtime_error& ex)
+        {
+            return MakeError(ex.what());
+        }
     }
 
 
@@ -76,10 +84,14 @@ namespace fsh
 
     void Machine::store_variable(const std::string& name, ElementPtr& d)
     {
+        executionContext->AddVariable(name, d);
     }
 
     bool Machine::get_variable(const std::string& name, ElementPtr& out)
     {
+        out = executionContext->GetVariable(name);
+        if (out)
+            return true;
         return false;
     }
 }

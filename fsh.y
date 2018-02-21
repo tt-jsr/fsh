@@ -10,7 +10,7 @@ using namespace std;
 extern "C" int yylex();
 extern "C" int yyparse();
 extern "C" FILE *yyin;
-fsh::instruction::Instruction *result;
+void Execute(fsh::instruction::Instruction *pInst);
  
 void yyerror(const char *s);
 %}
@@ -18,34 +18,40 @@ void yyerror(const char *s);
 %define api.value.type {void *} // Actually is instruction::Instruction
 
 // define the constant-string tokens:
-%token FSH_IDENTIFIER
-%token FSH_INT
-%token FSH_FLOAT
+%token IDENTIFIER
+%token INT
+%token FLOAT
 %left '='
 %left '+' '-'
 %left '*' '/'
+%precedence NEG
 
 %% /* The grammar follows. */
 input:
     %empty
-    | input exp
+    | input toplev
     ;
+
+toplev: exp {
+        Execute((fsh::instruction::Instruction *)$1);
+      }
+      ;
 exp:
-    FSH_INT { 
+    INT { 
         $$ = $1; 
-        result = (fsh::instruction::Instruction *)$1;
     }
-    | FSH_IDENTIFIER { 
+    | FLOAT { 
         $$ = $1; 
-        result = (fsh::instruction::Instruction *)$1;
     }
-    | FSH_IDENTIFIER '=' exp { 
+    | IDENTIFIER { 
+        $$ = $1; 
+    }
+    | IDENTIFIER '=' exp { 
         fsh::instruction::BinaryOperator *bop = new fsh::instruction::BinaryOperator();
         bop->op = fsh::TOKEN_ASSIGNMENT;
         bop->lhs = (fsh::instruction::Instruction *)$1;
         bop->rhs = (fsh::instruction::Instruction *)$3;
         $$ = bop;
-        result = bop;
     }
     //| FNCT '(' exp ')' { $$ = (*($1->value.fnctptr))($3); }
     | exp '+' exp { 
@@ -54,16 +60,13 @@ exp:
         bop->lhs = (fsh::instruction::Instruction *)$1;
         bop->rhs = (fsh::instruction::Instruction *)$3;
         $$ = bop;
-        result = bop;
     }
-        
     | exp '-' exp { 
         fsh::instruction::BinaryOperator *bop = new fsh::instruction::BinaryOperator();
         bop->op = fsh::TOKEN_MINUS;
         bop->lhs = (fsh::instruction::Instruction *)$1;
         bop->rhs = (fsh::instruction::Instruction *)$3;
         $$ = bop;
-        result = bop;
     }
     | exp '*' exp { 
         fsh::instruction::BinaryOperator *bop = new fsh::instruction::BinaryOperator();
@@ -71,7 +74,6 @@ exp:
         bop->lhs = (fsh::instruction::Instruction *)$1;
         bop->rhs = (fsh::instruction::Instruction *)$3;
         $$ = bop;
-        result = bop;
     }
     | exp '/' exp { 
         fsh::instruction::BinaryOperator *bop = new fsh::instruction::BinaryOperator();
@@ -79,15 +81,57 @@ exp:
         bop->lhs = (fsh::instruction::Instruction *)$1;
         bop->rhs = (fsh::instruction::Instruction *)$3;
         $$ = bop;
-        result = bop;
     }
-    //| '-' exp %prec NEG { $$ = -$2; }
+    | '-' exp %prec NEG { 
+        fsh::instruction::Instruction *p = (fsh::instruction::Instruction *)$2;
+        if (p->type() == fsh::instruction::INSTRUCTION_INTEGER)
+        {
+            fsh::instruction::Integer *pInt = (fsh::instruction::Integer *)p;
+            pInt->value = -pInt->value;
+        }
+        else if (p->type() == fsh::instruction::INSTRUCTION_FLOAT)   {
+            fsh::instruction::Float *pFloat = (fsh::instruction::Float *)p;
+            pFloat->value = -pFloat->value;
+        }
+        $$ = p; 
+    }
     //| exp '^' exp { $$ = pow ($1, $3); }
-    //| '(' exp ')' { $$ = $2; }
+    | '(' exp ')' { $$ = $2; }
     ;
 /* End of grammar. */
 %%
 
+fsh::Machine machine;
+
+void Execute(fsh::instruction::Instruction *pInst)
+{
+    fsh::instruction::InstructionPtr inst(pInst);
+    fsh::ElementPtr e = machine.Execute(inst);
+    switch (e->type())
+    {
+    case fsh::ELEMENT_TYPE_INTEGER:
+        {
+            fsh::IntegerPtr ip = e.cast<fsh::Integer>();
+            std::cout << ip->value << std::endl;
+        }
+        break;
+    case fsh::ELEMENT_TYPE_FLOAT:
+        {
+            fsh::FloatPtr ip = e.cast<fsh::Float>();
+            std::cout << ip->value << std::endl;
+        }
+        break;
+    case fsh::ELEMENT_TYPE_ERROR:
+        {
+            fsh::ErrorPtr ep = e.cast<fsh::Error>();
+            std::cout << ep->msg << std::endl;
+        }
+        break;
+    default:
+        std::cout << "Unhandled return from Execute!" << std::endl;
+        break;
+    }
+}
 
 int main(int, char**) {
 	// open a file handle to a particular file:
@@ -100,22 +144,9 @@ int main(int, char**) {
 	// set flex to read from it instead of defaulting to STDIN:
 	yyin = myfile;
 
-    fsh::Machine machine;
 	// parse through the input until there is no more:
 	do {
 		yyparse();
-        fsh::instruction::InstructionPtr inst(result);
-        fsh::ElementPtr e = machine.Execute(inst);
-        switch (e->type())
-        {
-        case fsh::ELEMENT_TYPE_INTEGER:
-            {
-                fsh::IntegerPtr ip = e.cast<fsh::Integer>();
-                std::cout << ip->value;
-            }
-        default:
-            break;
-        }
 	} while (!feof(yyin));
 	
 }

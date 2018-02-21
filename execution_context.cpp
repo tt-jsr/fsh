@@ -26,7 +26,7 @@ namespace fsh
 
         auto it = ctx->variables_.find(s);
         if (it == ctx->variables_.end())
-            AddVariableImpl(ctx->parent, s, value);
+            return AddVariableImpl(ctx->parent, s, value);
         it->second = value;
         return true;
     }

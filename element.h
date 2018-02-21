@@ -16,10 +16,9 @@ namespace fsh
         ,ELEMENT_TYPE_LIST
         ,ELEMENT_TYPE_HEAD
         ,ELEMENT_TYPE_EXPRESSION
+        ,ELEMENT_TYPE_ERROR
+        ,ELEMENT_TYPE_IDENTIFIER
     };
-
-    class Integer;
-    typedef instrusive_ptr<Integer> IntegerPtr;
 
     struct Element : public instrusive_base
     {
@@ -30,8 +29,8 @@ namespace fsh
         bool IsList() {return type() == ELEMENT_TYPE_LIST;}
         bool IsHead() {return type() == ELEMENT_TYPE_HEAD;}
         bool IsExpression() {return type() == ELEMENT_TYPE_EXPRESSION;}
-
-        IntegerPtr ToInteger();
+        bool IsError() {return type() == ELEMENT_TYPE_ERROR;}
+        bool IsIdentifier() {return type() == ELEMENT_TYPE_IDENTIFIER;}
     };
 
     typedef instrusive_ptr<Element> ElementPtr;
@@ -65,6 +64,30 @@ namespace fsh
         std::string value;
     };
     typedef instrusive_ptr<String> StringPtr;
+
+    struct Identifier : public Element
+    {
+        Identifier() {}
+        Identifier(const std::string& s)
+        :name(s)
+        {}
+
+        virtual ElementType type() {return ELEMENT_TYPE_IDENTIFIER;}
+        std::string name;
+    };
+    typedef instrusive_ptr<Identifier> IdentifierPtr;
+
+    struct Error : public Element
+    {
+        Error() {}
+        Error(const std::string& s)
+        :msg(s)
+        {}
+
+        virtual ElementType type() {return ELEMENT_TYPE_ERROR;}
+        std::string msg;
+    };
+    typedef instrusive_ptr<Error> ErrorPtr;
 
     struct Integer : public Element
     {
@@ -113,9 +136,11 @@ namespace fsh
     typedef instrusive_ptr<Expression> ExpressionPtr;
 
     StringPtr MakeString(const std::string& s);
+    ErrorPtr MakeError(const std::string& s);
     IntegerPtr MakeInteger(int64_t);
     FloatPtr MakeFloat(double);
     ListPtr MakeList(HeadType);
     ExpressionPtr MakeExpression();
+    IdentifierPtr MakeIdentifier(const std::string&);
 }
 

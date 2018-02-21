@@ -12,17 +12,44 @@ namespace fsh
     
     namespace instruction
     {
-        bool GetIntegers(ElementPtr e1, ElementPtr e2, int64_t& v1, int64_t& v2)
-        {
-            if (e1->type() != ELEMENT_TYPE_INTEGER)
-                return false;
-            if (e2->type() != ELEMENT_TYPE_INTEGER)
-                return false;
-            v1 = e1.cast<fsh::Integer>()->value;
-            v2 = e2.cast<fsh::Integer>()->value;
-            return true;
-        }
         /*****************************************************/
+        void ExecuteInteger(Machine& machine, int op, fsh::IntegerPtr lhs, fsh::IntegerPtr rhs)
+        {
+            switch(op)
+            {
+            case TOKEN_PLUS:
+                machine.push_data(MakeInteger(lhs->value + rhs->value));
+                break;
+            case TOKEN_MINUS:
+                machine.push_data(MakeInteger(lhs->value - rhs->value));
+                break;
+            case TOKEN_MULTIPLY:
+                machine.push_data(MakeInteger(lhs->value * rhs->value));
+                break;
+            case TOKEN_DIVIDE:
+                machine.push_data(MakeInteger(lhs->value / rhs->value));
+                break;
+            }
+        }
+
+        void ExecuteFloat(Machine& machine, int op, fsh::FloatPtr lhs, fsh::FloatPtr rhs)
+        {
+            switch(op)
+            {
+            case TOKEN_PLUS:
+                machine.push_data(MakeFloat(lhs->value + rhs->value));
+                break;
+            case TOKEN_MINUS:
+                machine.push_data(MakeFloat(lhs->value - rhs->value));
+                break;
+            case TOKEN_MULTIPLY:
+                machine.push_data(MakeFloat(lhs->value * rhs->value));
+                break;
+            case TOKEN_DIVIDE:
+                machine.push_data(MakeFloat(lhs->value / rhs->value));
+                break;
+            }
+        }
         BinaryOperator::~BinaryOperator()
         {
         }
@@ -33,25 +60,39 @@ namespace fsh
             rhs->Execute(machine);
             ElementPtr rdata = machine.pop_data();
             ElementPtr ldata = machine.pop_data();
-            int64_t lv, rv;
-            if (GetIntegers(ldata, rdata, lv, rv) == false)
-                throw std::runtime_error("Expected integer");
-            switch(op)
+            if (op == TOKEN_ASSIGNMENT)
             {
-            case TOKEN_PLUS:
-                machine.push_data(MakeInteger(lv + rv));
-                break;
-            case TOKEN_MINUS:
-                machine.push_data(MakeInteger(lv - rv));
-                break;
-            case TOKEN_MULTIPLY:
-                machine.push_data(MakeInteger(lv * rv));
-                break;
-            case TOKEN_DIVIDE:
-                machine.push_data(MakeInteger(lv / rv));
-                break;
+                if (ldata->type() != fsh::ELEMENT_TYPE_IDENTIFIER)
+                {
+                    std::stringstream strm;
+                    strm << "lhs of assignment is not an identifier";
+                    throw std::runtime_error(strm.str());
+                }
+                machine.store_variable(ldata.cast<fsh::Identifier>()->name, rdata);
+                machine.push_data(rdata);
             }
-
+            else
+            {
+                if (rdata->IsFloat() && ldata->IsInteger())
+                {
+                    fsh::FloatPtr l = MakeFloat((double)ldata.cast<fsh::Integer>()->value);
+                    fsh::FloatPtr r = rdata.cast<fsh::Float>();
+                    ExecuteFloat(machine, op, l, r);
+                }
+                if (rdata->IsInteger() && ldata->IsFloat())
+                {
+                    fsh::FloatPtr r = MakeFloat((double)rdata.cast<fsh::Integer>()->value);
+                    ExecuteFloat(machine, op, ldata.cast<fsh::Float>(), r);
+                }
+                if (rdata->IsFloat() && ldata->IsFloat())
+                {
+                    ExecuteFloat(machine, op, ldata.cast<fsh::Float>(), rdata.cast<fsh::Float>());
+                }
+                if (rdata->IsInteger() && ldata->IsInteger())
+                {
+                    ExecuteInteger(machine, op, ldata.cast<fsh::Integer>(), rdata.cast<fsh::Integer>());
+                }
+            }
         }
 
         void BinaryOperator::dump(std::ostream& strm)
@@ -92,7 +133,22 @@ namespace fsh
         /*****************************************************/
         void Identifier::Execute(Machine& machine)
         {
-            
+            if (name[0] == '$')
+            {
+                ElementPtr e;
+                if (machine.get_variable(&name[1], e) == false)
+                {
+                    std::stringstream strm;
+                    strm << "Variable \"" << name << "\" not found";
+                    throw std::runtime_error(strm.str());
+                }
+                machine.push_data(e);
+            }
+            else
+            {
+                ElementPtr e = fsh::MakeIdentifier(name);
+                machine.push_data(e);
+            }
         }
 
         void Identifier::dump(std::ostream& strm)

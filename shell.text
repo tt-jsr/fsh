@@ -109,14 +109,14 @@ For[f in $files,
 # view all partitions
 ViewReports = &[file :
     stat = Fstat[$file]
-    size = stat[[Fstat.size]]
-    nparts = size/100000000 + 1
+    size = stat[[$Fstat.size]]
+    nparts = $size/100000000 + 1
     files = PartitionFile[$file, $nparts]
     For[f in $files,
         Thread[threadObj,
-            If [Extension[file] == "gz",
-                System[$f | System[erformat > er$(For.iteration).log] ],
-                System[zcat | erformat > er$(For.iteration).log]
+            If [Extension[$file] == "gz",
+                System[$f | System[erformat > er$($For.iteration).log] ],
+                System[zcat | erformat > er$($For.iteration).log]
             ]
 
         ]
