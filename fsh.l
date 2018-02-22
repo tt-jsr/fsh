@@ -18,6 +18,8 @@ using namespace std;
 ,               {return ',';}
 \[               {return '[';}
 \]               {return ']';}
+&               {return '&';}
+:               {return ':';}
 [0-9]+\.[0-9]+ { yylval = new fsh::instruction::Float(strtod(yytext, nullptr)); return FLOAT; }
 [0-9]+         { yylval = new fsh::instruction::Integer(atoi(yytext)); return INT; }
 \$?[a-zA-Z0-9_]+   { yylval = new fsh::instruction::Identifier(yytext); return IDENTIFIER; }

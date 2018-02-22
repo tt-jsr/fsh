@@ -63,7 +63,9 @@ namespace fsh
             ,INSTRUCTION_FLOAT
             ,INSTRUCTION_BINARY_OPERATOR
             ,INSTRUCTION_FUNCTION_CALL
+            ,INSTRUCTION_FUNCTION_DEF
             ,INSTRUCTION_EXPRESSION_LIST
+            ,INSTRUCTION_IDENTIFIER_LIST
         };
     }
 }

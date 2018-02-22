@@ -3,6 +3,7 @@
 #include <iostream>
 #include "common.h"
 #include "machine.h"
+#include "instructions.h"
 
 namespace fsh
 {
@@ -48,15 +49,24 @@ namespace fsh
         return NonePtr(new None());
     }
 
+    FunctionShellPtr MakeFunctionShell()
+    {
+        return FunctionShellPtr(new FunctionShell());
+    }
+
     /****************************************************/
     void FunctionBuiltIn::Execute(Machine& machine)
     {
-        machine.push_context();
-        returnVal = execute(machine, args);
+        returnVal = body(machine, args);
         if (!returnVal)
         {
             returnVal = MakeNone();
         }
-        machine.pop_context();
+    }
+
+    /***************************************************/
+    void FunctionShell::Execute(Machine& machine)
+    {
+        body->Execute(machine);
     }
 }

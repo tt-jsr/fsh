@@ -129,28 +129,76 @@ namespace fsh
                 strm << "Function \"" << name << "\" not found";
                 throw std::runtime_error(strm.str());
             }
-            if (e->IsFunctionBuiltIn() == false)
+            if (e->IsFunctionBuiltIn() == false && e->IsFunctionShell() == false)
             {
                 std::stringstream strm;
                 strm << "Function \"" << name << "\" is not a function";
                 throw std::runtime_error(strm.str());
             }
 
-            fsh::FunctionBuiltInPtr func = e.cast<FunctionBuiltIn>();
-
-            if (args)
+            if (e->IsFunctionBuiltIn())
             {
-                for (auto& in : args->expressions)
+                fsh::FunctionBuiltInPtr func = e.cast<FunctionBuiltIn>();
+
+                if (args)
                 {
-                    in->Execute(machine);
-                    func->args.push_back(machine.pop_data());
+                    for (auto& in : args->expressions)
+                    {
+                        in->Execute(machine);
+                        func->args.push_back(machine.pop_data());
+                    }
                 }
+                machine.push_context();
+                // now execute the function
+                func->Execute(machine);
+                machine.pop_context();
+                machine.push_data(func->returnVal);
             }
-            func->Execute(machine);
-            machine.push_data(func->returnVal);
+            if (e->IsFunctionShell())
+            {
+                fsh::FunctionShellPtr func = e.cast<FunctionShell>();
+                std::vector<ElementPtr> dataArgs;
+                // Execute each argument and put the result into the 'args' vector
+                if (args.get() != nullptr)
+                {
+                    for (auto& in : args->expressions)
+                    {
+                        in->Execute(machine);
+                        dataArgs.push_back(machine.pop_data());
+                    }
+                }
+                // Create a new context, create a variable for each named argument
+                machine.push_context();
+                size_t dataArgIdx = 0;
+                for (; dataArgIdx < dataArgs.size(); ++dataArgIdx)
+                {
+                    machine.store_variable(func->arg_names[dataArgIdx], dataArgs[dataArgIdx]);
+                }
+                // Any named arguments that the caller did not provide, we set to None
+                for (;dataArgIdx < func->arg_names.size(); ++dataArgIdx)
+                {
+                    ElementPtr none = MakeNone();
+                    machine.store_variable(func->arg_names[dataArgIdx], none);
+                }
+                func->Execute(machine);
+                machine.pop_context();
+            }
         }
 
         void FunctionCall::dump(std::ostream&)
+        {
+        }
+
+        /*****************************************************/
+        void FunctionDef::Execute(Machine& machine)
+        {
+            fsh::FunctionShellPtr func = fsh::MakeFunctionShell();
+            func->arg_names = arg_names;
+            func->body = body;
+            machine.push_data(func);
+        }
+
+        void FunctionDef::dump(std::ostream&)
         {
         }
 
@@ -178,6 +226,15 @@ namespace fsh
         void Identifier::dump(std::ostream& strm)
         {
             strm << " " << name << " ";
+        }
+
+        /*****************************************************/
+        void IdentifierList::Execute(Machine& machine)
+        {
+        }
+
+        void IdentifierList::dump(std::ostream&)
+        {
         }
 
         /*****************************************************/

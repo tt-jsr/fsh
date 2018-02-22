@@ -104,7 +104,7 @@ namespace fsh
             std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> func)
     {
         FunctionBuiltInPtr f = MakeFunctionBuiltIn();
-        f->execute = func;
+        f->body = func;
         ElementPtr e = f.cast<Element>();
         store_variable(name, e);
     }

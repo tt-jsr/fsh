@@ -8,6 +8,12 @@
 
 namespace fsh
 {
+    namespace instruction
+    {
+        class Instruction;
+        typedef instrusive_ptr<Instruction> InstructionPtr;
+    }
+
     class Machine;
 
     enum ElementType
@@ -17,10 +23,10 @@ namespace fsh
         ,ELEMENT_TYPE_FLOAT
         ,ELEMENT_TYPE_LIST
         ,ELEMENT_TYPE_HEAD
-        ,ELEMENT_TYPE_EXPRESSION
         ,ELEMENT_TYPE_ERROR
         ,ELEMENT_TYPE_IDENTIFIER
         ,ELEMENT_TYPE_FUNCTION_BUILTIN
+        ,ELEMENT_TYPE_FUNCTION_SHELL
         ,ELEMENT_TYPE_NONE
     };
 
@@ -32,10 +38,10 @@ namespace fsh
         bool IsString() {return type() == ELEMENT_TYPE_STRING;}
         bool IsList() {return type() == ELEMENT_TYPE_LIST;}
         bool IsHead() {return type() == ELEMENT_TYPE_HEAD;}
-        bool IsExpression() {return type() == ELEMENT_TYPE_EXPRESSION;}
         bool IsError() {return type() == ELEMENT_TYPE_ERROR;}
         bool IsIdentifier() {return type() == ELEMENT_TYPE_IDENTIFIER;}
         bool IsFunctionBuiltIn() {return type() == ELEMENT_TYPE_FUNCTION_BUILTIN;}
+        bool IsFunctionShell() {return type() == ELEMENT_TYPE_FUNCTION_SHELL;}
         bool IsNone() {return type() == ELEMENT_TYPE_NONE;}
     };
 
@@ -136,16 +142,31 @@ namespace fsh
 
     typedef instrusive_ptr<List> ListPtr;
 
+    // Machine::register_builtin() creates a FunctionBuiltIn instruction. When
+    // this is called t will execute the function
     struct FunctionBuiltIn : public Element
     {
         virtual ElementType type() {return ELEMENT_TYPE_FUNCTION_BUILTIN;}
-        void Execute(Machine&);
-        std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> execute;
+        void Execute(Machine& machine);
+        std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> body;
         std::vector<ElementPtr> args;
         ElementPtr returnVal;
     };
 
     typedef instrusive_ptr<FunctionBuiltIn> FunctionBuiltInPtr;
+
+    // A lambda expression generates a instruction::FunctionDef instruction. When executed
+    // that will create a FunctionShell that can be stored as a variable, placed in list
+    // etc. Exeucting a FunctionShell executes the expression defined by the script
+    struct FunctionShell : public Element
+    {
+        virtual ElementType type() {return ELEMENT_TYPE_FUNCTION_SHELL;}
+        void Execute(Machine& machine);
+        fsh::instruction::InstructionPtr body;
+        std::vector<std::string> arg_names;
+    };
+
+    typedef instrusive_ptr<FunctionShell> FunctionShellPtr;
 
     struct ExecutionContext;
     typedef instrusive_ptr<ExecutionContext> ExecutionContextPtr;
@@ -157,6 +178,7 @@ namespace fsh
     ListPtr MakeList(HeadType);
     IdentifierPtr MakeIdentifier(const std::string&);
     FunctionBuiltInPtr MakeFunctionBuiltIn();
+    FunctionShellPtr MakeFunctionShell();
     NonePtr MakeNone();
 }
 

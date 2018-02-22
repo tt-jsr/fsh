@@ -108,6 +108,23 @@ namespace fsh
 
         typedef fsh::instrusive_ptr<ExpressionList> ExpressionListPtr;
 
+        class IdentifierList : public Instruction
+        {
+        public:
+            IdentifierList()
+            { }
+
+            ~IdentifierList() {}
+            void Execute(Machine&);
+            InstructionType type() {return INSTRUCTION_IDENTIFIER_LIST;}
+            void dump(std::ostream&);
+            std::vector<InstructionPtr> identifiers;
+        };
+
+        typedef fsh::instrusive_ptr<IdentifierList> IdentifierListPtr;
+
+        // Created from function call syntax identifier[args...]
+        // the element 
         class FunctionCall : public Instruction
         {
         public:
@@ -121,6 +138,22 @@ namespace fsh
         };
 
         typedef fsh::instrusive_ptr<FunctionCall> FunctionCallPtr;
+
+        // Created from the lambda expression &[args... : exp]
+        // The execution of this pushes a FunctionShell element onto the stack
+        class FunctionDef : public Instruction
+        {
+        public:
+            FunctionDef()
+            { }
+            void Execute(Machine&);
+            InstructionType type() {return INSTRUCTION_FUNCTION_DEF;}
+            void dump(std::ostream&);
+            std::vector<std::string> arg_names;
+            InstructionPtr body;
+        };
+
+        typedef fsh::instrusive_ptr<FunctionDef> FunctionCallDef;
 
     }
 }
