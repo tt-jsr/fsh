@@ -66,6 +66,7 @@ namespace fsh
             ,INSTRUCTION_FUNCTION_DEF
             ,INSTRUCTION_EXPRESSION_LIST
             ,INSTRUCTION_IDENTIFIER_LIST
+            ,INSTRUCTION_STRING
         };
     }
 

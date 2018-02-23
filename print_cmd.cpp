@@ -6,11 +6,6 @@
 
 namespace fsh
 {
-    ElementPtr If(Machine& machine, std::vector<ElementPtr>& args)
-    {
-        
-    }
-
     ElementPtr Print(Machine& machine, std::vector<ElementPtr>& args)
     {
         std::cout << "Print: " ;
@@ -33,38 +28,39 @@ namespace fsh
             case ELEMENT_TYPE_ERROR:
                 {
                     ErrorPtr ep = e.cast<Error>();
-                    std::cout << ep->msg << std::endl;
+                    std::cout << ep->msg;
                 }
                 break;
             case ELEMENT_TYPE_IDENTIFIER:
                 {
                     IdentifierPtr id = e.cast<Identifier>();
-                    std::cout << id->name << std::endl;
+                    std::cout << id->name;
                 }
                 break;
             case ELEMENT_TYPE_NONE:
                 {
-                    std::cout << "None" << std::endl;
+                    std::cout << "None";
                 }
                 break;
             case ELEMENT_TYPE_STRING:
                 {
-                    std::cout << "String" << std::endl;
+                    StringPtr sp = e.cast<String>();
+                    std::cout << sp->value;
                 }
                 break;
             case ELEMENT_TYPE_LIST:
                 {
-                    std::cout << "List" << std::endl;
+                    std::cout << "List";
                 }
                 break;
             case ELEMENT_TYPE_HEAD:
                 {
-                    std::cout << "Head" << std::endl;
+                    std::cout << "Head";
                 }
                 break;
             case ELEMENT_TYPE_FUNCTION_DEFINITION:
                 {
-                    std::cout << "FunctionDefinition" << std::endl;
+                    std::cout << "FunctionDefinition";
                 }
                 break;
             default:

@@ -20,6 +20,8 @@ void yyerror(const char *s);
 
 // define the constant-string tokens:
 %token IDENTIFIER
+%token NONE
+%token STRING
 %token INT
 %token FLOAT
 %left ','
@@ -47,6 +49,12 @@ exp:
     }
     | IDENTIFIER { 
         $$ = $1; 
+    }
+    | NONE{
+        $$ = new fsh::instruction::None();
+    }
+    | STRING {
+        $$ = $1;
     }
     | IDENTIFIER '=' exp { 
         fsh::instruction::BinaryOperator *bop = new fsh::instruction::BinaryOperator();

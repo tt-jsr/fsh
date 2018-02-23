@@ -74,6 +74,39 @@ namespace fsh
 
         typedef fsh::instrusive_ptr<Integer> IntegerPtr;
 
+        class String : public Instruction
+        {
+        public:
+            String()
+            { }
+
+            String(const std::string& s)
+            :value(s)
+            {}
+
+            ~String() {}
+            void Execute(Machine&);
+            InstructionType type() {return INSTRUCTION_STRING;}
+            void dump(std::ostream&);
+            std::string value;
+        };
+
+        typedef fsh::instrusive_ptr<String> StringPtr;
+
+        class None : public Instruction
+        {
+        public:
+            None()
+            { }
+
+            ~None() {}
+            void Execute(Machine&);
+            InstructionType type() {return INSTRUCTION_NONE;}
+            void dump(std::ostream&);
+        };
+
+        typedef fsh::instrusive_ptr<None> NonePtr;
+
         class Float : public Instruction
         {
         public:

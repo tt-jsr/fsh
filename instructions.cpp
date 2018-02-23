@@ -256,6 +256,28 @@ namespace fsh
         }
 
         /*****************************************************/
+        void String::Execute(Machine& machine)
+        {
+            machine.push_data(MakeString(value));
+        }
+
+        void String::dump(std::ostream& strm)
+        {
+            strm << " " << value << " ";
+        }
+
+        /*****************************************************/
+        void None::Execute(Machine& machine)
+        {
+            machine.push_data(MakeNone());
+        }
+
+        void None::dump(std::ostream& strm)
+        {
+            strm << " None ";
+        }
+
+        /*****************************************************/
 
         void Float::Execute(Machine& machine)
         {
