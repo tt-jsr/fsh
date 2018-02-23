@@ -68,4 +68,6 @@ namespace fsh
             ,INSTRUCTION_IDENTIFIER_LIST
         };
     }
+
 }
+#include "instructions.h"

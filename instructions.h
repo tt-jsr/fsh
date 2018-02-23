@@ -123,8 +123,6 @@ namespace fsh
 
         typedef fsh::instrusive_ptr<IdentifierList> IdentifierListPtr;
 
-        // Created from function call syntax identifier[args...]
-        // the element 
         class FunctionCall : public Instruction
         {
         public:
@@ -139,8 +137,6 @@ namespace fsh
 
         typedef fsh::instrusive_ptr<FunctionCall> FunctionCallPtr;
 
-        // Created from the lambda expression &[args... : exp]
-        // The execution of this pushes a FunctionShell element onto the stack
         class FunctionDef : public Instruction
         {
         public:
@@ -150,10 +146,10 @@ namespace fsh
             InstructionType type() {return INSTRUCTION_FUNCTION_DEF;}
             void dump(std::ostream&);
             std::vector<std::string> arg_names;
-            InstructionPtr body;
+            std::vector<InstructionPtr> body;
         };
 
-        typedef fsh::instrusive_ptr<FunctionDef> FunctionCallDef;
+        typedef fsh::instrusive_ptr<FunctionDef> FunctionDefPtr;
 
     }
 }

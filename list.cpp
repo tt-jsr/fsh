@@ -3,6 +3,7 @@
 #include <iostream>
 #include "common.h"
 #include "list.h"
+#include "instructions.h"
 
 namespace fsh
 {

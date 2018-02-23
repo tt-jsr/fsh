@@ -129,37 +129,35 @@ namespace fsh
                 strm << "Function \"" << name << "\" not found";
                 throw std::runtime_error(strm.str());
             }
-            if (e->IsFunctionBuiltIn() == false && e->IsFunctionShell() == false)
+            if (e->IsFunctionDefinition() == false)
             {
                 std::stringstream strm;
-                strm << "Function \"" << name << "\" is not a function";
+                strm << "Name \"" << name << "\" is not a function";
                 throw std::runtime_error(strm.str());
             }
 
-            if (e->IsFunctionBuiltIn())
+            fsh::FunctionDefinitionPtr func = e.cast<FunctionDefinition>();
+            std::vector<ElementPtr> dataArgs;
+            if (func->isBuiltIn)
             {
-                fsh::FunctionBuiltInPtr func = e.cast<FunctionBuiltIn>();
-
-                if (args)
+                if (args.get())
                 {
                     for (auto& in : args->expressions)
                     {
                         in->Execute(machine);
-                        func->args.push_back(machine.pop_data());
+                        dataArgs.push_back(machine.pop_data());
                     }
                 }
                 machine.push_context();
                 // now execute the function
-                func->Execute(machine);
+                ElementPtr rtn = func->builtInBody(machine, dataArgs);
                 machine.pop_context();
-                machine.push_data(func->returnVal);
+                machine.push_data(rtn);
             }
-            if (e->IsFunctionShell())
+            else
             {
-                fsh::FunctionShellPtr func = e.cast<FunctionShell>();
-                std::vector<ElementPtr> dataArgs;
-                // Execute each argument and put the result into the 'args' vector
-                if (args.get() != nullptr)
+                // Execute each argument and put the result into the dataArgs vector
+                if (args)
                 {
                     for (auto& in : args->expressions)
                     {
@@ -180,7 +178,13 @@ namespace fsh
                     ElementPtr none = MakeNone();
                     machine.store_variable(func->arg_names[dataArgIdx], none);
                 }
-                func->Execute(machine);
+                ElementPtr e;
+                for (auto& in : func->shellBody)
+                {
+                    in->Execute(machine);
+                    e = machine.pop_data();
+                }
+                machine.push_data(e); // push back that last statement result
                 machine.pop_context();
             }
         }
@@ -192,9 +196,12 @@ namespace fsh
         /*****************************************************/
         void FunctionDef::Execute(Machine& machine)
         {
-            fsh::FunctionShellPtr func = fsh::MakeFunctionShell();
+            fsh::FunctionDefinitionPtr func = fsh::MakeFunctionDefinition();
             func->arg_names = arg_names;
-            func->body = body;
+            for (auto& in : body)
+            {
+                func->shellBody.push_back(in);
+            }
             machine.push_data(func);
         }
 

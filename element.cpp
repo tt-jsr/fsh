@@ -39,34 +39,13 @@ namespace fsh
         return FloatPtr(new Float(f));
     }
 
-    FunctionBuiltInPtr MakeFunctionBuiltIn()
+    FunctionDefinitionPtr MakeFunctionDefinition()
     {
-        return FunctionBuiltInPtr(new FunctionBuiltIn());
+        return FunctionDefinitionPtr(new FunctionDefinition());
     }
 
     NonePtr MakeNone()
     {
         return NonePtr(new None());
-    }
-
-    FunctionShellPtr MakeFunctionShell()
-    {
-        return FunctionShellPtr(new FunctionShell());
-    }
-
-    /****************************************************/
-    void FunctionBuiltIn::Execute(Machine& machine)
-    {
-        returnVal = body(machine, args);
-        if (!returnVal)
-        {
-            returnVal = MakeNone();
-        }
-    }
-
-    /***************************************************/
-    void FunctionShell::Execute(Machine& machine)
-    {
-        body->Execute(machine);
     }
 }

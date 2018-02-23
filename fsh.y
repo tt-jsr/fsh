@@ -4,6 +4,7 @@
 #include "common.h"
 #include "instructions.h"
 #include "machine.h"
+#include "builtins.h"
 using namespace std;
 
 // stuff from flex that bison needs to know about:
@@ -69,7 +70,7 @@ exp:
         delete id;
         $$ = pCall;
     }
-    |'&' '[' iden_list ':' exp ']' {
+    |'&' '[' iden_list ':' exp_block ']' {
         fsh::instruction::FunctionDef *pDef = new fsh::instruction::FunctionDef();
         fsh::instruction::IdentifierList *il = (fsh::instruction::IdentifierList *)$3;
         for (auto& inst : il->identifiers)
@@ -80,13 +81,21 @@ exp:
                 pDef->arg_names.push_back(id->name);
             }
         }
-        pDef->body = (fsh::instruction::ExpressionList *)$5;
+        fsh::instruction::ExpressionList *pExpList = (fsh::instruction::ExpressionList *)5;
+        for (auto& in : pExpList->expressions)
+        {
+            pDef->body.push_back(in);
+        }
         delete il;
         $$ = pDef;
     }
-    |'&' '[' exp ']' {
+    |'&' '[' exp_block ']' {
         fsh::instruction::FunctionDef *pDef = new fsh::instruction::FunctionDef();
-        pDef->body = (fsh::instruction::ExpressionList *)$3;
+        fsh::instruction::ExpressionList *pExpList = (fsh::instruction::ExpressionList *)$3;
+        for (auto& in : pExpList->expressions)
+        {
+            pDef->body.push_back(in);
+        }
         $$ = pDef;
     }
     | exp '+' exp { 
@@ -168,6 +177,24 @@ exp_list:
         $$ = el;
     }
     ;
+exp_block:
+    exp ';'     {
+        fsh::instruction::ExpressionList *el = new fsh::instruction::ExpressionList();
+        el->expressions.push_back((fsh::instruction::Instruction *)$1);
+        $$ = el;
+    }
+    | exp ';' exp ';'   {
+        fsh::instruction::ExpressionList *el = new fsh::instruction::ExpressionList();
+        el->expressions.push_back((fsh::instruction::Instruction *)$1);
+        el->expressions.push_back((fsh::instruction::Instruction *)$3);
+        $$ = el;
+    }
+    | exp_block ';' exp ';' {
+        fsh::instruction::ExpressionList *el = (fsh::instruction::ExpressionList *)$1;
+        el->expressions.push_back((fsh::instruction::Instruction *)$3);
+        $$ = el;
+    }
+    ;
 /* End of grammar. */
 %%
 
@@ -243,76 +270,6 @@ void Execute(fsh::instruction::Instruction *pInst)
     */
 }
 
-fsh::ElementPtr Print(fsh::Machine& machine, std::vector<fsh::ElementPtr>& args)
-{
-    std::cout << "Print: " ;
-    for (auto& e : args)
-    {
-        switch(e->type())
-        {
-        case fsh::ELEMENT_TYPE_INTEGER:
-            {
-                fsh::IntegerPtr n = e.cast<fsh::Integer>();
-                std::cout << " " << n->value;
-            }
-            break;
-        case fsh::ELEMENT_TYPE_FLOAT:
-            {
-                fsh::FloatPtr f = e.cast<fsh::Float>();
-                std::cout << " " << f->value;
-            }
-            break;
-        case fsh::ELEMENT_TYPE_ERROR:
-            {
-                fsh::ErrorPtr ep = e.cast<fsh::Error>();
-                std::cout << ep->msg << std::endl;
-            }
-            break;
-        case fsh::ELEMENT_TYPE_IDENTIFIER:
-            {
-                fsh::IdentifierPtr id = e.cast<fsh::Identifier>();
-                std::cout << id->name << std::endl;
-            }
-            break;
-        case fsh::ELEMENT_TYPE_NONE:
-            {
-                std::cout << "None" << std::endl;
-            }
-            break;
-        case fsh::ELEMENT_TYPE_STRING:
-            {
-                std::cout << "String" << std::endl;
-            }
-            break;
-        case fsh::ELEMENT_TYPE_LIST:
-            {
-                std::cout << "List" << std::endl;
-            }
-            break;
-        case fsh::ELEMENT_TYPE_HEAD:
-            {
-                std::cout << "Head" << std::endl;
-            }
-            break;
-        case fsh::ELEMENT_TYPE_FUNCTION_BUILTIN:
-            {
-                std::cout << "FunctionBuiltIn" << std::endl;
-            }
-            break;
-        case fsh::ELEMENT_TYPE_FUNCTION_SHELL:
-            {
-                std::cout << "FunctionShell" << std::endl;
-            }
-            break;
-        default:
-            std::cout << " Print[] no handler ";
-            break;
-        }
-    }
-    std::cout << std::endl;
-    fsh::ElementPtr e = fsh::MakeNone();
-    return e;
-}
 
 int main(int, char**) {
 	// open a file handle to a particular file:
@@ -325,7 +282,7 @@ int main(int, char**) {
 	// set flex to read from it instead of defaulting to STDIN:
 	yyin = myfile;
 
-    machine.register_builtin("Print", Print);
+    machine.register_builtin("Print", fsh::Print);
 	// parse through the input until there is no more:
 	do {
 		yyparse();

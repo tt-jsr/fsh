@@ -103,8 +103,9 @@ namespace fsh
     void Machine::register_builtin(const std::string& name, 
             std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> func)
     {
-        FunctionBuiltInPtr f = MakeFunctionBuiltIn();
-        f->body = func;
+        FunctionDefinitionPtr f = MakeFunctionDefinition();
+        f->builtInBody = func;
+        f->isBuiltIn = true;
         ElementPtr e = f.cast<Element>();
         store_variable(name, e);
     }
