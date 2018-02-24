@@ -27,6 +27,7 @@ namespace fsh
         ,ELEMENT_TYPE_IDENTIFIER
         ,ELEMENT_TYPE_FUNCTION_DEFINITION
         ,ELEMENT_TYPE_NONE
+        ,ELEMENT_TYPE_BOOL
     };
 
     struct Element : public instrusive_base
@@ -41,6 +42,7 @@ namespace fsh
         bool IsIdentifier() {return type() == ELEMENT_TYPE_IDENTIFIER;}
         bool IsFunctionDefinition() {return type() == ELEMENT_TYPE_FUNCTION_DEFINITION;}
         bool IsNone() {return type() == ELEMENT_TYPE_NONE;}
+        bool IsBool() {return type() == ELEMENT_TYPE_BOOL;}
     };
 
     typedef instrusive_ptr<Element> ElementPtr;
@@ -118,6 +120,17 @@ namespace fsh
     };
     typedef instrusive_ptr<Integer> IntegerPtr;
 
+    struct Bool : public Element
+    {
+        Bool(bool b)
+        : value(b)
+        {}
+
+        virtual ElementType type() {return ELEMENT_TYPE_BOOL;}
+        bool value;
+    };
+    typedef instrusive_ptr<Bool> BoolPtr;
+
     struct Float : public Element
     {
         Float(double f)
@@ -146,7 +159,7 @@ namespace fsh
         :isBuiltIn(false)
         {}
         virtual ElementType type() {return ELEMENT_TYPE_FUNCTION_DEFINITION;}
-        std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> builtInBody;
+        std::function<ElementPtr (Machine&, std::vector<instruction::InstructionPtr>&)> builtInBody;
         std::vector<instruction::InstructionPtr> shellBody;
         std::vector<instruction::InstructionPtr> args;
         std::vector<std::string> arg_names;
@@ -166,5 +179,6 @@ namespace fsh
     IdentifierPtr MakeIdentifier(const std::string&);
     FunctionDefinitionPtr MakeFunctionDefinition();
     NonePtr MakeNone();
+    BoolPtr MakeBool(bool);
 }
 

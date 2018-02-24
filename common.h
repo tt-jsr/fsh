@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cstring>
 #include <string>
+#include <stdexcept>
 #include "instrusive_ptr.h"
 #include "element.h"
 
@@ -67,6 +68,7 @@ namespace fsh
             ,INSTRUCTION_EXPRESSION_LIST
             ,INSTRUCTION_IDENTIFIER_LIST
             ,INSTRUCTION_STRING
+            ,INSTRUCTION_BOOL
         };
     }
 

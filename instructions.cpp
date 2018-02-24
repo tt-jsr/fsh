@@ -29,6 +29,24 @@ namespace fsh
             case TOKEN_DIVIDE:
                 machine.push_data(MakeInteger(lhs->value / rhs->value));
                 break;
+            case TOKEN_GT:
+                machine.push_data(MakeBool(lhs->value > rhs->value));
+                break;
+            case TOKEN_GTE:
+                machine.push_data(MakeBool(lhs->value >= rhs->value));
+                break;
+            case TOKEN_LT:
+                machine.push_data(MakeBool(lhs->value < rhs->value));
+                break;
+            case TOKEN_LTE:
+                machine.push_data(MakeBool(lhs->value <= rhs->value));
+                break;
+            case TOKEN_EQ:
+                machine.push_data(MakeBool(lhs->value == rhs->value));
+                break;
+            case TOKEN_NEQ:
+                machine.push_data(MakeBool(lhs->value != rhs->value));
+                break;
             }
         }
 
@@ -47,6 +65,24 @@ namespace fsh
                 break;
             case TOKEN_DIVIDE:
                 machine.push_data(MakeFloat(lhs->value / rhs->value));
+                break;
+            case TOKEN_GT:
+                machine.push_data(MakeBool(lhs->value > rhs->value));
+                break;
+            case TOKEN_GTE:
+                machine.push_data(MakeBool(lhs->value >= rhs->value));
+                break;
+            case TOKEN_LT:
+                machine.push_data(MakeBool(lhs->value < rhs->value));
+                break;
+            case TOKEN_LTE:
+                machine.push_data(MakeBool(lhs->value <= rhs->value));
+                break;
+            case TOKEN_EQ:
+                machine.push_data(MakeBool(lhs->value == rhs->value));
+                break;
+            case TOKEN_NEQ:
+                machine.push_data(MakeBool(lhs->value != rhs->value));
                 break;
             }
         }
@@ -137,25 +173,17 @@ namespace fsh
             }
 
             fsh::FunctionDefinitionPtr func = e.cast<FunctionDefinition>();
-            std::vector<ElementPtr> dataArgs;
             if (func->isBuiltIn)
             {
-                if (args.get())
-                {
-                    for (auto& in : args->expressions)
-                    {
-                        in->Execute(machine);
-                        dataArgs.push_back(machine.pop_data());
-                    }
-                }
                 machine.push_context();
                 // now execute the function
-                ElementPtr rtn = func->builtInBody(machine, dataArgs);
+                ElementPtr rtn = func->builtInBody(machine, args->expressions);
                 machine.pop_context();
                 machine.push_data(rtn);
             }
             else
             {
+                std::vector<ElementPtr> dataArgs;
                 // Execute each argument and put the result into the dataArgs vector
                 if (args)
                 {
@@ -168,7 +196,7 @@ namespace fsh
                 // Create a new context, create a variable for each named argument
                 machine.push_context();
                 size_t dataArgIdx = 0;
-                for (; dataArgIdx < dataArgs.size(); ++dataArgIdx)
+                for (; dataArgIdx < dataArgs.size() && dataArgIdx < func->arg_names.size(); ++dataArgIdx)
                 {
                     machine.store_variable(func->arg_names[dataArgIdx], dataArgs[dataArgIdx]);
                 }
@@ -198,9 +226,9 @@ namespace fsh
         {
             fsh::FunctionDefinitionPtr func = fsh::MakeFunctionDefinition();
             func->arg_names = arg_names;
-            for (auto& in : body)
+            for (auto& stmt : statements)
             {
-                func->shellBody.push_back(in);
+                func->shellBody.push_back(stmt);
             }
             machine.push_data(func);
         }
@@ -275,6 +303,17 @@ namespace fsh
         void None::dump(std::ostream& strm)
         {
             strm << " None ";
+        }
+
+        /*****************************************************/
+        void Boolean::Execute(Machine& machine)
+        {
+            machine.push_data(MakeBool(value));
+        }
+
+        void Boolean::dump(std::ostream& strm)
+        {
+            strm << (value ? " true " : " false ");
         }
 
         /*****************************************************/

@@ -59,6 +59,7 @@ namespace fsh
         {
         public:
             Integer()
+            :value(0)
             { }
 
             Integer(int64_t n)
@@ -107,10 +108,30 @@ namespace fsh
 
         typedef fsh::instrusive_ptr<None> NonePtr;
 
+        class Boolean : public Instruction
+        {
+        public:
+            Boolean()
+            :value(false)
+            { }
+            Boolean(bool b)
+            : value(b)
+            { }
+
+            ~Boolean() {}
+            void Execute(Machine&);
+            InstructionType type() {return INSTRUCTION_BOOL;}
+            void dump(std::ostream&);
+            bool value;
+        };
+
+        typedef fsh::instrusive_ptr<Boolean> BooleanPtr;
+
         class Float : public Instruction
         {
         public:
             Float()
+            :value(0.0)
             { }
 
             Float(double n)
@@ -179,7 +200,7 @@ namespace fsh
             InstructionType type() {return INSTRUCTION_FUNCTION_DEF;}
             void dump(std::ostream&);
             std::vector<std::string> arg_names;
-            std::vector<InstructionPtr> body;
+            std::vector<InstructionPtr> statements;
         };
 
         typedef fsh::instrusive_ptr<FunctionDef> FunctionDefPtr;

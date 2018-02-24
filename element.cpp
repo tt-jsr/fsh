@@ -48,4 +48,9 @@ namespace fsh
     {
         return NonePtr(new None());
     }
+
+    BoolPtr MakeBool(bool b)
+    {
+        return BoolPtr(new Bool(b));
+    }
 }

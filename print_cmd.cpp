@@ -6,23 +6,33 @@
 
 namespace fsh
 {
-    ElementPtr Print(Machine& machine, std::vector<ElementPtr>& args)
+    ElementPtr Print(Machine& machine, std::vector<instruction::InstructionPtr>& args)
     {
-        std::cout << "Print: " ;
-        for (auto& e : args)
+        for (auto& in : args)
         {
+            in->Execute(machine);
+            ElementPtr e = machine.pop_data();
             switch(e->type())
             {
             case ELEMENT_TYPE_INTEGER:
                 {
                     IntegerPtr n = e.cast<Integer>();
-                    std::cout << " " << n->value;
+                    std::cout << n->value;
+                }
+                break;
+            case ELEMENT_TYPE_BOOL:
+                {
+                    BoolPtr n = e.cast<Bool>();
+                    if (n->value)
+                        std::cout << "True";
+                    else
+                        std::cout << "False";
                 }
                 break;
             case ELEMENT_TYPE_FLOAT:
                 {
                     FloatPtr f = e.cast<Float>();
-                    std::cout << " " << f->value;
+                    std::cout << f->value;
                 }
                 break;
             case ELEMENT_TYPE_ERROR:

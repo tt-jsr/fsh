@@ -11,6 +11,7 @@ using namespace std;
 extern "C" int yylex();
 extern "C" int yyparse();
 extern "C" FILE *yyin;
+extern uint64_t lineno;
 void Execute(fsh::instruction::Instruction *pInst);
  
 void yyerror(const char *s);
@@ -24,8 +25,12 @@ void yyerror(const char *s);
 %token STRING
 %token INT
 %token FLOAT
+%token TRUE
+%token FALSE
 %left ','
 %left '='
+%left GT LT GTE LTE
+%left EQ NEQ
 %left '+' '-'
 %left '*' '/'
 %precedence NEG
@@ -36,7 +41,7 @@ input:
     | input toplev
     ;
 
-toplev: exp {
+toplev: exp ';'{
         Execute((fsh::instruction::Instruction *)$1);
       }
       ;
@@ -50,8 +55,14 @@ exp:
     | IDENTIFIER { 
         $$ = $1; 
     }
-    | NONE{
+    | NONE {
         $$ = new fsh::instruction::None();
+    }
+    | TRUE {
+        $$ = new fsh::instruction::Boolean(true);
+    }
+    | FALSE {
+        $$ = new fsh::instruction::Boolean(false);
     }
     | STRING {
         $$ = $1;
@@ -89,20 +100,20 @@ exp:
                 pDef->arg_names.push_back(id->name);
             }
         }
-        fsh::instruction::ExpressionList *pExpList = (fsh::instruction::ExpressionList *)5;
+        fsh::instruction::ExpressionList *pExpList = (fsh::instruction::ExpressionList *)$5;
         for (auto& in : pExpList->expressions)
         {
-            pDef->body.push_back(in);
+            pDef->statements.push_back(in);
         }
         delete il;
         $$ = pDef;
     }
-    |'&' '[' exp_block ']' {
+    |'&' '[' exp_block  ']' {
         fsh::instruction::FunctionDef *pDef = new fsh::instruction::FunctionDef();
         fsh::instruction::ExpressionList *pExpList = (fsh::instruction::ExpressionList *)$3;
         for (auto& in : pExpList->expressions)
         {
-            pDef->body.push_back(in);
+            pDef->statements.push_back(in);
         }
         $$ = pDef;
     }
@@ -130,6 +141,48 @@ exp:
     | exp '/' exp { 
         fsh::instruction::BinaryOperator *bop = new fsh::instruction::BinaryOperator();
         bop->op = fsh::TOKEN_DIVIDE;
+        bop->lhs = (fsh::instruction::Instruction *)$1;
+        bop->rhs = (fsh::instruction::Instruction *)$3;
+        $$ = bop;
+    }
+    | exp GT exp { 
+        fsh::instruction::BinaryOperator *bop = new fsh::instruction::BinaryOperator();
+        bop->op = fsh::TOKEN_GT;
+        bop->lhs = (fsh::instruction::Instruction *)$1;
+        bop->rhs = (fsh::instruction::Instruction *)$3;
+        $$ = bop;
+    }
+    | exp GTE exp { 
+        fsh::instruction::BinaryOperator *bop = new fsh::instruction::BinaryOperator();
+        bop->op = fsh::TOKEN_GTE;
+        bop->lhs = (fsh::instruction::Instruction *)$1;
+        bop->rhs = (fsh::instruction::Instruction *)$3;
+        $$ = bop;
+    }
+    | exp LT exp { 
+        fsh::instruction::BinaryOperator *bop = new fsh::instruction::BinaryOperator();
+        bop->op = fsh::TOKEN_LT;
+        bop->lhs = (fsh::instruction::Instruction *)$1;
+        bop->rhs = (fsh::instruction::Instruction *)$3;
+        $$ = bop;
+    }
+    | exp LTE exp { 
+        fsh::instruction::BinaryOperator *bop = new fsh::instruction::BinaryOperator();
+        bop->op = fsh::TOKEN_LTE;
+        bop->lhs = (fsh::instruction::Instruction *)$1;
+        bop->rhs = (fsh::instruction::Instruction *)$3;
+        $$ = bop;
+    }
+    | exp EQ exp { 
+        fsh::instruction::BinaryOperator *bop = new fsh::instruction::BinaryOperator();
+        bop->op = fsh::TOKEN_EQ;
+        bop->lhs = (fsh::instruction::Instruction *)$1;
+        bop->rhs = (fsh::instruction::Instruction *)$3;
+        $$ = bop;
+    }
+    | exp NEQ exp { 
+        fsh::instruction::BinaryOperator *bop = new fsh::instruction::BinaryOperator();
+        bop->op = fsh::TOKEN_NEQ;
         bop->lhs = (fsh::instruction::Instruction *)$1;
         bop->rhs = (fsh::instruction::Instruction *)$3;
         $$ = bop;
@@ -168,18 +221,18 @@ iden_list:
     }
     ;
 exp_list:
-    exp     {
+    exp      {
         fsh::instruction::ExpressionList *el = new fsh::instruction::ExpressionList();
         el->expressions.push_back((fsh::instruction::Instruction *)$1);
         $$ = el;
     }
-    | exp ',' exp   {
+    | exp ',' exp    {
         fsh::instruction::ExpressionList *el = new fsh::instruction::ExpressionList();
         el->expressions.push_back((fsh::instruction::Instruction *)$1);
         el->expressions.push_back((fsh::instruction::Instruction *)$3);
         $$ = el;
     }
-    | exp_list ',' exp {
+    | exp_list ',' exp  {
         fsh::instruction::ExpressionList *el = (fsh::instruction::ExpressionList *)$1;
         el->expressions.push_back((fsh::instruction::Instruction *)$3);
         $$ = el;
@@ -197,7 +250,7 @@ exp_block:
         el->expressions.push_back((fsh::instruction::Instruction *)$3);
         $$ = el;
     }
-    | exp_block ';' exp ';' {
+    | exp_block ';' exp ';'  {
         fsh::instruction::ExpressionList *el = (fsh::instruction::ExpressionList *)$1;
         el->expressions.push_back((fsh::instruction::Instruction *)$3);
         $$ = el;
@@ -211,11 +264,16 @@ fsh::Machine machine;
 void Execute(fsh::instruction::Instruction *pInst)
 {
     fsh::instruction::InstructionPtr inst(pInst);
-    machine.Execute(inst);
-    /*
     fsh::ElementPtr e = machine.Execute(inst);
     switch (e->type())
     {
+    case fsh::ELEMENT_TYPE_ERROR:
+        {
+            fsh::ErrorPtr ep = e.cast<fsh::Error>();
+            std::cout << ep->msg << std::endl;
+        }
+        break;
+    /*
     case fsh::ELEMENT_TYPE_INTEGER:
         {
             fsh::IntegerPtr ip = e.cast<fsh::Integer>();
@@ -226,12 +284,6 @@ void Execute(fsh::instruction::Instruction *pInst)
         {
             fsh::FloatPtr ip = e.cast<fsh::Float>();
             std::cout << ip->value << std::endl;
-        }
-        break;
-    case fsh::ELEMENT_TYPE_ERROR:
-        {
-            fsh::ErrorPtr ep = e.cast<fsh::Error>();
-            std::cout << ep->msg << std::endl;
         }
         break;
     case fsh::ELEMENT_TYPE_IDENTIFIER:
@@ -274,8 +326,8 @@ void Execute(fsh::instruction::Instruction *pInst)
         std::cout << "Unhandled return from Execute!" << std::endl;
         std::cout << "type: " << e->type() << std::endl;
         break;
-    }
     */
+    }
 }
 
 
@@ -291,6 +343,8 @@ int main(int, char**) {
 	yyin = myfile;
 
     machine.register_builtin("Print", fsh::Print);
+    machine.register_builtin("If", fsh::If);
+    machine.register_builtin("While", fsh::While);
 	// parse through the input until there is no more:
 	do {
 		yyparse();
@@ -299,7 +353,7 @@ int main(int, char**) {
 }
 
 void yyerror(const char *s) {
-	cout << "EEK, parse error!  Message: " << s << endl;
+	cout << "EEK, parse error!  Message: " << s << " line: " << lineno << endl;
 	// might as well halt now:
 	exit(-1);
 }

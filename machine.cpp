@@ -101,7 +101,7 @@ namespace fsh
     }
 
     void Machine::register_builtin(const std::string& name, 
-            std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> func)
+            std::function<ElementPtr (Machine&, std::vector<instruction::InstructionPtr>&)> func)
     {
         FunctionDefinitionPtr f = MakeFunctionDefinition();
         f->builtInBody = func;
