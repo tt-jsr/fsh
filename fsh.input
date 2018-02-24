@@ -1,0 +1,20 @@
+
+ while =&[While [
+           $ans > 0 
+         , &[Print[$ans];
+             ans = $ans-1;
+            ]
+      ];
+     ];
+
+
+ans = 5;
+result = If[
+   $ans > 6
+   , &[$while[];True;]
+   , &[Print["Nothing to do"]; False;
+      ]
+];
+
+Print[$result];
+
