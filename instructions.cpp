@@ -159,7 +159,10 @@ namespace fsh
         void FunctionCall::Execute(Machine& machine)
         {
             fsh::ElementPtr e;
-            if (machine.get_variable(name, e) == false)
+            std::string fname = name;
+            if (fname[0] == '$')
+                fname = &fname[1];
+            if (machine.get_variable(fname, e) == false)
             {
                 std::stringstream strm;
                 strm << "Function \"" << name << "\" not found";
