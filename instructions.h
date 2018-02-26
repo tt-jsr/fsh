@@ -6,13 +6,27 @@ namespace fsh
 
     namespace instruction
     {
+        class DumpContext
+        {
+        public:
+            DumpContext(std::ostream& os);
+            void inc();
+            void dec();
+            void indent();
+            std::ostream& strm();
+
+            int indent_;
+            std::ostream& strm_;
+        };
+
         class Instruction : public fsh::instrusive_base
         {
         public:
             virtual ~Instruction(){}
             virtual void Execute(Machine&) = 0;
             virtual instruction::InstructionType type() = 0;
-            virtual void dump(std::ostream&) = 0;
+            virtual std::string type_str() = 0;
+            virtual void dump(DumpContext&) = 0;
         };
 
         typedef fsh::instrusive_ptr<Instruction> InstructionPtr;
@@ -27,7 +41,8 @@ namespace fsh
             ~BinaryOperator();
             void Execute(Machine&);
             InstructionType type() {return INSTRUCTION_BINARY_OPERATOR;}
-            void dump(std::ostream&);
+            std::string type_str();
+            void dump(DumpContext&);
             int op;
             int prec;
             InstructionPtr lhs;
@@ -49,7 +64,8 @@ namespace fsh
             ~Identifier() {}
             void Execute(Machine&);
             InstructionType type() {return INSTRUCTION_IDENTIFIER;}
-            void dump(std::ostream&);
+            std::string type_str();
+            void dump(DumpContext&);
             std::string name;
         };
 
@@ -69,7 +85,8 @@ namespace fsh
             ~Integer() {}
             void Execute(Machine&);
             InstructionType type() {return INSTRUCTION_INTEGER;}
-            void dump(std::ostream&);
+            std::string type_str();
+            void dump(DumpContext&);
             int64_t value;
         };
 
@@ -88,7 +105,8 @@ namespace fsh
             ~String() {}
             void Execute(Machine&);
             InstructionType type() {return INSTRUCTION_STRING;}
-            void dump(std::ostream&);
+            std::string type_str();
+            void dump(DumpContext&);
             std::string value;
         };
 
@@ -103,7 +121,8 @@ namespace fsh
             ~None() {}
             void Execute(Machine&);
             InstructionType type() {return INSTRUCTION_NONE;}
-            void dump(std::ostream&);
+            std::string type_str();
+            void dump(DumpContext&);
         };
 
         typedef fsh::instrusive_ptr<None> NonePtr;
@@ -121,7 +140,8 @@ namespace fsh
             ~Boolean() {}
             void Execute(Machine&);
             InstructionType type() {return INSTRUCTION_BOOL;}
-            void dump(std::ostream&);
+            std::string type_str();
+            void dump(DumpContext&);
             bool value;
         };
 
@@ -141,7 +161,8 @@ namespace fsh
             ~Float() {}
             void Execute(Machine&);
             InstructionType type() {return INSTRUCTION_FLOAT;}
-            void dump(std::ostream&);
+            std::string type_str();
+            void dump(DumpContext&);
             double value;
         };
 
@@ -156,11 +177,31 @@ namespace fsh
             ~ExpressionList() {}
             void Execute(Machine&);
             InstructionType type() {return INSTRUCTION_EXPRESSION_LIST;}
-            void dump(std::ostream&);
+            std::string type_str();
+            void dump(DumpContext&);
             std::vector<InstructionPtr> expressions;
         };
 
         typedef fsh::instrusive_ptr<ExpressionList> ExpressionListPtr;
+
+        class WhileIf : public Instruction
+        {
+        public:
+            WhileIf()
+            { }
+
+            ~WhileIf() {}
+            void Execute(Machine&);
+            InstructionType type() {return INSTRUCTION_WHILE_IF;}
+            std::string type_str();
+            void dump(DumpContext&);
+            bool isWhile;
+            InstructionPtr condition;
+            InstructionPtr if_true;
+            InstructionPtr if_false;
+        };
+
+        typedef fsh::instrusive_ptr<WhileIf> WhileIfPtr;
 
         class IdentifierList : public Instruction
         {
@@ -171,7 +212,8 @@ namespace fsh
             ~IdentifierList() {}
             void Execute(Machine&);
             InstructionType type() {return INSTRUCTION_IDENTIFIER_LIST;}
-            void dump(std::ostream&);
+            std::string type_str();
+            void dump(DumpContext&);
             std::vector<InstructionPtr> identifiers;
         };
 
@@ -184,8 +226,9 @@ namespace fsh
             { }
             void Execute(Machine&);
             InstructionType type() {return INSTRUCTION_FUNCTION_CALL;}
-            void dump(std::ostream&);
-            ExpressionListPtr args;
+            std::string type_str();
+            void dump(DumpContext&);
+            InstructionPtr functionArguments;
             std::string name;
         };
 
@@ -198,9 +241,10 @@ namespace fsh
             { }
             void Execute(Machine&);
             InstructionType type() {return INSTRUCTION_FUNCTION_DEF;}
-            void dump(std::ostream&);
+            std::string type_str();
+            void dump(DumpContext&);
             std::vector<std::string> arg_names;
-            std::vector<InstructionPtr> statements;
+            InstructionPtr functionBody;
         };
 
         typedef fsh::instrusive_ptr<FunctionDef> FunctionDefPtr;

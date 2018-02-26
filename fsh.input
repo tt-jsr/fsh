@@ -1,20 +1,27 @@
+Print ["Hello ", "world"]
+foo = &[var : 
+    Print["Var: ", $var + 1]
+]
 
- while =&[While [
-           $ans > 0 
-         , &[Print[$ans];
-             ans = $ans-1;
-            ]
-      ];
-     ];
+ans = 5
+junk = If[$ans > 4 
+then 
+    r = While[$ans > 7
+        then
+            Print[$ans],
+            ans=$ans-1
+        else
+            foo[3],
+            Print["test"],
+            Print[True],
+            "complete"
+    ],
+    Print["r:", $r],
+    $r
+else 
+    Print[False],
+    "no dice"
+]
+Print[$junk]
 
-
-ans = 5;
-result = If[
-   $ans > 6
-   , &[$while[];True;]
-   , &[Print["Nothing to do"]; False;
-      ]
-];
-
-Print[$result];
 

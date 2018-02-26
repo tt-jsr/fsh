@@ -27,7 +27,7 @@ namespace fsh
         ,ELEMENT_TYPE_IDENTIFIER
         ,ELEMENT_TYPE_FUNCTION_DEFINITION
         ,ELEMENT_TYPE_NONE
-        ,ELEMENT_TYPE_BOOL
+        ,ELEMENT_TYPE_BOOLEAN
     };
 
     struct Element : public instrusive_base
@@ -42,7 +42,7 @@ namespace fsh
         bool IsIdentifier() {return type() == ELEMENT_TYPE_IDENTIFIER;}
         bool IsFunctionDefinition() {return type() == ELEMENT_TYPE_FUNCTION_DEFINITION;}
         bool IsNone() {return type() == ELEMENT_TYPE_NONE;}
-        bool IsBool() {return type() == ELEMENT_TYPE_BOOL;}
+        bool IsBoolean() {return type() == ELEMENT_TYPE_BOOLEAN;}
     };
 
     typedef instrusive_ptr<Element> ElementPtr;
@@ -89,11 +89,12 @@ namespace fsh
     {
         Identifier() {}
         Identifier(const std::string& s)
-        :name(s)
+        :value(s)
         {}
-
+        
+        bool IsVariable() {return value[0] == '$';}
         virtual ElementType type() {return ELEMENT_TYPE_IDENTIFIER;}
-        std::string name;
+        std::string value;
     };
     typedef instrusive_ptr<Identifier> IdentifierPtr;
 
@@ -120,16 +121,16 @@ namespace fsh
     };
     typedef instrusive_ptr<Integer> IntegerPtr;
 
-    struct Bool : public Element
+    struct Boolean : public Element
     {
-        Bool(bool b)
+        Boolean(bool b)
         : value(b)
         {}
 
-        virtual ElementType type() {return ELEMENT_TYPE_BOOL;}
+        virtual ElementType type() {return ELEMENT_TYPE_BOOLEAN;}
         bool value;
     };
-    typedef instrusive_ptr<Bool> BoolPtr;
+    typedef instrusive_ptr<Boolean> BooleanPtr;
 
     struct Float : public Element
     {
@@ -159,9 +160,9 @@ namespace fsh
         :isBuiltIn(false)
         {}
         virtual ElementType type() {return ELEMENT_TYPE_FUNCTION_DEFINITION;}
-        std::function<ElementPtr (Machine&, std::vector<instruction::InstructionPtr>&)> builtInBody;
-        std::vector<instruction::InstructionPtr> shellBody;
-        std::vector<instruction::InstructionPtr> args;
+        std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> builtInBody;
+        instruction::InstructionPtr functionBody;   // Only for shell defined functions
+        //std::vector<instruction::InstructionPtr> args;
         std::vector<std::string> arg_names;
         bool isBuiltIn;
     };
@@ -179,6 +180,6 @@ namespace fsh
     IdentifierPtr MakeIdentifier(const std::string&);
     FunctionDefinitionPtr MakeFunctionDefinition();
     NonePtr MakeNone();
-    BoolPtr MakeBool(bool);
+    BooleanPtr MakeBoolean(bool);
 }
 

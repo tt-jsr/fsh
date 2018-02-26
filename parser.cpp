@@ -62,13 +62,6 @@ namespace fsh
     {
     }
 
-    void dump(instruction::InstructionPtr in)
-    {
-        std::cout << "**************************" << std::endl;
-        in->dump(std::cout);
-        std::cout << std::endl;
-    }
-
     /*
     void Parser::HandleInstruction(instruction::BinaryOperatorPtr bop)
     {

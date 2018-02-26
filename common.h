@@ -69,6 +69,7 @@ namespace fsh
             ,INSTRUCTION_IDENTIFIER_LIST
             ,INSTRUCTION_STRING
             ,INSTRUCTION_BOOL
+            ,INSTRUCTION_WHILE_IF
         };
     }
 

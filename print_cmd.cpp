@@ -6,12 +6,10 @@
 
 namespace fsh
 {
-    ElementPtr Print(Machine& machine, std::vector<instruction::InstructionPtr>& args)
+    ElementPtr Print(Machine& machine, std::vector<ElementPtr>& args)
     {
-        for (auto& in : args)
+        for (auto& e : args)
         {
-            in->Execute(machine);
-            ElementPtr e = machine.pop_data();
             switch(e->type())
             {
             case ELEMENT_TYPE_INTEGER:
@@ -20,9 +18,9 @@ namespace fsh
                     std::cout << n->value;
                 }
                 break;
-            case ELEMENT_TYPE_BOOL:
+            case ELEMENT_TYPE_BOOLEAN:
                 {
-                    BoolPtr n = e.cast<Bool>();
+                    BooleanPtr n = e.cast<Boolean>();
                     if (n->value)
                         std::cout << "True";
                     else
@@ -44,7 +42,7 @@ namespace fsh
             case ELEMENT_TYPE_IDENTIFIER:
                 {
                     IdentifierPtr id = e.cast<Identifier>();
-                    std::cout << id->name;
+                    std::cout << id->value;
                 }
                 break;
             case ELEMENT_TYPE_NONE:

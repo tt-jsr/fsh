@@ -1,6 +1,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <iostream>
+#include <algorithm>
 #include "common.h"
 #include "common.h"
 #include "instructions.h"
@@ -30,22 +31,22 @@ namespace fsh
                 machine.push_data(MakeInteger(lhs->value / rhs->value));
                 break;
             case TOKEN_GT:
-                machine.push_data(MakeBool(lhs->value > rhs->value));
+                machine.push_data(MakeBoolean(lhs->value > rhs->value));
                 break;
             case TOKEN_GTE:
-                machine.push_data(MakeBool(lhs->value >= rhs->value));
+                machine.push_data(MakeBoolean(lhs->value >= rhs->value));
                 break;
             case TOKEN_LT:
-                machine.push_data(MakeBool(lhs->value < rhs->value));
+                machine.push_data(MakeBoolean(lhs->value < rhs->value));
                 break;
             case TOKEN_LTE:
-                machine.push_data(MakeBool(lhs->value <= rhs->value));
+                machine.push_data(MakeBoolean(lhs->value <= rhs->value));
                 break;
             case TOKEN_EQ:
-                machine.push_data(MakeBool(lhs->value == rhs->value));
+                machine.push_data(MakeBoolean(lhs->value == rhs->value));
                 break;
             case TOKEN_NEQ:
-                machine.push_data(MakeBool(lhs->value != rhs->value));
+                machine.push_data(MakeBoolean(lhs->value != rhs->value));
                 break;
             }
         }
@@ -67,22 +68,22 @@ namespace fsh
                 machine.push_data(MakeFloat(lhs->value / rhs->value));
                 break;
             case TOKEN_GT:
-                machine.push_data(MakeBool(lhs->value > rhs->value));
+                machine.push_data(MakeBoolean(lhs->value > rhs->value));
                 break;
             case TOKEN_GTE:
-                machine.push_data(MakeBool(lhs->value >= rhs->value));
+                machine.push_data(MakeBoolean(lhs->value >= rhs->value));
                 break;
             case TOKEN_LT:
-                machine.push_data(MakeBool(lhs->value < rhs->value));
+                machine.push_data(MakeBoolean(lhs->value < rhs->value));
                 break;
             case TOKEN_LTE:
-                machine.push_data(MakeBool(lhs->value <= rhs->value));
+                machine.push_data(MakeBoolean(lhs->value <= rhs->value));
                 break;
             case TOKEN_EQ:
-                machine.push_data(MakeBool(lhs->value == rhs->value));
+                machine.push_data(MakeBoolean(lhs->value == rhs->value));
                 break;
             case TOKEN_NEQ:
-                machine.push_data(MakeBool(lhs->value != rhs->value));
+                machine.push_data(MakeBoolean(lhs->value != rhs->value));
                 break;
             }
         }
@@ -90,25 +91,40 @@ namespace fsh
         {
         }
 
+        std::string BinaryOperator::type_str()
+        {
+            std::stringstream strm;
+            strm << "BINARY_OPERERATOR(" << op << ")";
+            return strm.str();
+        }
+
         void BinaryOperator::Execute(Machine& machine)
         {
             lhs->Execute(machine);
             rhs->Execute(machine);
-            ElementPtr rdata = machine.pop_data();
-            ElementPtr ldata = machine.pop_data();
+            if (op == TOKEN_COMMA)
+            {
+                return;
+            }
             if (op == TOKEN_ASSIGNMENT)
             {
+                ElementPtr rdata = machine.pop_data();
+                ElementPtr ldata = machine.pop_data();
+
                 if (ldata->type() != fsh::ELEMENT_TYPE_IDENTIFIER)
                 {
                     std::stringstream strm;
                     strm << "lhs of assignment is not an identifier";
                     throw std::runtime_error(strm.str());
                 }
-                machine.store_variable(ldata.cast<fsh::Identifier>()->name, rdata);
+                machine.store_variable(ldata.cast<fsh::Identifier>()->value, rdata);
                 machine.push_data(rdata);
             }
             else
             {
+                ElementPtr rdata = machine.pop_data();
+                ElementPtr ldata = machine.pop_data();
+
                 if (rdata->IsFloat() && ldata->IsInteger())
                 {
                     fsh::FloatPtr l = MakeFloat((double)ldata.cast<fsh::Integer>()->value);
@@ -131,31 +147,72 @@ namespace fsh
             }
         }
 
-        void BinaryOperator::dump(std::ostream& strm)
+        void BinaryOperator::dump(DumpContext& ctx)
         {
-            lhs->dump(strm);
-            if (rhs)
-            {
-                rhs->dump(strm);
-            }
             switch(op)
             {
             case TOKEN_PLUS:
-                strm << " + ";
+                ctx.strm() << "+" << std::endl;
                 break;
             case TOKEN_MINUS:
-                strm << " - ";
+                ctx.strm() << "-" << std::endl;
                 break;
             case TOKEN_MULTIPLY:
-                strm << " * ";
+                ctx.strm() << "*" << std::endl;
                 break;
             case TOKEN_DIVIDE:
-                strm << " / ";
+                ctx.strm() << "/" << std::endl;
                 break;
+            case TOKEN_LT:
+                ctx.strm() << "<" << std::endl;
+                break;
+            case TOKEN_LTE:
+                ctx.strm() << "<=" << std::endl;
+                break;
+            case TOKEN_GT:
+                ctx.strm() << ">" << std::endl;
+                break;
+            case TOKEN_GTE:
+                ctx.strm() << ">=" << std::endl;
+                break;
+            case TOKEN_EQ:
+                ctx.strm() << "==" << std::endl;
+                break;
+            case TOKEN_NEQ:
+                ctx.strm() << "!=" << std::endl;
+                break;
+            case TOKEN_ASSIGNMENT:
+                ctx.strm() << "=" << std::endl;
+                break;
+            case TOKEN_COMMA:
+                ctx.strm() << "," << std::endl;
+                break;
+            default:
+                ctx.strm() << op << std::endl;
             }
+            ctx.inc();
+            ctx.strm() << "left" << std::endl;
+            ctx.inc();
+            lhs->dump(ctx);
+            ctx.dec();
+            ctx.strm() << "right" << std::endl;
+            ctx.inc();
+            if (rhs)
+            {
+                rhs->dump(ctx);
+            }
+            ctx.dec();
+            ctx.dec();
         }
 
         /*****************************************************/
+        std::string FunctionCall::type_str()
+        {
+            std::stringstream strm;
+            strm << "FUNCTION_CALL(" << name << ")";
+            return strm.str();
+        }
+
         void FunctionCall::Execute(Machine& machine)
         {
             fsh::ElementPtr e;
@@ -175,12 +232,20 @@ namespace fsh
                 throw std::runtime_error(strm.str());
             }
 
-            fsh::FunctionDefinitionPtr func = e.cast<FunctionDefinition>();
-            if (func->isBuiltIn)
+            fsh::FunctionDefinitionPtr funcDef = e.cast<FunctionDefinition>();
+            if (funcDef->isBuiltIn)
             {
                 machine.push_context();
                 // now execute the function
-                ElementPtr rtn = func->builtInBody(machine, args->expressions);
+                std::vector<ElementPtr> arguments;
+                size_t top = machine.size_data();
+                functionArguments->Execute(machine);
+                while(machine.size_data() > top)
+                {
+                    arguments.push_back(machine.pop_data());
+                }
+                std::reverse(arguments.begin(), arguments.end());
+                ElementPtr rtn = funcDef->builtInBody(machine, arguments);
                 machine.pop_context();
                 machine.push_data(rtn);
             }
@@ -188,56 +253,168 @@ namespace fsh
             {
                 std::vector<ElementPtr> dataArgs;
                 // Execute each argument and put the result into the dataArgs vector
-                if (args)
+                size_t top = machine.size_data();
+                if (functionArguments)
                 {
-                    for (auto& in : args->expressions)
-                    {
-                        in->Execute(machine);
-                        dataArgs.push_back(machine.pop_data());
-                    }
+                    functionArguments->Execute(machine);
                 }
+                while (machine.size_data() > top)
+                {
+                    dataArgs.push_back(machine.pop_data());
+                }
+                std::reverse(dataArgs.begin(), dataArgs.end());
                 // Create a new context, create a variable for each named argument
                 machine.push_context();
                 size_t dataArgIdx = 0;
-                for (; dataArgIdx < dataArgs.size() && dataArgIdx < func->arg_names.size(); ++dataArgIdx)
+                for (; dataArgIdx < dataArgs.size() && dataArgIdx < funcDef->arg_names.size(); ++dataArgIdx)
                 {
-                    machine.store_variable(func->arg_names[dataArgIdx], dataArgs[dataArgIdx]);
+                    machine.store_variable(funcDef->arg_names[dataArgIdx], dataArgs[dataArgIdx]);
                 }
                 // Any named arguments that the caller did not provide, we set to None
-                for (;dataArgIdx < func->arg_names.size(); ++dataArgIdx)
+                for (;dataArgIdx < funcDef->arg_names.size(); ++dataArgIdx)
                 {
                     ElementPtr none = MakeNone();
-                    machine.store_variable(func->arg_names[dataArgIdx], none);
+                    machine.store_variable(funcDef->arg_names[dataArgIdx], none);
                 }
-                ElementPtr e;
-                for (auto& in : func->shellBody)
+                top = machine.size_data();
+                funcDef->functionBody->Execute(machine);
+                ElementPtr rtn = machine.peek_data();
+                while(machine.size_data() > top)
                 {
-                    in->Execute(machine);
-                    e = machine.pop_data();
+                    machine.pop_data();
                 }
-                machine.push_data(e); // push back that last statement result
+                machine.push_data(rtn); // push back that last statement result
                 machine.pop_context();
             }
         }
 
-        void FunctionCall::dump(std::ostream&)
+        void FunctionCall::dump(DumpContext& ctx)
         {
+            ctx.strm() << "FunctionCall " << name << std::endl;
+            ctx.inc();
+            ctx.strm() << "arguments:" << std::endl;
+            ctx.inc();
+            functionArguments->dump(ctx);
+            ctx.dec();
+            ctx.dec();
         }
 
         /*****************************************************/
+        std::string FunctionDef::type_str()
+        {
+            std::stringstream strm;
+            strm << "FUNCTION_DEFINITION";
+            return strm.str();
+        }
         void FunctionDef::Execute(Machine& machine)
         {
             fsh::FunctionDefinitionPtr func = fsh::MakeFunctionDefinition();
             func->arg_names = arg_names;
-            for (auto& stmt : statements)
-            {
-                func->shellBody.push_back(stmt);
-            }
+            func->functionBody = functionBody;
             machine.push_data(func);
         }
 
-        void FunctionDef::dump(std::ostream&)
+        void FunctionDef::dump(DumpContext& ctx)
         {
+            ctx.strm() << "FunctionDef" << std::endl;
+            ctx.inc();
+            ctx.strm() << "arg-names: ";
+            for (auto& s: arg_names)
+            {
+                ctx.strm_ << s;
+            }
+            ctx.strm_ << std::endl;
+            functionBody->dump(ctx);
+            ctx.dec();
+        }
+
+        /****************************************************/
+        void WhileIf::Execute(Machine& machine)
+        {
+            if (isWhile)
+            {
+                bool executeElse(true);
+                ElementPtr rtn;
+                bool run = true;
+                while(run)
+                {
+                    condition->Execute(machine);
+                    ElementPtr cond = machine.pop_data();
+                    run = machine.ConvertToBool(cond);
+                    if (run)
+                    {
+                        executeElse = false;
+                        size_t top = machine.size_data();
+
+                        if_true->Execute(machine);
+                        // Clean up the stack
+                        rtn = machine.peek_data();
+                        while(machine.size_data() > top)
+                        {
+                            machine.pop_data();
+                        }
+                    }
+                    if (executeElse)
+                    {
+                        size_t top = machine.size_data();
+                        if_false->Execute(machine);
+                        // Clean up the stack
+                        rtn = machine.peek_data();
+                        while(machine.size_data() > top)
+                        {
+                            machine.pop_data();
+                        }
+                    }
+                }
+                machine.push_data(rtn);
+            }
+            else
+            {
+                condition->Execute(machine);
+                ElementPtr cond = machine.pop_data();
+                bool b = machine.ConvertToBool(cond);
+                size_t top = machine.size_data();
+                if (b)
+                {
+                    if_true->Execute(machine);
+                }
+                else
+                {
+                    if_false->Execute(machine);
+                }
+
+                // Clean up the stack
+                ElementPtr rtn = machine.peek_data();
+                while(machine.size_data() > top)
+                {
+                    machine.pop_data();
+                }
+                machine.push_data(rtn);
+            }
+        }
+
+        std::string WhileIf::type_str()
+        {
+            return "WhileIf";
+        }
+
+        void WhileIf::dump(DumpContext& ctx)
+        {
+            ctx.strm() << "WhileIf isWhile:" << isWhile << std::endl;
+            ctx.inc();
+            ctx.strm() << "Conditional" << std::endl;
+            ctx.inc();
+            condition->dump(ctx);
+            ctx.dec();
+            ctx.strm() << "true" << std::endl;
+            ctx.inc();
+            if_true->dump(ctx);
+            ctx.dec();
+            ctx.strm() << "false" << std::endl;
+            ctx.inc();
+            if_false->dump(ctx);
+            ctx.dec();
+            ctx.dec();
         }
 
         /*****************************************************/
@@ -261,9 +438,16 @@ namespace fsh
             }
         }
 
-        void Identifier::dump(std::ostream& strm)
+        std::string Identifier::type_str()
         {
-            strm << " " << name << " ";
+            std::stringstream strm;
+            strm << "IDENTIFIER(" << name << ")";
+            return strm.str();
+        }
+
+        void Identifier::dump(DumpContext& ctx)
+        {
+            ctx.strm() << name << std::endl;
         }
 
         /*****************************************************/
@@ -271,8 +455,22 @@ namespace fsh
         {
         }
 
-        void IdentifierList::dump(std::ostream&)
+        std::string IdentifierList::type_str()
         {
+            std::stringstream strm;
+            strm << "IDENTIFIER_LIST";
+            return strm.str();
+        }
+
+        void IdentifierList::dump(DumpContext& ctx)
+        {
+            ctx.strm() << "IdentifierList" << std::endl;
+            ctx.inc();
+            for (auto& in : identifiers)
+            {
+                in->dump(ctx);
+            }
+            ctx.dec();
         }
 
         /*****************************************************/
@@ -281,9 +479,16 @@ namespace fsh
             machine.push_data(MakeInteger(value));
         }
 
-        void Integer::dump(std::ostream& strm)
+        void Integer::dump(DumpContext& ctx)
         {
-            strm << " " << value << " ";
+            ctx.strm() << value << std::endl;
+        }
+
+        std::string Integer::type_str()
+        {
+            std::stringstream strm;
+            strm << "INTEGER(" << value << ")";
+            return strm.str();
         }
 
         /*****************************************************/
@@ -292,9 +497,16 @@ namespace fsh
             machine.push_data(MakeString(value));
         }
 
-        void String::dump(std::ostream& strm)
+        void String::dump(DumpContext& ctx)
         {
-            strm << " " << value << " ";
+            ctx.strm() << "\"" << value << "\"" << std::endl;
+        }
+
+        std::string String::type_str()
+        {
+            std::stringstream strm;
+            strm << "String(" << value << ")";
+            return strm.str();
         }
 
         /*****************************************************/
@@ -303,20 +515,34 @@ namespace fsh
             machine.push_data(MakeNone());
         }
 
-        void None::dump(std::ostream& strm)
+        void None::dump(DumpContext& ctx)
         {
-            strm << " None ";
+            ctx.strm() << "None" << std::endl;
+        }
+
+        std::string None::type_str()
+        {
+            std::stringstream strm;
+            strm << "None";
+            return strm.str();
         }
 
         /*****************************************************/
         void Boolean::Execute(Machine& machine)
         {
-            machine.push_data(MakeBool(value));
+            machine.push_data(MakeBoolean(value));
         }
 
-        void Boolean::dump(std::ostream& strm)
+        void Boolean::dump(DumpContext& ctx)
         {
-            strm << (value ? " true " : " false ");
+            ctx.strm() << (value ? " true " : " false ") << std::endl;
+        }
+
+        std::string Boolean::type_str()
+        {
+            std::stringstream strm;
+            strm << "Boolean(" << value << ")";
+            return strm.str();
         }
 
         /*****************************************************/
@@ -326,9 +552,16 @@ namespace fsh
             machine.push_data(MakeFloat(value));
         }
 
-        void Float::dump(std::ostream& strm)
+        void Float::dump(DumpContext& ctx)
         {
-            strm << " " << value << " ";
+            ctx.strm() << value << std::endl;
+        }
+
+        std::string Float::type_str()
+        {
+            std::stringstream strm;
+            strm << "Float(" << value << ")";
+            return strm.str();
         }
 
         /**************************************************/
@@ -340,8 +573,53 @@ namespace fsh
             }
         }
 
-        void ExpressionList::dump(std::ostream& strm)
+        void ExpressionList::dump(DumpContext& ctx)
         {
+            ctx.strm() << "Expressionlist" << std::endl;
+            ctx.inc();
+            for(auto& ex : expressions)
+            {
+                ex->dump(ctx);
+            }
+            ctx.dec();
+        }
+
+        std::string ExpressionList::type_str()
+        {
+            std::stringstream strm;
+            strm << "ExpressionList";
+            return strm.str();
+        }
+
+        /***************************************************************/
+
+        DumpContext::DumpContext(std::ostream& os)
+        :strm_(os)
+        ,indent_(0)
+        {}
+
+        void DumpContext::inc() 
+        {
+            indent_+= 4;
+        }
+        
+        void DumpContext::dec() 
+        {
+            indent_-= 4;
+        }
+        
+        std::ostream& DumpContext::strm()
+        {
+            indent();
+            return strm_;
+        }
+
+        void DumpContext::indent()
+        {
+            for (int i = 0; i < indent_; i++)
+            {
+                strm_ << ' ';
+            }
         }
     }
  }

@@ -36,6 +36,29 @@ namespace fsh
         }
     }
 
+    bool Machine::ConvertToBool(ElementPtr e)
+    {
+        switch(e->type())
+        {
+        case ELEMENT_TYPE_BOOLEAN:
+            return e.cast<Boolean>()->value;
+            break;
+        case ELEMENT_TYPE_INTEGER:
+            return e.cast<Integer>()->value != 0;
+            break;
+        case ELEMENT_TYPE_IDENTIFIER:
+            {
+                IdentifierPtr id = e.cast<Identifier>();
+                ElementPtr var;
+                if (get_variable(id->value, var))
+                    return ConvertToBool(var);
+            }
+            break;
+        default:
+            return false;
+        }
+        return false;
+    }
 
     // Substitute any $(..) variables if argument is a string
     ElementPtr Machine::resolve(ElementPtr e)
@@ -94,14 +117,19 @@ namespace fsh
 
     bool Machine::get_variable(const std::string& name, ElementPtr& out)
     {
-        out = executionContext->GetVariable(name);
+        std::string varname;
+        if (name[0] == '$')
+            varname = &name[1];
+        else
+            varname = name;
+        out = executionContext->GetVariable(varname);
         if (out)
             return true;
         return false;
     }
 
     void Machine::register_builtin(const std::string& name, 
-            std::function<ElementPtr (Machine&, std::vector<instruction::InstructionPtr>&)> func)
+            std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> func)
     {
         FunctionDefinitionPtr f = MakeFunctionDefinition();
         f->builtInBody = func;

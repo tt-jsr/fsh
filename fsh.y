@@ -27,6 +27,11 @@ void yyerror(const char *s);
 %token FLOAT
 %token TRUE
 %token FALSE
+%token IF
+%token WHILE
+%token THEN
+%token ELSE
+%token ';'
 %left ','
 %left '='
 %left GT LT GTE LTE
@@ -41,8 +46,12 @@ input:
     | input toplev
     ;
 
-toplev: exp ';'{
-        Execute((fsh::instruction::Instruction *)$1);
+toplev: exp  {
+        //fsh::instruction::DumpContext ctx(std::cout);
+        fsh::instruction::Instruction *pInst = (fsh::instruction::Instruction *)$1;
+        //pInst->dump(ctx);
+        //std::cout << "***********************************" << std::endl;
+        Execute(pInst);
       }
       ;
 exp:
@@ -74,22 +83,24 @@ exp:
         bop->rhs = (fsh::instruction::Instruction *)$3;
         $$ = bop;
     }
-    | IDENTIFIER '[' exp_list ']' { 
+    | IDENTIFIER '[' exp ']' { 
         fsh::instruction::FunctionCall *pCall = new fsh::instruction::FunctionCall();
         fsh::instruction::Identifier *id = (fsh::instruction::Identifier *)$1;
         pCall->name = id->name;
         delete id;
-        pCall->args = (fsh::instruction::ExpressionList *)$3;
+        pCall->functionArguments = (fsh::instruction::Instruction *)$3;
+        //std::cout << "adding " << id->name << std::endl;
         $$ = pCall;
     }
     | IDENTIFIER '[' ']' { 
         fsh::instruction::FunctionCall *pCall = new fsh::instruction::FunctionCall();
         fsh::instruction::Identifier *id = (fsh::instruction::Identifier *)$1;
+        //std::cout << "adding " << id->name << std::endl;
         pCall->name = id->name;
         delete id;
         $$ = pCall;
     }
-    |'&' '[' iden_list ':' exp_block ']' {
+    |'&' '[' iden_list ':' exp ']' {
         fsh::instruction::FunctionDef *pDef = new fsh::instruction::FunctionDef();
         fsh::instruction::IdentifierList *il = (fsh::instruction::IdentifierList *)$3;
         for (auto& inst : il->identifiers)
@@ -100,22 +111,30 @@ exp:
                 pDef->arg_names.push_back(id->name);
             }
         }
-        fsh::instruction::ExpressionList *pExpList = (fsh::instruction::ExpressionList *)$5;
-        for (auto& in : pExpList->expressions)
-        {
-            pDef->statements.push_back(in);
-        }
+        pDef->functionBody = (fsh::instruction::Instruction *)$5;
         delete il;
         $$ = pDef;
     }
-    |'&' '[' exp_block  ']' {
+    |'&' '[' exp ']' {
         fsh::instruction::FunctionDef *pDef = new fsh::instruction::FunctionDef();
-        fsh::instruction::ExpressionList *pExpList = (fsh::instruction::ExpressionList *)$3;
-        for (auto& in : pExpList->expressions)
-        {
-            pDef->statements.push_back(in);
-        }
+        pDef->functionBody = (fsh::instruction::Instruction *)$3;
         $$ = pDef;
+    }
+    | IF '[' exp  THEN exp  ELSE exp  ']'  {
+        fsh::instruction::WhileIf *pWhileIf = new fsh::instruction::WhileIf();
+        pWhileIf->isWhile = false;
+        pWhileIf->condition = (fsh::instruction::Instruction *)$3;
+        pWhileIf->if_true = (fsh::instruction::Instruction *)$5;
+        pWhileIf->if_false = (fsh::instruction::Instruction *)$7;
+        $$ = pWhileIf;
+    }
+    | WHILE '[' exp  THEN exp  ELSE exp  ']'  {
+        fsh::instruction::WhileIf *pWhileIf = new fsh::instruction::WhileIf();
+        pWhileIf->isWhile = true;
+        pWhileIf->condition = (fsh::instruction::Instruction *)$3;
+        pWhileIf->if_true = (fsh::instruction::Instruction *)$5;
+        pWhileIf->if_false = (fsh::instruction::Instruction *)$7;
+        $$ = pWhileIf;
     }
     | exp '+' exp { 
         fsh::instruction::BinaryOperator *bop = new fsh::instruction::BinaryOperator();
@@ -187,6 +206,13 @@ exp:
         bop->rhs = (fsh::instruction::Instruction *)$3;
         $$ = bop;
     }
+    | exp ',' exp {
+        fsh::instruction::BinaryOperator *bop = new fsh::instruction::BinaryOperator();
+        bop->op = fsh::TOKEN_COMMA;
+        bop->lhs = (fsh::instruction::Instruction *)$1;
+        bop->rhs = (fsh::instruction::Instruction *)$3;
+        $$ = bop;
+    }
     | '-' exp %prec NEG { 
         fsh::instruction::Instruction *p = (fsh::instruction::Instruction *)$2;
         if (p->type() == fsh::instruction::INSTRUCTION_INTEGER)
@@ -220,31 +246,14 @@ iden_list:
         $$ = il;
     }
     ;
-exp_list:
-    exp      {
-        fsh::instruction::ExpressionList *el = new fsh::instruction::ExpressionList();
-        el->expressions.push_back((fsh::instruction::Instruction *)$1);
-        $$ = el;
-    }
-    | exp ',' exp    {
-        fsh::instruction::ExpressionList *el = new fsh::instruction::ExpressionList();
-        el->expressions.push_back((fsh::instruction::Instruction *)$1);
-        el->expressions.push_back((fsh::instruction::Instruction *)$3);
-        $$ = el;
-    }
-    | exp_list ',' exp  {
-        fsh::instruction::ExpressionList *el = (fsh::instruction::ExpressionList *)$1;
-        el->expressions.push_back((fsh::instruction::Instruction *)$3);
-        $$ = el;
-    }
-    ;
+/*
 exp_block:
-    exp ';'     {
+    exp ';' {
         fsh::instruction::ExpressionList *el = new fsh::instruction::ExpressionList();
         el->expressions.push_back((fsh::instruction::Instruction *)$1);
         $$ = el;
     }
-    | exp ';' exp ';'   {
+    | exp ';' exp ';'  {
         fsh::instruction::ExpressionList *el = new fsh::instruction::ExpressionList();
         el->expressions.push_back((fsh::instruction::Instruction *)$1);
         el->expressions.push_back((fsh::instruction::Instruction *)$3);
@@ -256,6 +265,7 @@ exp_block:
         $$ = el;
     }
     ;
+*/
 /* End of grammar. */
 %%
 
@@ -343,8 +353,8 @@ int main(int, char**) {
 	yyin = myfile;
 
     machine.register_builtin("Print", fsh::Print);
-    machine.register_builtin("If", fsh::If);
-    machine.register_builtin("While", fsh::While);
+    //machine.register_builtin("If", fsh::If);
+    //machine.register_builtin("While", fsh::While);
 	// parse through the input until there is no more:
 	do {
 		yyparse();

@@ -32,6 +32,10 @@ uint64_t lineno = 1;
 None            {return NONE;}
 True            {return TRUE;}
 False           {return FALSE;}
+then            {return THEN;}
+else            {return ELSE;}
+If              {return IF;}
+While           {return WHILE;}
 \"[^\"\n]*\"    {
                     int len = strlen(yytext);
                     std::string s(yytext+1, len-2);

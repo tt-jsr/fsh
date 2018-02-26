@@ -35,9 +35,10 @@ namespace fsh
         // Register a builtin function.
         // The signiture is ElementPtr (Machine&, std::vector<ElementPtr>& args);
         void register_builtin(const std::string& name, 
-                std::function<ElementPtr (Machine&, std::vector<instruction::InstructionPtr>&)>);
+                std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)>);
         void store_variable(const std::string& name, ElementPtr& d);
         bool get_variable(const std::string& name, ElementPtr& out);
+        bool ConvertToBool(ElementPtr);
     private:
         std::vector<ElementPtr> datastack;
         ExecutionContextPtr executionContext;
