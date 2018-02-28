@@ -168,10 +168,27 @@ namespace fsh
 
         typedef fsh::instrusive_ptr<Float> FloatPtr;
 
+        class ElementWrapper : public Instruction
+        {
+        public:
+            ElementWrapper()
+            { }
+
+            ~ElementWrapper() {}
+            void Execute(Machine&);
+            InstructionType type() {return INSTRUCTION_ELEMENT_WRAPPER;}
+            std::string type_str();
+            void dump(DumpContext&);
+            fsh::ElementPtr element;
+        };
+
+        typedef fsh::instrusive_ptr<ElementWrapper> ElementWrapperPtr;
+
         class ExpressionList : public Instruction
         {
         public:
             ExpressionList()
+            :isList(false)
             { }
 
             ~ExpressionList() {}
@@ -180,6 +197,7 @@ namespace fsh
             std::string type_str();
             void dump(DumpContext&);
             std::vector<InstructionPtr> expressions;
+            bool isList;
         };
 
         typedef fsh::instrusive_ptr<ExpressionList> ExpressionListPtr;

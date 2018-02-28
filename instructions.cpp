@@ -114,7 +114,7 @@ namespace fsh
                 if (ldata->type() != fsh::ELEMENT_TYPE_IDENTIFIER)
                 {
                     std::stringstream strm;
-                    strm << "lhs of assignment is not an identifier";
+                    strm << "lhs of assignment is not an identifier, got " << ldata->type();
                     throw std::runtime_error(strm.str());
                 }
                 machine.store_variable(ldata.cast<fsh::Identifier>()->value, rdata);
@@ -565,11 +565,41 @@ namespace fsh
         }
 
         /**************************************************/
+        void ElementWrapper::Execute(Machine& machine)
+        {
+            machine.push_data(element);
+        }
+
+        void ElementWrapper::dump(DumpContext& ctx)
+        {
+            ctx.strm() << "ElementWrapper" << std::endl;
+        }
+
+        std::string ElementWrapper::type_str()
+        {
+            std::stringstream strm;
+            strm << "ElementWrapper";
+            return strm.str();
+        }
+
+        /**************************************************/
         void ExpressionList::Execute(Machine& machine)
         {
-            for (auto &in : expressions)
+            if (isList)
             {
-                in->Execute(machine);
+                fsh::ListPtr lp = fsh::MakeList(HEAD_TYPE_LIST);
+                for (auto& in : expressions)
+                {
+                    lp->items.push_back(in);
+                }
+                machine.push_data(lp);
+            }
+            else
+            {
+                for (auto &in : expressions)
+                {
+                    in->Execute(machine);
+                }
             }
         }
 

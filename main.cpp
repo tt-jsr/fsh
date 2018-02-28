@@ -2,42 +2,34 @@
 #include "common.h"
 #include "list.h"
 #include "machine.h"
-#include "parser.h"
 #include "instructions.h"
+#include "builtins.h"
 
 using namespace fsh;
 
-void ListTest()
-{
-    ListPtr lst = MakeList(HEAD_TYPE_LIST);
-    lst->Add("Hello");
-    lst->Add("cruel");
-    lst->Add("world");
+extern "C" int yylex();
+extern "C" int yyparse();
+extern "C" FILE *yyin;
 
-    ListPtr args = MakeList(HEAD_TYPE_LIST);
-    args->Add(-4);
-
-    ListPtr l = Part(lst, args);
-
-    Dump(l);
-}
+extern Machine machine;
 
 int main(int argc, char *argv[])
 {
-    Machine m;
-    Parser parser;
+	// open a file handle to a particular file:
+	FILE *myfile = fopen("fsh.input", "r");
+	// make sure it's valid:
+	if (!myfile) {
+        std::cout << "Cannot open fsh.input" << std::endl;
+		return -1;
+	}
+	// set flex to read from it instead of defaulting to STDIN:
+	yyin = myfile;
 
-    while(true)
-    {
-        std::string inbuf;
-        std::cout << "> ";
-        std::getline(std::cin, inbuf);
-        parser.input_ = inbuf;
-        parser.pos_ = 0;
-        parser.tokenize();
-        for (auto& t : parser.tokens_)
-        {
-            std::cout << t.text << std::endl;
-        }
-    }
+    machine.register_builtin("Print", fsh::Print);
+    //machine.register_builtin("If", fsh::If);
+    //machine.register_builtin("While", fsh::While);
+	// parse through the input until there is no more:
+	do {
+		yyparse();
+	} while (!feof(yyin));
 }

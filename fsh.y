@@ -21,6 +21,7 @@ void yyerror(const char *s);
 
 // define the constant-string tokens:
 %token IDENTIFIER
+%token VARIABLE
 %token NONE
 %token STRING
 %token INT
@@ -54,14 +55,11 @@ toplev: exp  {
         Execute(pInst);
       }
       ;
-exp:
+term:
     INT { 
         $$ = $1; 
     }
     | FLOAT { 
-        $$ = $1; 
-    }
-    | IDENTIFIER { 
         $$ = $1; 
     }
     | NONE {
@@ -76,14 +74,21 @@ exp:
     | STRING {
         $$ = $1;
     }
-    | IDENTIFIER '=' exp { 
+    | VARIABLE {
+        $$ = $1;
+    }
+    ;
+exp:
+    term {$$ = $1;}
+    |
+    IDENTIFIER '=' exp { 
         fsh::instruction::BinaryOperator *bop = new fsh::instruction::BinaryOperator();
         bop->op = fsh::TOKEN_ASSIGNMENT;
         bop->lhs = (fsh::instruction::Instruction *)$1;
         bop->rhs = (fsh::instruction::Instruction *)$3;
         $$ = bop;
     }
-    | IDENTIFIER '[' exp ']' { 
+    | IDENTIFIER '[' exp_list ']' { 
         fsh::instruction::FunctionCall *pCall = new fsh::instruction::FunctionCall();
         fsh::instruction::Identifier *id = (fsh::instruction::Identifier *)$1;
         pCall->name = id->name;
@@ -100,7 +105,7 @@ exp:
         delete id;
         $$ = pCall;
     }
-    |'&' '[' iden_list ':' exp ']' {
+    |'&' '[' iden_list ':' exp_list ']' {
         fsh::instruction::FunctionDef *pDef = new fsh::instruction::FunctionDef();
         fsh::instruction::IdentifierList *il = (fsh::instruction::IdentifierList *)$3;
         for (auto& inst : il->identifiers)
@@ -115,12 +120,12 @@ exp:
         delete il;
         $$ = pDef;
     }
-    |'&' '[' exp ']' {
+    |'&' '[' exp_list ']' {
         fsh::instruction::FunctionDef *pDef = new fsh::instruction::FunctionDef();
         pDef->functionBody = (fsh::instruction::Instruction *)$3;
         $$ = pDef;
     }
-    | IF '[' exp  THEN exp  ELSE exp  ']'  {
+    | IF '[' exp_list  THEN exp_list  ELSE exp_list  ']'  {
         fsh::instruction::WhileIf *pWhileIf = new fsh::instruction::WhileIf();
         pWhileIf->isWhile = false;
         pWhileIf->condition = (fsh::instruction::Instruction *)$3;
@@ -128,7 +133,7 @@ exp:
         pWhileIf->if_false = (fsh::instruction::Instruction *)$7;
         $$ = pWhileIf;
     }
-    | WHILE '[' exp  THEN exp  ELSE exp  ']'  {
+    | WHILE '[' exp_list  THEN exp_list  ELSE exp_list  ']'  {
         fsh::instruction::WhileIf *pWhileIf = new fsh::instruction::WhileIf();
         pWhileIf->isWhile = true;
         pWhileIf->condition = (fsh::instruction::Instruction *)$3;
@@ -206,13 +211,6 @@ exp:
         bop->rhs = (fsh::instruction::Instruction *)$3;
         $$ = bop;
     }
-    | exp ',' exp {
-        fsh::instruction::BinaryOperator *bop = new fsh::instruction::BinaryOperator();
-        bop->op = fsh::TOKEN_COMMA;
-        bop->lhs = (fsh::instruction::Instruction *)$1;
-        bop->rhs = (fsh::instruction::Instruction *)$3;
-        $$ = bop;
-    }
     | '-' exp %prec NEG { 
         fsh::instruction::Instruction *p = (fsh::instruction::Instruction *)$2;
         if (p->type() == fsh::instruction::INSTRUCTION_INTEGER)
@@ -226,7 +224,12 @@ exp:
         }
         $$ = p; 
     }
-    | '(' exp ')' { $$ = $2; }
+    | '(' exp_list ')' { $$ = $2; }
+    | '{' exp_list '}' { 
+        fsh::instruction::ExpressionList *el = (fsh::instruction::ExpressionList *)$2;
+        el->isList = true;
+        $$ = $2; 
+    }
     ;
 iden_list:
     IDENTIFIER {
@@ -246,26 +249,24 @@ iden_list:
         $$ = il;
     }
     ;
-/*
-exp_block:
-    exp ';' {
+exp_list:
+    exp {
         fsh::instruction::ExpressionList *el = new fsh::instruction::ExpressionList();
         el->expressions.push_back((fsh::instruction::Instruction *)$1);
         $$ = el;
     }
-    | exp ';' exp ';'  {
+    | exp ',' exp {
         fsh::instruction::ExpressionList *el = new fsh::instruction::ExpressionList();
         el->expressions.push_back((fsh::instruction::Instruction *)$1);
         el->expressions.push_back((fsh::instruction::Instruction *)$3);
         $$ = el;
     }
-    | exp_block ';' exp ';'  {
+    | exp_list ',' exp {
         fsh::instruction::ExpressionList *el = (fsh::instruction::ExpressionList *)$1;
         el->expressions.push_back((fsh::instruction::Instruction *)$3);
         $$ = el;
     }
     ;
-*/
 /* End of grammar. */
 %%
 
@@ -338,28 +339,6 @@ void Execute(fsh::instruction::Instruction *pInst)
         break;
     */
     }
-}
-
-
-int main(int, char**) {
-	// open a file handle to a particular file:
-	FILE *myfile = fopen("fsh.input", "r");
-	// make sure it's valid:
-	if (!myfile) {
-		cout << "Cannot open fsh.input" << endl;
-		return -1;
-	}
-	// set flex to read from it instead of defaulting to STDIN:
-	yyin = myfile;
-
-    machine.register_builtin("Print", fsh::Print);
-    //machine.register_builtin("If", fsh::If);
-    //machine.register_builtin("While", fsh::While);
-	// parse through the input until there is no more:
-	do {
-		yyparse();
-	} while (!feof(yyin));
-	
 }
 
 void yyerror(const char *s) {

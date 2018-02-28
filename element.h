@@ -147,9 +147,9 @@ namespace fsh
     {
         void Add(const std::string&);
         void Add(int64_t n);
-        size_t size() {return elements.size();}
+        size_t size() {return items.size();}
         virtual ElementType type() {return ELEMENT_TYPE_LIST;}
-        std::vector<ElementPtr> elements;
+        std::vector<instruction::InstructionPtr> items;
     };
 
     typedef instrusive_ptr<List> ListPtr;

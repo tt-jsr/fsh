@@ -70,6 +70,7 @@ namespace fsh
             ,INSTRUCTION_STRING
             ,INSTRUCTION_BOOL
             ,INSTRUCTION_WHILE_IF
+            ,INSTRUCTION_ELEMENT_WRAPPER
         };
     }
 
