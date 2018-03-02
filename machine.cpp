@@ -34,7 +34,7 @@ namespace fsh
         }
         catch (std::runtime_error& ex)
         {
-            return MakeError(ex.what());
+            return MakeError(ex.what(), false);
         }
     }
 

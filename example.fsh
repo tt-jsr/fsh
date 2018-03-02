@@ -26,14 +26,5 @@ Print[$junk]
 lst = {1,2,3,4}
 Print [$lst]
 
-io = MakeIO[]
-IOReadOutput[io, readLines]
-
-IOWriteInput[io, "line of data"]
-# If IOReadOutput has been set, a thread will be created to perform
-# the blocking reads of the process's stdout
-System[io, "grep ExecutionReport"]
-
-ReadFile[io, "OC_cme.log"]
 
 

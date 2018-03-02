@@ -6,6 +6,7 @@
 #include "common.h"
 #include "instructions.h"
 #include "machine.h"
+#include "builtins.h"
 
 namespace fsh
 {
@@ -215,10 +216,7 @@ namespace fsh
         void FunctionCall::Execute(Machine& machine)
         {
             fsh::ElementPtr e;
-            std::string fname = name;
-            if (fname[0] == '$')
-                fname = &fname[1];
-            if (machine.get_variable(fname, e) == false)
+            if (machine.get_variable(name, e) == false)
             {
                 std::stringstream strm;
                 strm << "Function \"" << name << "\" not found";
@@ -232,59 +230,13 @@ namespace fsh
             }
 
             fsh::FunctionDefinitionPtr funcDef = e.cast<FunctionDefinition>();
-            if (funcDef->isBuiltIn)
-            {
-                machine.push_context();
-                // now execute the function
-                std::vector<ElementPtr> arguments;
-                size_t top = machine.size_data();
+            size_t top = machine.size_data();
+            if (functionArguments)
                 functionArguments->Execute(machine);
-                while(machine.size_data() > top)
-                {
-                    arguments.push_back(machine.pop_data());
-                }
-                std::reverse(arguments.begin(), arguments.end());
-                ElementPtr rtn = funcDef->builtInBody(machine, arguments);
-                machine.pop_context();
-                machine.push_data(rtn);
-            }
-            else
-            {
-                std::vector<ElementPtr> dataArgs;
-                // Execute each argument and put the result into the dataArgs vector
-                size_t top = machine.size_data();
-                if (functionArguments)
-                {
-                    functionArguments->Execute(machine);
-                }
-                while (machine.size_data() > top)
-                {
-                    dataArgs.push_back(machine.pop_data());
-                }
-                std::reverse(dataArgs.begin(), dataArgs.end());
-                // Create a new context, create a variable for each named argument
-                machine.push_context();
-                size_t dataArgIdx = 0;
-                for (; dataArgIdx < dataArgs.size() && dataArgIdx < funcDef->arg_names.size(); ++dataArgIdx)
-                {
-                    machine.store_variable(funcDef->arg_names[dataArgIdx], dataArgs[dataArgIdx]);
-                }
-                // Any named arguments that the caller did not provide, we set to None
-                for (;dataArgIdx < funcDef->arg_names.size(); ++dataArgIdx)
-                {
-                    ElementPtr none = MakeNone();
-                    machine.store_variable(funcDef->arg_names[dataArgIdx], none);
-                }
-                top = machine.size_data();
-                funcDef->functionBody->Execute(machine);
-                ElementPtr rtn = machine.peek_data();
-                while(machine.size_data() > top)
-                {
-                    machine.pop_data();
-                }
-                machine.push_data(rtn); // push back that last statement result
-                machine.pop_context();
-            }
+
+            size_t nItemsOnStack = machine.size_data() - top;
+            ElementPtr rtn = fsh::CallFunction(machine, funcDef, nItemsOnStack);
+            machine.push_data(rtn);
         }
 
         void FunctionCall::dump(DumpContext& ctx)

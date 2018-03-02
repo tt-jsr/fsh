@@ -28,6 +28,7 @@ namespace fsh
         ,ELEMENT_TYPE_FUNCTION_DEFINITION
         ,ELEMENT_TYPE_NONE
         ,ELEMENT_TYPE_BOOLEAN
+        ,ELEMENT_TYPE_OBJECT
     };
 
     struct Element : public instrusive_base
@@ -43,6 +44,7 @@ namespace fsh
         bool IsFunctionDefinition() {return type() == ELEMENT_TYPE_FUNCTION_DEFINITION;}
         bool IsNone() {return type() == ELEMENT_TYPE_NONE;}
         bool IsBoolean() {return type() == ELEMENT_TYPE_BOOLEAN;}
+        bool IsObject() {return type() ==ELEMENT_TYPE_OBJECT;}
     };
 
     typedef instrusive_ptr<Element> ElementPtr;
@@ -101,13 +103,16 @@ namespace fsh
     struct Error : public Element
     {
         Error() {}
-        Error(const std::string& s)
+        Error(const std::string& s, bool b)
         :msg(s)
+        ,bOk(b)
         {}
 
         virtual ElementType type() {return ELEMENT_TYPE_ERROR;}
         std::string msg;
+        bool bOk;
     };
+
     typedef instrusive_ptr<Error> ErrorPtr;
 
     struct Integer : public Element
@@ -154,6 +159,22 @@ namespace fsh
 
     typedef instrusive_ptr<List> ListPtr;
 
+    struct ObjectBase
+    {
+        virtual ~ObjectBase() {}
+    };
+
+    struct Object : public Element
+    {
+        Object():pObject(nullptr),magic(0) {}
+        ~Object() {delete pObject;}
+        virtual ElementType type() {return ELEMENT_TYPE_OBJECT;}
+        ObjectBase *pObject;
+        uint64_t magic;
+    };
+
+    typedef instrusive_ptr<Object> ObjectPtr;
+
     struct FunctionDefinition : public Element
     {
         FunctionDefinition()
@@ -162,7 +183,6 @@ namespace fsh
         virtual ElementType type() {return ELEMENT_TYPE_FUNCTION_DEFINITION;}
         std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> builtInBody;
         instruction::InstructionPtr functionBody;   // Only for shell defined functions
-        //std::vector<instruction::InstructionPtr> args;
         std::vector<std::string> arg_names;
         bool isBuiltIn;
     };
@@ -173,7 +193,7 @@ namespace fsh
     typedef instrusive_ptr<ExecutionContext> ExecutionContextPtr;
 
     StringPtr MakeString(const std::string& s);
-    ErrorPtr MakeError(const std::string& s);
+    ErrorPtr MakeError(const std::string& s, bool b);
     IntegerPtr MakeInteger(int64_t);
     FloatPtr MakeFloat(double);
     ListPtr MakeList(HeadType);
@@ -181,5 +201,6 @@ namespace fsh
     FunctionDefinitionPtr MakeFunctionDefinition();
     NonePtr MakeNone();
     BooleanPtr MakeBoolean(bool);
+    ObjectPtr MakeObject(ObjectBase *, uint64_t);
 }
 

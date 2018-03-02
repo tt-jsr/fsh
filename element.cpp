@@ -21,9 +21,9 @@ namespace fsh
         return StringPtr(new String(s));
     }
 
-    ErrorPtr MakeError(const std::string& s)
+    ErrorPtr MakeError(const std::string& s, bool b)
     {
-        return ErrorPtr(new Error(s));
+        return ErrorPtr(new Error(s,b));
     }
 
     IdentifierPtr MakeIdentifier(const std::string& s)
@@ -54,5 +54,13 @@ namespace fsh
     BooleanPtr MakeBoolean(bool b)
     {
         return BooleanPtr(new Boolean(b));
+    }
+
+    ObjectPtr MakeObject(ObjectBase *p, uint64_t m)
+    {
+        ObjectPtr op = ObjectPtr(new Object());
+        op->magic = m;
+        op->pObject = p;
+        return op;
     }
 }

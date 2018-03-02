@@ -281,7 +281,8 @@ void Execute(fsh::instruction::Instruction *pInst)
     case fsh::ELEMENT_TYPE_ERROR:
         {
             fsh::ErrorPtr ep = e.cast<fsh::Error>();
-            std::cout << ep->msg << std::endl;
+            if (ep->bOk == false)
+                std::cout << "Execution returned: " << ep->msg << std::endl;
         }
         break;
     /*
