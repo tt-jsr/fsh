@@ -1,6 +1,5 @@
 #include <iostream>
 #include "common.h"
-#include "list.h"
 #include "machine.h"
 #include "instructions.h"
 #include "builtins.h"

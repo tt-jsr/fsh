@@ -24,23 +24,14 @@ namespace fsh
 
         ElementPtr Execute(instruction::InstructionPtr);
 
-        // Substitute any $(..) variables if argument is a string
-        ElementPtr resolve(ElementPtr);
-        void verify(ElementPtr, int type, const char *msg);
-
-        // Pops the tos and returns true if the value is an int and
-        // != 0
-        bool result_true();
-
         // Register a builtin function.
-        // The signiture is ElementPtr (Machine&, std::vector<ElementPtr>& args);
         void register_builtin(const std::string& name, 
                 std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)>);
         void store_variable(const std::string& name, ElementPtr& d);
         bool get_variable(const std::string& name, ElementPtr& out);
         bool ConvertToBool(ElementPtr);
     private:
-        std::vector<ElementPtr> datastack;
+        static thread_local std::vector<ElementPtr> datastack;
         ExecutionContextPtr executionContext;
     private_impl:
         ElementPtr pop_data();

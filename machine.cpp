@@ -7,6 +7,8 @@
 
 namespace fsh
 {
+    thread_local std::vector<ElementPtr> Machine::datastack;
+
     Machine::Machine(void)
     {
         executionContext = MakeExecutionContext();
@@ -58,21 +60,6 @@ namespace fsh
             return false;
         }
         return false;
-    }
-
-    // Substitute any $(..) variables if argument is a string
-    ElementPtr Machine::resolve(ElementPtr e)
-    {
-        return e;
-    }
-
-    void Machine::verify(ElementPtr e, int type, const char *msg)
-    {
-        assert(e->type() == type);
-        if (e->type() != type)
-        {
-            throw std::runtime_error(msg);
-        }
     }
 
     size_t Machine::size_data()
