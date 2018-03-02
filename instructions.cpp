@@ -6,7 +6,6 @@
 #include "common.h"
 #include "instructions.h"
 #include "machine.h"
-#include "parser.h"
 
 namespace fsh
 {
