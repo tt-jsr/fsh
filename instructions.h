@@ -232,7 +232,7 @@ namespace fsh
             InstructionType type() {return INSTRUCTION_IDENTIFIER_LIST;}
             std::string type_str();
             void dump(DumpContext&);
-            std::vector<InstructionPtr> identifiers;
+            std::vector<IdentifierPtr> identifiers;
         };
 
         typedef fsh::instrusive_ptr<IdentifierList> IdentifierListPtr;

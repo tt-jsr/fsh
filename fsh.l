@@ -6,48 +6,51 @@
 using namespace std;
 #define YY_DECL extern "C" int yylex()
 uint64_t lineno = 1;
+uint64_t column = 0;
 %}
+
+
 %%
-[ \t] ;
-[\n]        {++lineno;}
-\+             {return '+';}
--             {return '-';}
-\*             {return '*';}
-\/             {return '/';}
-=             {return '=';}
-\(             {return '(';}
-\)             {return ')';}
-\{             {return '{';}
-\}             {return '}';}
-,               {return ',';}
-\[               {return '[';}
-\]               {return ']';}
-&               {return '&';}
-:               {return ':';}
-\;               {return ';';}
-\>               {return GT;}
-\>=               {return GTE;}
-\<               {return LT;}
-\<=               {return LTE;}
-==               {return EQ;}
-\!=               {return NEQ;}
-None            {return NONE;}
-True            {return TRUE;}
-False           {return FALSE;}
-then            {return THEN;}
-else            {return ELSE;}
-If              {return IF;}
-While           {return WHILE;}
+[ \t]       {++column;}
+[\n]        {++lineno;column = 0;}
+\+             {++column;return '+';}
+-             {++column;return '-';}
+\*             {++column;return '*';}
+\/             {++column;return '/';}
+=             {++column;return '=';}
+\(             {++column;return '(';}
+\)             {++column;return ')';}
+\{             {++column;return '{';}
+\}             {++column;return '}';}
+,               {++column;return ',';}
+\[               {++column;return '[';}
+\]               {++column;return ']';}
+&               {++column;return '&';}
+:               {++column;return ':';}
+\;               {++column;return ';';}
+\>               {++column;return GT;}
+\>=               {column += 2;return GTE;}
+\<               {++column;return LT;}
+\<=               {++column;return LTE;}
+==               {++column;return EQ;}
+\!=               {column += 2;return NEQ;}
+None            {column += 4;return NONE;}
+True            {column += 4;return TRUE;}
+False           {column += 5;return FALSE;}
+then            {column += 4;return THEN;}
+else            {column += 4;return ELSE;}
+If              {column += 2;return IF;}
+While           {column += 5;return WHILE;}
 \"[^\"\n]*\"    {
                     int len = strlen(yytext);
                     std::string s(yytext+1, len-2);
                     yylval = new fsh::instruction::String(s); 
-                    return STRING;
+                    column += len;
+                    return STRING_LITERAL;
                 }
-[0-9]+\.[0-9]+ { yylval = new fsh::instruction::Float(strtod(yytext, nullptr)); return FLOAT; }
-[0-9]+         { yylval = new fsh::instruction::Integer(atoi(yytext)); return INT; }
-[a-zA-Z0-9_]+   { yylval = new fsh::instruction::Identifier(yytext); return IDENTIFIER; }
-\$[a-zA-Z0-9_]+   { yylval = new fsh::instruction::Identifier(yytext); return VARIABLE; }
+[0-9]+\.[0-9]+ { column += strlen(yytext);yylval = new fsh::instruction::Float(strtod(yytext, nullptr)); return FLOAT; }
+[0-9]+         { column += strlen(yytext);yylval = new fsh::instruction::Integer(atoi(yytext)); return INTEGER; }
+[a-zA-Z0-9_]+   { column += strlen(yytext);yylval = new fsh::instruction::Identifier(yytext); return IDENTIFIER; }
 #.*$ ;
 %%
 

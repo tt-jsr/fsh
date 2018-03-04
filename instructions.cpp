@@ -109,6 +109,8 @@ namespace fsh
             if (op == TOKEN_ASSIGNMENT)
             {
                 ElementPtr rdata = machine.pop_data();
+                rdata = machine.resolve(rdata);
+
                 ElementPtr ldata = machine.pop_data();
 
                 if (ldata->type() != fsh::ELEMENT_TYPE_IDENTIFIER)
@@ -123,7 +125,10 @@ namespace fsh
             else
             {
                 ElementPtr rdata = machine.pop_data();
+                rdata = machine.resolve(rdata);
+
                 ElementPtr ldata = machine.pop_data();
+                ldata = machine.resolve(ldata);
 
                 if (rdata->IsFloat() && ldata->IsInteger())
                 {
@@ -149,6 +154,12 @@ namespace fsh
 
         void BinaryOperator::dump(DumpContext& ctx)
         {
+            ctx.inc();
+            ctx.strm() << "bop left" << std::endl;
+            ctx.inc();
+            lhs->dump(ctx);
+            ctx.dec();
+            ctx.dec();
             switch(op)
             {
             case TOKEN_PLUS:
@@ -191,11 +202,7 @@ namespace fsh
                 ctx.strm() << op << std::endl;
             }
             ctx.inc();
-            ctx.strm() << "left" << std::endl;
-            ctx.inc();
-            lhs->dump(ctx);
-            ctx.dec();
-            ctx.strm() << "right" << std::endl;
+            ctx.strm() << "bop right" << std::endl;
             ctx.inc();
             if (rhs)
             {
@@ -245,7 +252,8 @@ namespace fsh
             ctx.inc();
             ctx.strm() << "arguments:" << std::endl;
             ctx.inc();
-            functionArguments->dump(ctx);
+            if (functionArguments)
+                functionArguments->dump(ctx);
             ctx.dec();
             ctx.dec();
         }
@@ -291,6 +299,7 @@ namespace fsh
                 {
                     condition->Execute(machine);
                     ElementPtr cond = machine.pop_data();
+                    cond = machine.resolve(cond);
                     run = machine.ConvertToBool(cond);
                     if (run)
                     {
@@ -323,6 +332,7 @@ namespace fsh
             {
                 condition->Execute(machine);
                 ElementPtr cond = machine.pop_data();
+                cond = machine.resolve(cond);
                 bool b = machine.ConvertToBool(cond);
                 size_t top = machine.size_data();
                 if (b)

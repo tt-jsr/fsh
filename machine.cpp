@@ -97,6 +97,20 @@ namespace fsh
         datastack.push_back(d);
     }
 
+    ElementPtr Machine::resolve(ElementPtr e)
+    {
+        ElementPtr rtn;
+        if (e->IsIdentifier())
+        {
+            IdentifierPtr id = e.cast<Identifier>();
+            if (get_variable(id->value, rtn))
+            {
+                return rtn;
+            }
+        }
+        return e;
+    }
+
     void Machine::store_variable(const std::string& name, ElementPtr& d)
     {
         executionContext->AddVariable(name, d);

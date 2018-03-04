@@ -24,6 +24,10 @@ namespace fsh
 
         ElementPtr Execute(instruction::InstructionPtr);
 
+        // Resolve the arg if it is an identifier, will return the 
+        // element it points to
+        ElementPtr resolve(ElementPtr);
+
         // Register a builtin function.
         void register_builtin(const std::string& name, 
                 std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)>);

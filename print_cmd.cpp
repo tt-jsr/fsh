@@ -40,7 +40,11 @@ namespace fsh
         case ELEMENT_TYPE_IDENTIFIER:
             {
                 IdentifierPtr id = e.cast<Identifier>();
-                std::cout << id->value;
+                ElementPtr e;
+                if (machine.get_variable(id->value, e))
+                    Print(machine, e);
+                else
+                    std::cout << id->value;
             }
             break;
         case ELEMENT_TYPE_NONE:
