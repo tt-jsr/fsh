@@ -31,6 +31,7 @@ typedef fsh::instruction::Boolean bool_t;
 typedef fsh::instruction::Integer int_t;
 typedef fsh::instruction::Float float_t;
 typedef fsh::instruction::None none_t;
+typedef fsh::instruction::TryCatch trycatch_t;
 
 void dump(const char *p)
 {
@@ -61,6 +62,7 @@ void dump(void *p)
 %token IDENTIFIER INTEGER FLOAT STRING_LITERAL
 %token NONE TRUE FALSE
 %token IF WHILE THEN ELSE
+%token TRY CATCH
 %token ';'
 %left ','
 %left '='
@@ -123,6 +125,7 @@ expression
     | function_definition       {$$ = $1;}
     | selection_expression      {$$ = $1;}
     | iteration_expression      {$$ = $1;}
+    | exception_expression      {$$ = $1;}
     ;
 
 relational_expression
@@ -211,6 +214,15 @@ math_expression
             pFloat->value = -pFloat->value;
         }
         $$ = p; 
+    }
+    ;
+
+exception_expression
+    : TRY '[' statement_list  CATCH statement_list  ']'  {
+        trycatch_t *pException = new trycatch_t();
+        pException->try_ = (inst_t *)$3;
+        pException->catch_ = (inst_t *)$5;
+        $$ = pException;
     }
     ;
 

@@ -378,6 +378,40 @@ namespace fsh
             ctx.dec();
         }
 
+        /****************************************************/
+        void TryCatch::Execute(Machine& machine)
+        {
+            try 
+            {
+                try_->Execute(machine);
+            }
+            catch (std::exception& e)
+            {
+                ElementPtr msg = MakeString(e.what());
+                machine.store_variable("_exception", msg);
+                catch_->Execute(machine);
+            }
+        }
+
+        std::string TryCatch::type_str()
+        {
+            return "TryCatch";
+        }
+
+        void TryCatch::dump(DumpContext& ctx)
+        {
+            ctx.strm() << "TryCatch" << std::endl;
+            ctx.inc();
+            ctx.strm() << "try" << std::endl;
+            ctx.inc();
+            try_->dump(ctx);
+            ctx.dec();
+            ctx.strm() << "catch" << std::endl;
+            ctx.inc();
+            catch_->dump(ctx);
+            ctx.dec();
+            ctx.dec();
+        }
         /*****************************************************/
         void Identifier::Execute(Machine& machine)
         {

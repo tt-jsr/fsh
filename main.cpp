@@ -15,7 +15,7 @@ extern Machine machine;
 int main(int argc, char *argv[])
 {
 	// open a file handle to a particular file:
-	FILE *myfile = fopen("example.fsh", "r");
+	FILE *myfile = fopen("io.fsh", "r");
 	// make sure it's valid:
 	if (!myfile) {
         std::cout << "Cannot open io.fsh" << std::endl;
@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
     machine.register_builtin("MakeIO", fsh::MakeIO);
     machine.register_builtin("ReadFile", fsh::ReadFile);
     machine.register_builtin("SetReadHandler", fsh::SetReadHandler);
+    machine.register_builtin("Throw", fsh::Throw);
 	// parse through the input until there is no more:
 	do {
 		yyparse();

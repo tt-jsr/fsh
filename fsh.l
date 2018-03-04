@@ -41,6 +41,8 @@ then            {column += 4;return THEN;}
 else            {column += 4;return ELSE;}
 If              {column += 2;return IF;}
 While           {column += 5;return WHILE;}
+Try             {column += 5;return TRY;}
+catch           {column += 5;return CATCH;}
 \"[^\"\n]*\"    {
                     int len = strlen(yytext);
                     std::string s(yytext+1, len-2);

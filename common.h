@@ -71,6 +71,7 @@ namespace fsh
             ,INSTRUCTION_BOOL
             ,INSTRUCTION_WHILE_IF
             ,INSTRUCTION_ELEMENT_WRAPPER
+            ,INSTRUCTION_TRYCATCH
         };
     }
 

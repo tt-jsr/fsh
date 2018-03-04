@@ -1,35 +1,23 @@
-printError = &[err:
-    If[IsError[$err] 
-        then
-            Print[ErrorString[$err]]
-        else
-            None
-    ]
-]
+stageOne = &[phandle, line:
+    Print["stage one"];
+    NextStage[phandle, line];
+];
 
-foo = &[line, writeFunc:
-    
-err = ReadFile[
-        &[line: 
-            Print[$line]
-            ,True]
-        , "common.h"]
-printError[$err]
+stageTwo = &[phandle, line:
+    Print["stage two"];
+    NextStage[phandle, line];
+];
 
-Foo = &[line, pl: 
-   Print[$line],
-   NextPipe[&pl, $line]
-]
+foo = &[
+    Throw["Ouch"];
+];
 
-PipeLine["cat common.h", "grep ExecutionReport", "cut -c -24", $Foo]
+Try[
+    Print ["Line one"];
+    Print ["line two"];
+    foo[];
+    Print ["line three"];
+catch
+    Print[_exception];
+];
 
-hash = 0
-buildHash = &[line, write: 
-    parts = Split[$line, " "],
-    hash = Part[parts, 1]
-]
-
-PipeLine["grep \"build hash\" OC_cme.log", $buildHash]
-System["git checkout $hash"]
-
-PipeLine["grep \"build hash\" OC_cme.log", ">junk"]

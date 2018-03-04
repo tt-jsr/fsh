@@ -5,9 +5,12 @@ namespace fsh
 {
     class Machine;
 
+    //Print[arg1, srg2, ...];
     ElementPtr Print(Machine&, std::vector<ElementPtr>&);
 
     /********* List *********/
+    // Part[list, startidx];
+    // Part[list, startidx, endidx];
     ElementPtr Part(Machine&, std::vector<ElementPtr>&);
 
     /******** Error *********/
@@ -17,11 +20,16 @@ namespace fsh
 
     /********** IO ********/
     ElementPtr MakeIO(Machine&, std::vector<ElementPtr>&);
+    // ReadFile[func, "filename"];
+    //      func is defined as &[line : body...];
     ErrorPtr ReadFile(Machine&, std::vector<ElementPtr>&);
     ErrorPtr SetReadHandler(Machine&, std::vector<ElementPtr>&);
 
 
-    ElementPtr CallFunction(Machine& machine, FunctionDefinitionPtr funcDef, size_t nItemsOnStack);
+
+    // Throw["message"];
+    ElementPtr Throw(Machine&, std::vector<ElementPtr>&);
+
 
 
     /***********************************************
@@ -58,6 +66,7 @@ namespace fsh
 
     static const uint64_t ioobject_magic = 0x7e89ab46;
 
+    ElementPtr CallFunction(Machine& machine, FunctionDefinitionPtr funcDef, size_t nItemsOnStack);
 
     ElementPtr GetElement(Machine& machine, std::vector<ElementPtr>& args, size_t index, int& errorCode);
     ObjectPtr GetObject(Machine& machine, std::vector<ElementPtr>& args, size_t index, int& errorCode);
