@@ -30,8 +30,7 @@ namespace fsh
 
     ElementPtr Throw(Machine& machine, std::vector<ElementPtr>& args)
     {
-        int errorCode;
-        StringPtr sp = GetString(machine, args, 0, errorCode);
+        StringPtr sp = GetString(machine, args, 0);
         if (sp)
         {
             throw std::runtime_error(sp->value);

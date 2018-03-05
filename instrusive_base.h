@@ -31,6 +31,7 @@ namespace fsh
 
         int dec_ref()
         {
+            assert(refcount > 0);
             int val = refcount.fetch_add(-1);
             return val-1;
         }

@@ -51,6 +51,11 @@ namespace fsh
         return NonePtr(new None());
     }
 
+    FileHandlePtr MakeFileHandle()
+    {
+        return FileHandlePtr(new FileHandle());
+    }
+
     BooleanPtr MakeBoolean(bool b)
     {
         return BooleanPtr(new Boolean(b));

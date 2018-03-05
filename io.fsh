@@ -1,23 +1,18 @@
-stageOne = &[phandle, line:
-    Print["stage one"];
-    NextStage[phandle, line];
+stageOne = &[line:
+    Print["stage one ", line];
+    line;
 ];
 
-stageTwo = &[phandle, line:
-    Print["stage two"];
-    NextStage[phandle, line];
+stageTwo = &[line2:
+    Print["stage two ", line2];
+    line2;
 ];
 
-foo = &[
-    Throw["Ouch"];
-];
+
 
 Try[
-    Print ["Line one"];
-    Print ["line two"];
-    foo[];
-    Print ["line three"];
+    file = OpenFile["common.h", "r"];
+    PipeLine[file, stageOne, stageTwo];
 catch
-    Print[_exception];
+    Print [_exception];
 ];
-

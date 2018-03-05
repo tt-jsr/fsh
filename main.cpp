@@ -27,10 +27,10 @@ int main(int argc, char *argv[])
     machine.register_builtin("Print", fsh::Print);
     machine.register_builtin("IsError", fsh::IsError);
     machine.register_builtin("ErrorString", fsh::ErrorString);
-    machine.register_builtin("MakeIO", fsh::MakeIO);
     machine.register_builtin("ReadFile", fsh::ReadFile);
-    machine.register_builtin("SetReadHandler", fsh::SetReadHandler);
     machine.register_builtin("Throw", fsh::Throw);
+    machine.register_builtin("OpenFile", fsh::OpenFile);
+    machine.register_builtin("PipeLine", fsh::PipeLine);
 	// parse through the input until there is no more:
 	do {
 		yyparse();

@@ -29,6 +29,7 @@ namespace fsh
         ,ELEMENT_TYPE_NONE
         ,ELEMENT_TYPE_BOOLEAN
         ,ELEMENT_TYPE_OBJECT
+        ,ELEMENT_TYPE_FILE_HANDLE
     };
 
     struct Element : public instrusive_base
@@ -45,6 +46,7 @@ namespace fsh
         bool IsNone() {return type() == ELEMENT_TYPE_NONE;}
         bool IsBoolean() {return type() == ELEMENT_TYPE_BOOLEAN;}
         bool IsObject() {return type() ==ELEMENT_TYPE_OBJECT;}
+        bool IsFileHandle() {return type() == ELEMENT_TYPE_FILE_HANDLE;}
     };
 
     typedef instrusive_ptr<Element> ElementPtr;
@@ -94,7 +96,6 @@ namespace fsh
         :value(s)
         {}
         
-        bool IsVariable() {return value[0] == '$';}
         virtual ElementType type() {return ELEMENT_TYPE_IDENTIFIER;}
         std::string value;
     };
@@ -189,6 +190,25 @@ namespace fsh
 
     typedef instrusive_ptr<FunctionDefinition> FunctionDefinitionPtr;
 
+    struct FileHandle : public Element
+    {
+        FileHandle()
+        :fp(nullptr)
+        ,bRead(false)
+        {}
+        //~FileHandle()
+        //{
+            //if (fp)
+                //fclose(fp);
+            //fp = nullptr;
+        //}
+        virtual ElementType type() {return ELEMENT_TYPE_FILE_HANDLE;}
+        FILE *fp;
+        bool bRead;
+    };
+
+    typedef instrusive_ptr<FileHandle> FileHandlePtr;
+
     struct ExecutionContext;
     typedef instrusive_ptr<ExecutionContext> ExecutionContextPtr;
 
@@ -202,5 +222,6 @@ namespace fsh
     NonePtr MakeNone();
     BooleanPtr MakeBoolean(bool);
     ObjectPtr MakeObject(ObjectBase *, uint64_t);
+    FileHandlePtr MakeFileHandle();
 }
 

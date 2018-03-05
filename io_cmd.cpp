@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstdio>
 #include <algorithm>
+#include <sstream>
 #include "common.h"
 #include "element.h"
 #include "machine.h"
@@ -9,44 +10,41 @@
 
 namespace fsh
 {
-    ElementPtr MakeIO(Machine& machine, std::vector<ElementPtr>& args)
+    FileHandlePtr OpenFile(Machine& machine, std::vector<ElementPtr>& args)
     {
-        ObjectPtr op = MakeObject(new IOObject(), ioobject_magic);
-        return op;
-    }
-
-    ErrorPtr SetReadHandler(Machine& machine, std::vector<ElementPtr>& args)
-    {
-        int errorCode;
-
-        IOObject *pObject = GetIOObject(machine, args, 0, errorCode);
-        if (pObject == nullptr)
+        StringPtr filename = GetString(machine, args, 0);
+        if (filename.get() == nullptr)
         {
-            return MakeError("Expected IO object", false);
+            throw std::runtime_error("Openfile: arg0 is not a string");
         }
-
-        FunctionDefinitionPtr fd = GetFunctionDefinition(machine, args, 1, errorCode);
-        if (fd.get() == nullptr)
+        StringPtr mode = GetString(machine, args, 1);
+        if (mode.get() == nullptr)
         {
-            ErrorPtr e = MakeError("Expected function", false);
-            return e;
+            throw std::runtime_error("Openfile: arg1 is not a string");
         }
-
-        pObject->readHandler = fd;
-        return MakeError("ok", true);
+        FileHandlePtr fh = MakeFileHandle();
+        if (mode->value == "r" || mode->value == "rw")
+            fh->bRead = true;
+        fh->fp = fopen(filename->value.c_str(), mode->value.c_str());
+        if (fh->fp == nullptr)
+        {
+            std::stringstream strm;
+            strm << "Openfile: cannot open " << filename->value;
+            throw std::runtime_error(strm.str());
+        }
+        return fh;
     }
 
     ErrorPtr ReadFile(Machine& machine, std::vector<ElementPtr>& args)
     {
-        int errorCode;
-        FunctionDefinitionPtr fd = GetFunctionDefinition(machine, args, 0, errorCode);
+        FunctionDefinitionPtr fd = GetFunctionDefinition(machine, args, 0);
         if (fd.get() == nullptr)
         {
             ErrorPtr e = MakeError("Expected function", false);
             return e;
         }
 
-        StringPtr sp = GetString(machine, args, 1, errorCode);
+        StringPtr sp = GetString(machine, args, 1);
         if (sp.get() == nullptr)
             return MakeError("Expected filename", false);
         FILE *fp = fopen(sp->value.c_str(), "r");
@@ -85,6 +83,75 @@ namespace fsh
         }
         fclose(fp);
         return MakeError("success", true);
+    }
+
+    ElementPtr PipelineStage(Machine& machine, ElementPtr stage, ElementPtr data)
+    {
+                    //std::cout << "stage" << std::endl;
+        stage = machine.resolve(stage);
+        switch (stage->type())
+        {
+        case ELEMENT_TYPE_FUNCTION_DEFINITION:
+            {
+                    //std::cout << "stage function" << std::endl;
+                FunctionDefinitionPtr func = stage.cast<FunctionDefinition>();
+
+                machine.push_data(data);
+                return CallFunction(machine, func, 1);
+            }
+            break;
+        case ELEMENT_TYPE_FILE_HANDLE:
+            {
+                    //std::cout << "stage file" << std::endl;
+                FileHandlePtr file = stage.cast<FileHandle>();
+                
+                if (file->bRead)
+                {
+                    char buffer[1024];
+                    if (nullptr == fgets(buffer, sizeof(buffer), file->fp))
+                    {
+                        fclose(file->fp);
+                        return MakeNone();
+                    }
+                    int len = strlen(buffer);
+                    if (buffer[len-1] ==  '\n')
+                        buffer[len-1] = '\0';
+                    //std::cout << buffer << std::endl;
+                    return MakeString(buffer);
+                }
+                else
+                {
+                    throw std::runtime_error("Write not implemented");
+                }
+            }
+            break;
+        default:
+            {
+                std::stringstream strm;
+                strm << "Pipeline: unsupported element: " << stage->type();
+                throw std::runtime_error(strm.str());
+            }
+            break;
+        }
+        return MakeNone();
+    }
+
+    ElementPtr PipeLine(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        size_t idx = 0;
+        ElementPtr data;
+        while (true)
+        {
+
+                    //std::cout << "pipeline" << std::endl;
+            data = PipelineStage(machine, args[idx], data);
+            if (data->IsNone())
+                return data;
+            ++idx;
+            if (idx == args.size())
+                idx = 0;
+        }
+        return MakeNone();
     }
 }
 

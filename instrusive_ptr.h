@@ -120,9 +120,9 @@ namespace fsh
 
         void reset(pointer p)
         {
+            inc_ref(p);
             dec_ref(object);
             object = p;
-            inc_ref(object);
         }
 
         pointer get()

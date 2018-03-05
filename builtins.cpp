@@ -10,75 +10,59 @@
 namespace fsh
 {
 
-    ElementPtr GetElement(Machine& machine, std::vector<ElementPtr>& args, size_t index, int& errorCode)
+    ElementPtr GetElement(Machine& machine, std::vector<ElementPtr>& args, size_t index)
     {
         if (args.size() <= index)
         {
-            errorCode = GET_NOT_ENOUGH_ARGUMENTS;
             return ElementPtr();
         }
         ElementPtr ep = args[index];
-        if (ep->type() == ELEMENT_TYPE_IDENTIFIER)
-        {
-            IdentifierPtr ip = ep.cast<Identifier>();
-            if (ip->IsVariable())
-            {
-                if (machine.get_variable(ip->value, ep) == false)
-                {
-                    errorCode = GET_VARIABLE_NOT_FOUND;
-                    return ElementPtr();
-                }
-            }
-        }
+        ep = machine.resolve(ep);
         return ep;
     }
 
-    ObjectPtr GetObject(Machine& machine, std::vector<ElementPtr>& args, size_t index, int& errorCode)
+    ObjectPtr GetObject(Machine& machine, std::vector<ElementPtr>& args, size_t index)
     {
-        ElementPtr ep = GetElement(machine, args, index, errorCode);
+        ElementPtr ep = GetElement(machine, args, index);
         if(ep.get() == nullptr)
             return ObjectPtr();
 
         if (ep->type() != ELEMENT_TYPE_OBJECT)
         {
-            errorCode = GET_NOT_EXPECTED_TYPE;
             return ObjectPtr();
         }
         return ep.cast<Object>();
     }
 
-    StringPtr GetString(Machine& machine, std::vector<ElementPtr>& args, size_t index, int& errorCode)
+    StringPtr GetString(Machine& machine, std::vector<ElementPtr>& args, size_t index)
     {
-        ElementPtr ep = GetElement(machine, args, index, errorCode);
+        ElementPtr ep = GetElement(machine, args, index);
         if(ep.get() == nullptr)
             return StringPtr();
 
         if (ep->type() != ELEMENT_TYPE_STRING)
         {
-            errorCode = GET_NOT_EXPECTED_TYPE;
             return StringPtr();
         }
         return ep.cast<String>();
     }
 
-    IOObject * GetIOObject(Machine& machine, std::vector<ElementPtr>& args, size_t index, int& errorCode)
+    IntegerPtr GetInteger(Machine& machine, std::vector<ElementPtr>& args, size_t index)
     {
-        ObjectPtr op = GetObject(machine, args, index, errorCode);
-        if(op.get() ==nullptr)
-            return nullptr;
+        ElementPtr ep = GetElement(machine, args, index);
+        if(ep.get() == nullptr)
+            return IntegerPtr();
 
-        if(op->magic != ioobject_magic)
+        if (ep->type() != ELEMENT_TYPE_INTEGER)
         {
-            errorCode = GET_NOT_EXPECTED_TYPE;
-            return nullptr;
+            return IntegerPtr();
         }
-
-        return (IOObject *)op->pObject;
+        return ep.cast<Integer>();
     }
 
-    FunctionDefinitionPtr GetFunctionDefinition(Machine& machine, std::vector<ElementPtr>& args, size_t index, int& errorCode)
+    FunctionDefinitionPtr GetFunctionDefinition(Machine& machine, std::vector<ElementPtr>& args, size_t index)
     {
-        ElementPtr ep = GetElement(machine, args, index, errorCode);
+        ElementPtr ep = GetElement(machine, args, index);
         if(ep.get() == nullptr)
         {
             return FunctionDefinitionPtr();
@@ -86,7 +70,6 @@ namespace fsh
 
         if (ep->type() != ELEMENT_TYPE_FUNCTION_DEFINITION)
         {
-            errorCode = GET_NOT_EXPECTED_TYPE;
             return FunctionDefinitionPtr();
         }
         return ep.cast<FunctionDefinition>();
@@ -106,6 +89,7 @@ namespace fsh
             }
             std::reverse(arguments.begin(), arguments.end());
             ElementPtr rtn = funcDef->builtInBody(machine, arguments);
+            rtn = machine.resolve(rtn);
             machine.pop_context();
             return rtn;
         }
@@ -135,6 +119,7 @@ namespace fsh
             size_t top = machine.size_data();
             funcDef->functionBody->Execute(machine);
             ElementPtr rtn = machine.peek_data();
+            rtn = machine.resolve(rtn);
             while(machine.size_data() > top)
             {
                 machine.pop_data();
