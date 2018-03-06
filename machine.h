@@ -28,6 +28,7 @@ namespace fsh
         // element it points to
         ElementPtr resolve(ElementPtr);
 
+        void register_unittest(std::function<void (int)>&);
         // Register a builtin function.
         void register_builtin(const std::string& name, 
                 std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)>);
@@ -44,6 +45,7 @@ namespace fsh
         void push_data(ElementPtr);
         void push_context();
         void pop_context();
+        std::function<void (int)> unittest_callback;
     };
 }
 

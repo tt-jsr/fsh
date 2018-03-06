@@ -113,15 +113,17 @@ namespace fsh
                         fclose(file->fp);
                         return MakeNone();
                     }
-                    int len = strlen(buffer);
-                    if (buffer[len-1] ==  '\n')
-                        buffer[len-1] = '\0';
                     //std::cout << buffer << std::endl;
                     return MakeString(buffer);
                 }
                 else
                 {
-                    throw std::runtime_error("Write not implemented");
+                    if (data->IsString())
+                    {
+                        StringPtr sp = data.cast<String>();
+                        fputs(sp->value.c_str(), file->fp);
+                        return data;
+                    }
                 }
             }
             break;

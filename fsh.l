@@ -9,6 +9,10 @@ uint64_t lineno = 1;
 uint64_t column = 0;
 %}
 
+D           [0-9]
+L           [a-zA-Z_]
+E           [Ee][+-]?{D}+
+H           [a-fA-F0-9]
 
 %%
 [ \t]       {++column;}
@@ -43,6 +47,7 @@ If              {column += 2;return IF;}
 While           {column += 5;return WHILE;}
 Try             {column += 5;return TRY;}
 catch           {column += 5;return CATCH;}
+Part            {column += 4;return PART;}
 \"[^\"\n]*\"    {
                     int len = strlen(yytext);
                     std::string s(yytext+1, len-2);
@@ -50,9 +55,9 @@ catch           {column += 5;return CATCH;}
                     column += len;
                     return STRING_LITERAL;
                 }
-[0-9]+\.[0-9]+ { column += strlen(yytext);yylval = new fsh::instruction::Float(strtod(yytext, nullptr)); return FLOAT; }
-[0-9]+         { column += strlen(yytext);yylval = new fsh::instruction::Integer(atoi(yytext)); return INTEGER; }
-[a-zA-Z0-9_]+   { column += strlen(yytext);yylval = new fsh::instruction::Identifier(yytext); return IDENTIFIER; }
+{D}+\.{D}+ { column += strlen(yytext);yylval = new fsh::instruction::Float(strtod(yytext, nullptr)); return FLOAT; }
+{D}+         { column += strlen(yytext);yylval = new fsh::instruction::Integer(atoi(yytext)); return INTEGER; }
+{L}+   { column += strlen(yytext);yylval = new fsh::instruction::Identifier(yytext); return IDENTIFIER; }
 #.*$ ;
 %%
 

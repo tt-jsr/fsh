@@ -128,5 +128,14 @@ namespace fsh
             return rtn;
         }
     }
+
+    ElementPtr UnitTest(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        IntegerPtr n = GetInteger(machine, args, 0);
+        if (n)
+        {
+            machine.unittest_callback(n->value);
+        }
+    }
 }
 

@@ -5,7 +5,7 @@ LDFLAGS=-g
 LIBS = -lstdc++ -lfl
 DEPS=common.h element.h execution_context.h machine.h instructions.h builtins.h fsh.y fsh.l
 
-SRC	= main.cpp execution_context.cpp element.cpp machine.cpp instructions.cpp fsh.tab.cpp lex.yy.cpp print_cmd.cpp err_cmd.cpp io_cmd.cpp builtins.cpp
+SRC	= main.cpp execution_context.cpp element.cpp machine.cpp instructions.cpp fsh.tab.cpp lex.yy.cpp print_cmd.cpp err_cmd.cpp io_cmd.cpp builtins.cpp string_cmd.cpp list_cmd.cpp
 
 fsh.tab.o : fsh.y
 	bison -d fsh.y

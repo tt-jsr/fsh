@@ -15,7 +15,7 @@ extern Machine machine;
 int main(int argc, char *argv[])
 {
 	// open a file handle to a particular file:
-	FILE *myfile = fopen("io.fsh", "r");
+	FILE *myfile = fopen("junk.fsh", "r");
 	// make sure it's valid:
 	if (!myfile) {
         std::cout << "Cannot open io.fsh" << std::endl;
@@ -31,6 +31,12 @@ int main(int argc, char *argv[])
     machine.register_builtin("Throw", fsh::Throw);
     machine.register_builtin("OpenFile", fsh::OpenFile);
     machine.register_builtin("PipeLine", fsh::PipeLine);
+    machine.register_builtin("UnitTest", fsh::UnitTest);
+    machine.register_builtin("Trim", fsh::Trim);
+    machine.register_builtin("TrimLeft", fsh::TrimLeft);
+    machine.register_builtin("TrimRight", fsh::TrimRight);
+    machine.register_builtin("Split", fsh::Split);
+    machine.register_builtin("Part", fsh::Part);
 	// parse through the input until there is no more:
 	do {
 		yyparse();

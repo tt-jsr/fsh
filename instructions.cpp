@@ -560,6 +560,7 @@ namespace fsh
         }
 
         /**************************************************/
+        /*
         void ElementWrapper::Execute(Machine& machine)
         {
             machine.push_data(element);
@@ -576,6 +577,7 @@ namespace fsh
             strm << "ElementWrapper";
             return strm.str();
         }
+        */
 
         /**************************************************/
         void ExpressionList::Execute(Machine& machine)
@@ -585,7 +587,8 @@ namespace fsh
                 fsh::ListPtr lp = fsh::MakeList(HEAD_TYPE_LIST);
                 for (auto& in : expressions)
                 {
-                    lp->items.push_back(in);
+                    in->Execute(machine);
+                    lp->items.push_back(machine.pop_data());
                 }
                 machine.push_data(lp);
             }

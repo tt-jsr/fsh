@@ -8,11 +8,10 @@ stageTwo = &[line2:
     line2;
 ];
 
-
-
 Try[
     file = OpenFile["common.h", "r"];
-    PipeLine[file, stageOne, stageTwo];
+    fileOut = OpenFile["junk", "w"];
+    PipeLine[file, stageOne, fileOut, stageTwo];
 catch
     Print [_exception];
 ];

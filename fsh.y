@@ -63,6 +63,7 @@ void dump(void *p)
 %token NONE TRUE FALSE
 %token IF WHILE THEN ELSE
 %token TRY CATCH
+%token PART
 %token ';'
 %left ','
 %left '='
@@ -126,6 +127,7 @@ expression
     | selection_expression      {$$ = $1;}
     | iteration_expression      {$$ = $1;}
     | exception_expression      {$$ = $1;}
+    | part_expression           {$$ = $1;}
     ;
 
 relational_expression
@@ -214,6 +216,53 @@ math_expression
             pFloat->value = -pFloat->value;
         }
         $$ = p; 
+    }
+    ;
+
+part_expression
+    : PART '[' expression ',' expression ':' expression ']' {
+        call_t *pCall = new call_t();
+        pCall->name = "Part";
+        el_t *el = new fsh::instruction::ExpressionList();
+        el->expressions.push_back((inst_t *)$3);
+        el->expressions.push_back((inst_t *)$5);
+        el->expressions.push_back(new str_t(":"));
+        el->expressions.push_back((inst_t *)$7);
+        pCall->functionArguments = el;
+        //std::cout << "func call " << id->name << std::endl;
+        $$ = pCall;
+    }
+    | PART '[' expression ',' expression ':' ']' {
+        call_t *pCall = new call_t();
+        pCall->name = "Part";
+        el_t *el = new fsh::instruction::ExpressionList();
+        el->expressions.push_back((inst_t *)$3);
+        el->expressions.push_back((inst_t *)$5);
+        el->expressions.push_back(new str_t(":"));
+        pCall->functionArguments = el;
+        //std::cout << "func call " << id->name << std::endl;
+        $$ = pCall;
+    }
+    | PART '[' expression ',' expression ']' {
+        call_t *pCall = new call_t();
+        pCall->name = "Part";
+        el_t *el = new fsh::instruction::ExpressionList();
+        el->expressions.push_back((inst_t *)$3);
+        el->expressions.push_back((inst_t *)$5);
+        pCall->functionArguments = el;
+        //std::cout << "func call " << id->name << std::endl;
+        $$ = pCall;
+    }
+    | PART '[' expression ',' ':' expression ']' {
+        call_t *pCall = new call_t();
+        pCall->name = "Part";
+        el_t *el = new fsh::instruction::ExpressionList();
+        el->expressions.push_back((inst_t *)$3);
+        el->expressions.push_back(new str_t(":"));
+        el->expressions.push_back((inst_t *)$6);
+        pCall->functionArguments = el;
+        //std::cout << "func call " << id->name << std::endl;
+        $$ = pCall;
     }
     ;
 

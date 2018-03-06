@@ -154,4 +154,9 @@ namespace fsh
         // This crashes for some reason
         //executionContext = executionContext->parent;
     }
+
+    void Machine::register_unittest(std::function<void (int)>& f)
+    {
+        unittest_callback = f;
+    }
 }

@@ -168,6 +168,7 @@ namespace fsh
 
         typedef fsh::instrusive_ptr<Float> FloatPtr;
 
+        /*
         class ElementWrapper : public Instruction
         {
         public:
@@ -183,6 +184,7 @@ namespace fsh
         };
 
         typedef fsh::instrusive_ptr<ElementWrapper> ElementWrapperPtr;
+        */
 
         class ExpressionList : public Instruction
         {

@@ -28,5 +28,14 @@ Print [lst];
 Print [r];
 Print[ans];
 
+str = "This is a string";
+parts = Split[str, " "];
+Print[parts];
+
+str2 = "   word   ";
+Print[":", Trim[str2], ":"];
+Print[":", TrimRight[str2], ":"];
+Print[":", TrimLeft[str2], ":"];
+
 
 

@@ -61,12 +61,10 @@ namespace fsh
         case ELEMENT_TYPE_LIST:
             {
                 ListPtr lp = e.cast<List>();
-                for (auto & in : lp->items)
+                for (auto & item : lp->items)
                 {
-                    in->Execute(machine);
-                    ElementPtr e = machine.pop_data();
-                    Print(machine, e);
-                    std::cout << " ";
+                    Print(machine, item);
+                    std::cout << ",";
                 }
             }
             break;

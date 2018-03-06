@@ -10,9 +10,8 @@ namespace fsh
     ListPtr MakeList(HeadType ht)
     {
         ListPtr r(new List());
-        fsh::instruction::ElementWrapperPtr h(new fsh::instruction::ElementWrapper);
-        h->element = new Head(ht);
-        r->items.push_back(h);
+        HeadPtr hp(new Head(ht));
+        r->items.push_back(hp);
         return r;
     }
 

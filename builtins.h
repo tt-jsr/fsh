@@ -30,9 +30,18 @@ namespace fsh
     //      func is defined as &[line : body...];
     ErrorPtr ReadFile(Machine&, std::vector<ElementPtr>&);
 
+    /*********** String ************/
+    ElementPtr Trim(Machine&, std::vector<ElementPtr>&);
+    ElementPtr TrimLeft(Machine&, std::vector<ElementPtr>&);
+    ElementPtr TrimRight(Machine&, std::vector<ElementPtr>&);
+    // Split["", chars];
+    ElementPtr Split(Machine&, std::vector<ElementPtr>&);
+
     /***********************************************
      * Helpers for built in functions
      */
+
+    ElementPtr UnitTest(Machine&, std::vector<ElementPtr>&);
 
     ElementPtr GetElement(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     ObjectPtr GetObject(Machine& machine, std::vector<ElementPtr>& args, size_t index);

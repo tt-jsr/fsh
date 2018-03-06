@@ -30,6 +30,7 @@ namespace fsh
         ,ELEMENT_TYPE_BOOLEAN
         ,ELEMENT_TYPE_OBJECT
         ,ELEMENT_TYPE_FILE_HANDLE
+        ,ELEMENT_TYPE_PART
     };
 
     struct Element : public instrusive_base
@@ -47,6 +48,7 @@ namespace fsh
         bool IsBoolean() {return type() == ELEMENT_TYPE_BOOLEAN;}
         bool IsObject() {return type() ==ELEMENT_TYPE_OBJECT;}
         bool IsFileHandle() {return type() == ELEMENT_TYPE_FILE_HANDLE;}
+        bool IsPart() {return type() == ELEMENT_TYPE_PART;}
     };
 
     typedef instrusive_ptr<Element> ElementPtr;
@@ -155,7 +157,7 @@ namespace fsh
         void Add(int64_t n);
         size_t size() {return items.size();}
         virtual ElementType type() {return ELEMENT_TYPE_LIST;}
-        std::vector<instruction::InstructionPtr> items;
+        std::vector<ElementPtr> items;
     };
 
     typedef instrusive_ptr<List> ListPtr;
@@ -196,18 +198,27 @@ namespace fsh
         :fp(nullptr)
         ,bRead(false)
         {}
-        //~FileHandle()
-        //{
-            //if (fp)
-                //fclose(fp);
-            //fp = nullptr;
-        //}
+        ~FileHandle()
+        {
+            if (fp)
+                fclose(fp);
+            fp = nullptr;
+        }
         virtual ElementType type() {return ELEMENT_TYPE_FILE_HANDLE;}
         FILE *fp;
         bool bRead;
     };
 
     typedef instrusive_ptr<FileHandle> FileHandlePtr;
+
+    struct Part : public Element
+    {
+        virtual ElementType type() {return ELEMENT_TYPE_PART;}
+        int64_t start;
+        int64_t end;
+    };
+
+    typedef instrusive_ptr<Part> PartPtr;
 
     struct ExecutionContext;
     typedef instrusive_ptr<ExecutionContext> ExecutionContextPtr;
