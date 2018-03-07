@@ -36,6 +36,9 @@ namespace fsh
     ElementPtr TrimRight(Machine&, std::vector<ElementPtr>&);
     // Split["", chars];
     ElementPtr Split(Machine&, std::vector<ElementPtr>&);
+    ElementPtr Strcmp(Machine&, std::vector<ElementPtr>&);
+    ElementPtr RegMatch(Machine&, std::vector<ElementPtr>&);
+    ElementPtr RegSearch(Machine&, std::vector<ElementPtr>&);
 
     /***********************************************
      * Helpers for built in functions
@@ -48,5 +51,5 @@ namespace fsh
     StringPtr GetString(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     IntegerPtr GetInteger(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     FunctionDefinitionPtr GetFunctionDefinition(Machine& machine, std::vector<ElementPtr>& args, size_t index);
-    ElementPtr CallFunction(Machine& machine, FunctionDefinitionPtr funcDef, size_t nItemsOnStack);
+    ElementPtr CallFunctionImpl(Machine& machine, FunctionDefinitionPtr funcDef, size_t nItemsOnStack);
 }

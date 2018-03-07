@@ -96,5 +96,45 @@ namespace fsh
         }
         return lst;
     }
+
+    ElementPtr Strcmp(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        StringPtr s1 = GetString(machine, args, 0);
+        if (!s1)
+            throw std::runtime_error("Strcmp: invalid argument");
+        StringPtr s2 = GetString(machine, args, 1);
+        if (!s2)
+            throw std::runtime_error("Strcmp: invalid argument");
+        bool nocase(false);
+        machine.get_variable("__nocase", nocase);
+        int n;
+        if(nocase)
+            n = strcasecmp(s1->value.c_str(), s2->value.c_str());
+        else
+            n = strcmp(s1->value.c_str(), s2->value.c_str());
+        return MakeInteger(n);
+    }
+
+    ElementPtr RegSearch(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        StringPtr str = GetString(machine, args, 0);
+        if (!str)
+            throw std::runtime_error("Strcmp: invalid argument");
+        StringPtr regex = GetString(machine, args, 1);
+        if (!regex)
+            throw std::runtime_error("Strcmp: invalid argument");
+        return MakeBoolean(false);
+    }
+
+    ElementPtr RegMatch(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        StringPtr str = GetString(machine, args, 0);
+        if (!str)
+            throw std::runtime_error("Strcmp: invalid argument");
+        StringPtr regex = GetString(machine, args, 1);
+        if (!regex)
+            throw std::runtime_error("Strcmp: invalid argument");
+        return MakeBoolean(false);
+    }
 }
 

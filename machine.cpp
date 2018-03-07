@@ -119,13 +119,51 @@ namespace fsh
     bool Machine::get_variable(const std::string& name, ElementPtr& out)
     {
         std::string varname;
-        if (name[0] == '$')
-            varname = &name[1];
-        else
-            varname = name;
-        out = executionContext->GetVariable(varname);
+        out = executionContext->GetVariable(name);
         if (out)
             return true;
+        return false;
+    }
+
+    bool Machine::get_variable(const std::string& name, bool& out)
+    {
+        ElementPtr e;
+        if (get_variable(name, e))
+        {
+            if (e->IsBoolean())
+            {
+                out = e.cast<Boolean>()->value;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool Machine::get_variable(const std::string& name, std::string& out)
+    {
+        ElementPtr e;
+        if (get_variable(name, e))
+        {
+            if (e->IsString())
+            {
+                out = e.cast<String>()->value;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool Machine::get_variable(const std::string& name, int64_t& out)
+    {
+        ElementPtr e;
+        if (get_variable(name, e))
+        {
+            if (e->IsInteger())
+            {
+                out = e.cast<Integer>()->value;
+                return true;
+            }
+        }
         return false;
     }
 

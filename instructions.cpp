@@ -237,12 +237,14 @@ namespace fsh
             }
 
             fsh::FunctionDefinitionPtr funcDef = e.cast<FunctionDefinition>();
+            machine.push_context();
             size_t top = machine.size_data();
             if (functionArguments)
                 functionArguments->Execute(machine);
 
             size_t nItemsOnStack = machine.size_data() - top;
-            ElementPtr rtn = fsh::CallFunction(machine, funcDef, nItemsOnStack);
+            ElementPtr rtn = fsh::CallFunctionImpl(machine, funcDef, nItemsOnStack);
+            machine.pop_context();
             machine.push_data(rtn);
         }
 
@@ -415,22 +417,8 @@ namespace fsh
         /*****************************************************/
         void Identifier::Execute(Machine& machine)
         {
-            if (name[0] == '$')
-            {
-                ElementPtr e;
-                if (machine.get_variable(&name[1], e) == false)
-                {
-                    std::stringstream strm;
-                    strm << "Variable \"" << name << "\" not found";
-                    throw std::runtime_error(strm.str());
-                }
-                machine.push_data(e);
-            }
-            else
-            {
-                ElementPtr e = fsh::MakeIdentifier(name);
-                machine.push_data(e);
-            }
+            ElementPtr e = fsh::MakeIdentifier(name);
+            machine.push_data(e);
         }
 
         std::string Identifier::type_str()
@@ -588,7 +576,8 @@ namespace fsh
                 for (auto& in : expressions)
                 {
                     in->Execute(machine);
-                    lp->items.push_back(machine.pop_data());
+                    ElementPtr e = machine.pop_data();
+                    lp->items.push_back(machine.resolve(e));
                 }
                 machine.push_data(lp);
             }
@@ -597,6 +586,7 @@ namespace fsh
                 for (auto &in : expressions)
                 {
                     in->Execute(machine);
+                    // Do I need to resolve?
                 }
             }
         }

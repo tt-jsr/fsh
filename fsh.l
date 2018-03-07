@@ -57,7 +57,7 @@ Part            {column += 4;return PART;}
                 }
 {D}+\.{D}+ { column += strlen(yytext);yylval = new fsh::instruction::Float(strtod(yytext, nullptr)); return FLOAT; }
 {D}+         { column += strlen(yytext);yylval = new fsh::instruction::Integer(atoi(yytext)); return INTEGER; }
-{L}+   { column += strlen(yytext);yylval = new fsh::instruction::Identifier(yytext); return IDENTIFIER; }
+[a-zA-Z_][a-zA-Z0-9_]*   { column += strlen(yytext);yylval = new fsh::instruction::Identifier(yytext); return IDENTIFIER; }
 #.*$ ;
 %%
 

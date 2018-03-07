@@ -67,7 +67,9 @@ namespace fsh
             machine.push_data(e);
             try
             {
-                ElementPtr r = CallFunction(machine, fd, 1);
+                machine.push_context();
+                ElementPtr r = CallFunctionImpl(machine, fd, 1);
+                machine.pop_context();
                 bool b = machine.ConvertToBool(r);
                 if (b == false)
                 {
@@ -97,7 +99,10 @@ namespace fsh
                 FunctionDefinitionPtr func = stage.cast<FunctionDefinition>();
 
                 machine.push_data(data);
-                return CallFunction(machine, func, 1);
+                machine.push_context();
+                ElementPtr rtn =  CallFunctionImpl(machine, func, 1);
+                machine.pop_context();
+                return rtn;
             }
             break;
         case ELEMENT_TYPE_FILE_HANDLE:

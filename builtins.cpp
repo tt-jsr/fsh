@@ -9,7 +9,6 @@
 
 namespace fsh
 {
-
     ElementPtr GetElement(Machine& machine, std::vector<ElementPtr>& args, size_t index)
     {
         if (args.size() <= index)
@@ -75,11 +74,12 @@ namespace fsh
         return ep.cast<FunctionDefinition>();
     }
 
-    ElementPtr CallFunction(Machine& machine, FunctionDefinitionPtr funcDef, size_t nItemsOnStack)
+    // You must push_context() before calling this function, and pop_context
+    // after it returns!
+    ElementPtr CallFunctionImpl(Machine& machine, FunctionDefinitionPtr funcDef, size_t nItemsOnStack)
     {
         if (funcDef->isBuiltIn)
         {
-            machine.push_context();
             // now execute the function
             std::vector<ElementPtr> arguments;
             while(nItemsOnStack)
@@ -90,7 +90,6 @@ namespace fsh
             std::reverse(arguments.begin(), arguments.end());
             ElementPtr rtn = funcDef->builtInBody(machine, arguments);
             rtn = machine.resolve(rtn);
-            machine.pop_context();
             return rtn;
         }
         else
@@ -103,8 +102,6 @@ namespace fsh
                 --nItemsOnStack;
             }
             std::reverse(dataArgs.begin(), dataArgs.end());
-            // Create a new context, create a variable for each named argument
-            machine.push_context();
             size_t dataArgIdx = 0;
             for (; dataArgIdx < dataArgs.size() && dataArgIdx < funcDef->arg_names.size(); ++dataArgIdx)
             {
@@ -124,7 +121,6 @@ namespace fsh
             {
                 machine.pop_data();
             }
-            machine.pop_context();
             return rtn;
         }
     }
