@@ -9,8 +9,16 @@ using namespace fsh;
 extern "C" int yylex();
 extern "C" int yyparse();
 extern "C" FILE *yyin;
+extern uint64_t lineno;
+extern uint64_t column;
 
-extern Machine machine;
+Machine machine;
+
+void yyerror(const char *s) {
+    std::cout << "EEK, parse error!  Message: " << s << " line: " << lineno << ":" << column << std::endl;
+	// might as well halt now:
+	exit(-1);
+}
 
 int main(int argc, char *argv[])
 {
@@ -24,22 +32,8 @@ int main(int argc, char *argv[])
 	// set flex to read from it instead of defaulting to STDIN:
 	yyin = myfile;
 
-    machine.register_builtin("Print", fsh::Print);
-    machine.register_builtin("IsError", fsh::IsError);
-    machine.register_builtin("ErrorString", fsh::ErrorString);
-    machine.register_builtin("ReadFile", fsh::ReadFile);
-    machine.register_builtin("Throw", fsh::Throw);
-    machine.register_builtin("OpenFile", fsh::OpenFile);
-    machine.register_builtin("PipeLine", fsh::PipeLine);
-    machine.register_builtin("UnitTest", fsh::UnitTest);
-    machine.register_builtin("Trim", fsh::Trim);
-    machine.register_builtin("TrimLeft", fsh::TrimLeft);
-    machine.register_builtin("TrimRight", fsh::TrimRight);
-    machine.register_builtin("Split", fsh::Split);
-    machine.register_builtin("Part", fsh::Part);
-    machine.register_builtin("Strcmp", fsh::Strcmp);
-    machine.register_builtin("RegMatch", fsh::RegMatch);
-    machine.register_builtin("RegSearch", fsh::RegSearch);
+    RegisterBuiltIns(machine);
+
 	// parse through the input until there is no more:
 	do {
 		yyparse();

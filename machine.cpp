@@ -167,6 +167,20 @@ namespace fsh
         return false;
     }
 
+    bool Machine::get_variable(const std::string& name, double& out)
+    {
+        ElementPtr e;
+        if (get_variable(name, e))
+        {
+            if (e->IsFloat())
+            {
+                out = e.cast<Float>()->value;
+                return true;
+            }
+        }
+        return false;
+    }
+
     void Machine::register_builtin(const std::string& name, 
             std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> func)
     {

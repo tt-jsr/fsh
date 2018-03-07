@@ -37,6 +37,7 @@ namespace fsh
         bool get_variable(const std::string& name, bool& out);
         bool get_variable(const std::string& name, std::string& out);
         bool get_variable(const std::string& name, int64_t& out);
+        bool get_variable(const std::string& name, double& out);
         bool ConvertToBool(ElementPtr);
     private:
         static thread_local std::vector<ElementPtr> datastack;

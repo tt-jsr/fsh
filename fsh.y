@@ -16,7 +16,7 @@ extern uint64_t lineno;
 extern uint64_t column;
 void Execute(fsh::instruction::Instruction *pInst);
  
-void yyerror(const char *s);
+extern void yyerror(const char *s);
 
 typedef fsh::instruction::Instruction inst_t;
 typedef fsh::instruction::BinaryOperator bop_t;
@@ -432,7 +432,7 @@ statement_list
 /* End of grammar. */
 %%
 
-fsh::Machine machine;
+extern fsh::Machine machine;
 
 void Execute(fsh::instruction::Instruction *pInst)
 {
@@ -504,9 +504,4 @@ void Execute(fsh::instruction::Instruction *pInst)
     }
 }
 
-void yyerror(const char *s) {
-	cout << "EEK, parse error!  Message: " << s << " line: " << lineno << ":" << column << endl;
-	// might as well halt now:
-	exit(-1);
-}
 

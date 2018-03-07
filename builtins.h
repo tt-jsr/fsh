@@ -5,6 +5,8 @@ namespace fsh
 {
     class Machine;
 
+    void RegisterBuiltIns(Machine& machine);
+
     //Print[arg1, srg2, ...];
     ElementPtr Print(Machine&, std::vector<ElementPtr>&);
 

@@ -133,5 +133,30 @@ namespace fsh
             machine.unittest_callback(n->value);
         }
     }
+
+    void RegisterBuiltIns(Machine& machine)
+    {
+        // IO
+        machine.register_builtin("Print", fsh::Print);
+        machine.register_builtin("ReadFile", fsh::ReadFile);
+        machine.register_builtin("OpenFile", fsh::OpenFile);
+        machine.register_builtin("PipeLine", fsh::PipeLine);
+
+        // String
+        machine.register_builtin("Trim", fsh::Trim);
+        machine.register_builtin("TrimLeft", fsh::TrimLeft);
+        machine.register_builtin("TrimRight", fsh::TrimRight);
+        machine.register_builtin("Split", fsh::Split);
+        machine.register_builtin("Part", fsh::Part);
+        machine.register_builtin("Strcmp", fsh::Strcmp);
+        machine.register_builtin("RegMatch", fsh::RegMatch);
+        machine.register_builtin("RegSearch", fsh::RegSearch);
+
+        // Misc
+        machine.register_builtin("IsError", fsh::IsError);
+        machine.register_builtin("ErrorString", fsh::ErrorString);
+        machine.register_builtin("Throw", fsh::Throw);
+        machine.register_builtin("UnitTest", fsh::UnitTest);
+    }
 }
 
