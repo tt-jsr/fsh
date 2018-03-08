@@ -48,6 +48,8 @@ While           {column += 5;return WHILE;}
 Try             {column += 5;return TRY;}
 catch           {column += 5;return CATCH;}
 Part            {column += 4;return PART;}
+and             {column += 3;return AND;}
+or              {column += 2;return OR;}
 \"[^\"\n]*\"    {
                     int len = strlen(yytext);
                     std::string s(yytext+1, len-2);

@@ -79,6 +79,7 @@ namespace fsh
             }
             catch (std::exception)
             {
+                machine.pop_context();
                 fclose(fp);
                 return MakeError("Exception caught", false);
             }
@@ -100,9 +101,17 @@ namespace fsh
 
                 machine.push_data(data);
                 machine.push_context();
-                ElementPtr rtn =  CallFunctionImpl(machine, func, 1);
-                machine.pop_context();
-                return rtn;
+                try
+                {
+                    ElementPtr rtn =  CallFunctionImpl(machine, func, 1);
+                    machine.pop_context();
+                    return rtn;
+                }
+                catch (std::exception e)
+                {
+                    machine.pop_context();
+                    throw;
+                }
             }
             break;
         case ELEMENT_TYPE_FILE_HANDLE:

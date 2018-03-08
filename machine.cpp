@@ -38,6 +38,12 @@ namespace fsh
         }
     }
 
+    void Machine::reset()
+    {
+        datastack.clear();
+        executionContext = MakeExecutionContext();
+    }
+
     bool Machine::ConvertToBool(ElementPtr e)
     {
         switch(e->type())

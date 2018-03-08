@@ -67,6 +67,7 @@ void dump(void *p)
 %token ';'
 %left ','
 %left '='
+%left AND OR
 %left GT LT GTE LTE
 %left EQ NEQ
 %left '+' '-'
@@ -169,6 +170,20 @@ relational_expression
     |expression NEQ expression {
         bop_t *bop = new bop_t();
         bop->op = fsh::TOKEN_NEQ;
+        bop->lhs = (inst_t *)$1;
+        bop->rhs = (inst_t *)$3;
+        $$ = bop;
+    }
+    |expression AND expression {
+        bop_t *bop = new bop_t();
+        bop->op = fsh::TOKEN_AND;
+        bop->lhs = (inst_t *)$1;
+        bop->rhs = (inst_t *)$3;
+        $$ = bop;
+    }
+    |expression OR expression {
+        bop_t *bop = new bop_t();
+        bop->op = fsh::TOKEN_OR;
         bop->lhs = (inst_t *)$1;
         bop->rhs = (inst_t *)$3;
         $$ = bop;

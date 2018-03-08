@@ -43,6 +43,7 @@ namespace fsh
         static thread_local std::vector<ElementPtr> datastack;
         ExecutionContextPtr executionContext;
     private_impl:
+        void reset();
         ElementPtr pop_data();
         ElementPtr peek_data();
         size_t size_data();

@@ -11,12 +11,19 @@ class Test1 : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(Test1);
         CPPUNIT_TEST(testBasic);
+        CPPUNIT_TEST(testControl);
+        CPPUNIT_TEST(testFunctions);
     CPPUNIT_TEST_SUITE_END();
 public:
     void setUp();
     void tearDown();
+    void ValidateBool(const char *varname, bool expected);
     bool StartParser(const char *);
+    void UnitTestControl(int);
+    void UnitTestFunctions(int);
 
     void testBasic();
+    void testControl();
+    void testFunctions();
 };
 

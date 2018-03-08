@@ -100,6 +100,58 @@ namespace fsh
 
         void BinaryOperator::Execute(Machine& machine)
         {
+            if (op == TOKEN_AND)
+            {
+                lhs->Execute(machine);
+                ElementPtr ldata = machine.pop_data();
+                ldata = machine.resolve(ldata);
+                bool b = machine.ConvertToBool(ldata);
+                if (b == false)
+                {
+                    ElementPtr e = MakeBoolean(false);
+                    machine.push_data(e);
+                    return;
+                }
+                rhs->Execute(machine);
+                ElementPtr rdata = machine.pop_data();
+                rdata = machine.resolve(rdata);
+                b = machine.ConvertToBool(rdata);
+                if (b == false)
+                {
+                    ElementPtr e = MakeBoolean(false);
+                    machine.push_data(e);
+                    return;
+                }
+                ElementPtr e = MakeBoolean(true);
+                machine.push_data(e);
+                return;
+            }
+            if (op == TOKEN_OR)
+            {
+                lhs->Execute(machine);
+                ElementPtr ldata = machine.pop_data();
+                ldata = machine.resolve(ldata);
+                bool b = machine.ConvertToBool(ldata);
+                if (b == true)
+                {
+                    ElementPtr e = MakeBoolean(true);
+                    machine.push_data(e);
+                    return;
+                }
+                rhs->Execute(machine);
+                ElementPtr rdata = machine.pop_data();
+                rdata = machine.resolve(rdata);
+                b = machine.ConvertToBool(rdata);
+                if (b == false)
+                {
+                    ElementPtr e = MakeBoolean(false);
+                    machine.push_data(e);
+                    return;
+                }
+                ElementPtr e = MakeBoolean(true);
+                machine.push_data(e);
+                return;
+            }
             lhs->Execute(machine);
             rhs->Execute(machine);
             if (op == TOKEN_COMMA)
@@ -243,9 +295,17 @@ namespace fsh
                 functionArguments->Execute(machine);
 
             size_t nItemsOnStack = machine.size_data() - top;
-            ElementPtr rtn = fsh::CallFunctionImpl(machine, funcDef, nItemsOnStack);
-            machine.pop_context();
-            machine.push_data(rtn);
+            try
+            {
+                ElementPtr rtn = fsh::CallFunctionImpl(machine, funcDef, nItemsOnStack);
+                machine.pop_context();
+                machine.push_data(rtn);
+            }
+            catch (std::exception& e)
+            {
+                machine.pop_context();
+                throw;
+            }
         }
 
         void FunctionCall::dump(DumpContext& ctx)

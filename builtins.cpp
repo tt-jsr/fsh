@@ -132,6 +132,7 @@ namespace fsh
         {
             machine.unittest_callback(n->value);
         }
+        return MakeNone();
     }
 
     void RegisterBuiltIns(Machine& machine)
