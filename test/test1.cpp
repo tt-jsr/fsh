@@ -206,6 +206,10 @@ void Test1::UnitTestFunctions(int n)
         CPPUNIT_ASSERT(svalue == "test throw");
         CPPUNIT_ASSERT(machine.get_variable("var",  e) == false);
         break;
+    case 5:
+        CPPUNIT_ASSERT(machine.get_variable("var",  svalue));
+        CPPUNIT_ASSERT(svalue == "lambda");
+        break;
     }
 }
 

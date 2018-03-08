@@ -28,3 +28,16 @@ Try[
 catch
     UnitTest[4]; # catch the string and make sure we can't see 'var'
 ];
+UnitTest[4]; # catch the string and make sure we can't see 'var'
+
+# Test lambda
+foo = &[func:
+    func["lambda"];
+];
+
+var = foo[&[msg:
+    msg;
+    ]
+];
+
+UnitTest[5];
