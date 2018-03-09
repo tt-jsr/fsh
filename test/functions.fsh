@@ -41,3 +41,14 @@ var = foo[&[msg:
 ];
 
 UnitTest[5];
+
+foo = &[arg1, arg2:
+    arg1 - arg2;
+];
+
+fooBind = &[arg:
+    v = foo[10, arg];
+];
+
+ans = fooBind[2];
+UnitTest[6];

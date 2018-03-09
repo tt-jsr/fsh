@@ -152,17 +152,19 @@ namespace fsh
                 machine.push_data(e);
                 return;
             }
-            lhs->Execute(machine);
-            rhs->Execute(machine);
             if (op == TOKEN_COMMA)
             {
+                lhs->Execute(machine);
+                rhs->Execute(machine);
                 return;
             }
             if (op == TOKEN_ASSIGNMENT)
             {
+                rhs->Execute(machine);
                 ElementPtr rdata = machine.pop_data();
                 rdata = machine.resolve(rdata);
 
+                lhs->Execute(machine);
                 ElementPtr ldata = machine.pop_data();
 
                 if (ldata->type() != fsh::ELEMENT_TYPE_IDENTIFIER)
@@ -173,14 +175,18 @@ namespace fsh
                 }
                 machine.store_variable(ldata.cast<fsh::Identifier>()->value, rdata);
                 machine.push_data(rdata);
+                return;
             }
             else
             {
+                lhs->Execute(machine);
+                ElementPtr ldata = machine.pop_data();
+                ldata = machine.resolve(ldata);
+
+                rhs->Execute(machine);
                 ElementPtr rdata = machine.pop_data();
                 rdata = machine.resolve(rdata);
 
-                ElementPtr ldata = machine.pop_data();
-                ldata = machine.resolve(ldata);
 
                 if (rdata->IsFloat() && ldata->IsInteger())
                 {
@@ -188,18 +194,22 @@ namespace fsh
                     fsh::FloatPtr r = rdata.cast<fsh::Float>();
                     ExecuteFloat(machine, op, l, r);
                 }
-                if (rdata->IsInteger() && ldata->IsFloat())
+                else if (rdata->IsInteger() && ldata->IsFloat())
                 {
                     fsh::FloatPtr r = MakeFloat((double)rdata.cast<fsh::Integer>()->value);
                     ExecuteFloat(machine, op, ldata.cast<fsh::Float>(), r);
                 }
-                if (rdata->IsFloat() && ldata->IsFloat())
+                else if (rdata->IsFloat() && ldata->IsFloat())
                 {
                     ExecuteFloat(machine, op, ldata.cast<fsh::Float>(), rdata.cast<fsh::Float>());
                 }
-                if (rdata->IsInteger() && ldata->IsInteger())
+                else if (rdata->IsInteger() && ldata->IsInteger())
                 {
                     ExecuteInteger(machine, op, ldata.cast<fsh::Integer>(), rdata.cast<fsh::Integer>());
+                }
+                else
+                {
+                    throw std::runtime_error("Binary Operator: Invalid type");
                 }
             }
         }
@@ -298,6 +308,7 @@ namespace fsh
             try
             {
                 ElementPtr rtn = fsh::CallFunctionImpl(machine, funcDef, nItemsOnStack);
+                assert(!rtn->IsIdentifier());
                 machine.pop_context();
                 machine.push_data(rtn);
             }
@@ -646,7 +657,8 @@ namespace fsh
                 for (auto &in : expressions)
                 {
                     in->Execute(machine);
-                    // Do I need to resolve?
+                    ElementPtr e = machine.pop_data();
+                    machine.push_data(machine.resolve(e));
                 }
             }
         }

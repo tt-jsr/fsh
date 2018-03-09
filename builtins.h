@@ -30,6 +30,7 @@ namespace fsh
 
     // ReadFile[func, "filename"];
     //      func is defined as &[line : body...];
+    //      __stripnl=True to strip the ending newline
     ErrorPtr ReadFile(Machine&, std::vector<ElementPtr>&);
 
     /*********** String ************/

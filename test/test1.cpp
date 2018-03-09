@@ -150,6 +150,12 @@ void Test1::testBasic()
 
     CPPUNIT_ASSERT(machine.get_variable("m3",  ivalue));
     CPPUNIT_ASSERT(ivalue == -18);
+
+    CPPUNIT_ASSERT(machine.get_variable("sub1",  ivalue));
+    CPPUNIT_ASSERT(ivalue == 2);
+
+    CPPUNIT_ASSERT(machine.get_variable("sub2",  ivalue));
+    CPPUNIT_ASSERT(ivalue == 7);
 }
 
 void Test1::UnitTestControl(int n)
@@ -185,7 +191,7 @@ void Test1::testControl()
 void Test1::UnitTestFunctions(int n)
 {
     bool bvalue;
-    int64_t nvalue;
+    int64_t ivalue;
     std::string svalue;
     fsh::ElementPtr e;
     switch (n)
@@ -209,6 +215,10 @@ void Test1::UnitTestFunctions(int n)
     case 5:
         CPPUNIT_ASSERT(machine.get_variable("var",  svalue));
         CPPUNIT_ASSERT(svalue == "lambda");
+        break;
+    case 6:
+        CPPUNIT_ASSERT(machine.get_variable("ans",  ivalue));
+        CPPUNIT_ASSERT(ivalue == 8);
         break;
     }
 }

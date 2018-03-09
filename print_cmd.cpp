@@ -42,7 +42,12 @@ namespace fsh
                 IdentifierPtr id = e.cast<Identifier>();
                 ElementPtr e;
                 if (machine.get_variable(id->value, e))
-                    Print(machine, e);
+                {
+                    if (e->IsIdentifier())
+                        std::cout << e.cast<Identifier>()->value;
+                    else
+                        Print(machine, e);
+                }
                 else
                     std::cout << id->value;
             }

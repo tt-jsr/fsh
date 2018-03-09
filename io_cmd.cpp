@@ -37,6 +37,9 @@ namespace fsh
 
     ErrorPtr ReadFile(Machine& machine, std::vector<ElementPtr>& args)
     {
+        bool stripnl;
+        machine.get_variable("__stripnl", stripnl);
+
         FunctionDefinitionPtr fd = GetFunctionDefinition(machine, args, 0);
         if (fd.get() == nullptr)
         {
@@ -60,9 +63,12 @@ namespace fsh
                 fclose(fp);
                 return MakeError("success", true);
             }
-            int len = strlen(buffer);
-            if (buffer[len-1] ==  '\n')
-                buffer[len-1] = '\0';
+            if (stripnl)
+            {
+                int len = strlen(buffer);
+                if (buffer[len-1] ==  '\n')
+                    buffer[len-1] = '\0';
+            }
             ElementPtr e = MakeString(buffer);
             machine.push_data(e);
             try

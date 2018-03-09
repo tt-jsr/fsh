@@ -117,6 +117,7 @@ namespace fsh
             funcDef->functionBody->Execute(machine);
             ElementPtr rtn = machine.peek_data();
             rtn = machine.resolve(rtn);
+            assert(!rtn->IsIdentifier());
             while(machine.size_data() > top)
             {
                 machine.pop_data();

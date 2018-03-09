@@ -105,9 +105,9 @@ namespace fsh
 
     ElementPtr Machine::resolve(ElementPtr e)
     {
-        ElementPtr rtn;
         if (e->IsIdentifier())
         {
+            ElementPtr rtn;
             IdentifierPtr id = e.cast<Identifier>();
             if (get_variable(id->value, rtn))
             {
