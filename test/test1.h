@@ -13,6 +13,7 @@ class Test1 : public CppUnit::TestFixture
         CPPUNIT_TEST(testBasic);
         CPPUNIT_TEST(testControl);
         CPPUNIT_TEST(testFunctions);
+        CPPUNIT_TEST(testList);
     CPPUNIT_TEST_SUITE_END();
 public:
     void setUp();
@@ -21,9 +22,11 @@ public:
     bool StartParser(const char *);
     void UnitTestControl(int);
     void UnitTestFunctions(int);
+    void UnitTestLilst(int);
 
     void testBasic();
     void testControl();
     void testFunctions();
+    void testList();
 };
 

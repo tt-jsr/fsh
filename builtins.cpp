@@ -46,6 +46,19 @@ namespace fsh
         return ep.cast<String>();
     }
 
+    ListPtr GetList(Machine& machine, std::vector<ElementPtr>& args, size_t index)
+    {
+        ElementPtr ep = GetElement(machine, args, index);
+        if(ep.get() == nullptr)
+            return ListPtr();
+
+        if (ep->type() != ELEMENT_TYPE_LIST)
+        {
+            return ListPtr();
+        }
+        return ep.cast<List>();
+    }
+
     IntegerPtr GetInteger(Machine& machine, std::vector<ElementPtr>& args, size_t index)
     {
         ElementPtr ep = GetElement(machine, args, index);
@@ -149,10 +162,14 @@ namespace fsh
         machine.register_builtin("TrimLeft", fsh::TrimLeft);
         machine.register_builtin("TrimRight", fsh::TrimRight);
         machine.register_builtin("Split", fsh::Split);
-        machine.register_builtin("Part", fsh::Part);
         machine.register_builtin("Strcmp", fsh::Strcmp);
         machine.register_builtin("RegMatch", fsh::RegMatch);
         machine.register_builtin("RegSearch", fsh::RegSearch);
+
+        // List
+        machine.register_builtin("Part", fsh::Part);
+        machine.register_builtin("MakeRecord", fsh::MakeRecord);
+        machine.register_builtin("Len", fsh::Len);
 
         // Misc
         machine.register_builtin("IsError", fsh::IsError);

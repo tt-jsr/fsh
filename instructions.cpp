@@ -87,6 +87,7 @@ namespace fsh
                 break;
             }
         }
+
         BinaryOperator::~BinaryOperator()
         {
         }
@@ -265,6 +266,79 @@ namespace fsh
             }
             ctx.inc();
             ctx.strm() << "bop right" << std::endl;
+            ctx.inc();
+            if (rhs)
+            {
+                rhs->dump(ctx);
+            }
+            ctx.dec();
+            ctx.dec();
+        }
+
+        /*****************************************************/
+        DotOperator::~DotOperator()
+        {
+        }
+
+        std::string DotOperator::type_str()
+        {
+            std::stringstream strm;
+            strm << "DOT_OPERERATOR";
+            return strm.str();
+        }
+
+        void DotOperator::Execute(Machine& machine)
+        {
+            lhs->Execute(machine);
+            ElementPtr ldata = machine.pop_data();
+            ldata = machine.resolve(ldata);
+            if (ldata->IsList() == false)
+                throw std::runtime_error("lhs is required to be a list");
+            ListPtr lst = ldata.cast<List>();
+            if (rhs->type() == INSTRUCTION_BINARY_OPERATOR)
+            {
+                BinaryOperatorPtr bop = rhs.cast<BinaryOperator>();
+                if (bop->op != TOKEN_ASSIGNMENT)
+                    throw std::runtime_error("Assignment must be right of dot operator");
+                bop->lhs->Execute(machine);
+                ElementPtr e = machine.pop_data();
+                e = machine.resolve(e);
+                if (!e->IsInteger())
+                    throw std::runtime_error("dot operator requires integer");
+                int64_t idx = e.cast<fsh::Integer>()->value;
+                ++idx;
+                if (idx >= lst->items.size())
+                    throw std::runtime_error("field out of range");
+                bop->rhs->Execute(machine);
+                e = machine.pop_data();
+                e = machine.resolve(e);
+                lst->items[idx] = e;
+                machine.push_data(e);
+                return;
+            }
+            rhs->Execute(machine);
+            ElementPtr rdata = machine.pop_data();
+            rdata = machine.resolve(rdata);
+            if (rdata->IsInteger() == false)
+                throw std::runtime_error("rhs is required to be an integer");
+
+            int64_t idx = rdata.cast<fsh::Integer>()->value;
+            if ((idx+1) >= lst->items.size())
+                throw std::runtime_error("indexout of range");
+            machine.push_data(lst->items[idx+1]);
+        }
+
+        void DotOperator::dump(DumpContext& ctx)
+        {
+            ctx.inc();
+            ctx.strm() << "dot left" << std::endl;
+            ctx.inc();
+            lhs->dump(ctx);
+            ctx.dec();
+            ctx.dec();
+            ctx.strm() << "." << std::endl;
+            ctx.inc();
+            ctx.strm() << "dot right" << std::endl;
             ctx.inc();
             if (rhs)
             {

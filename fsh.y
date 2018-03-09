@@ -32,6 +32,7 @@ typedef fsh::instruction::Integer int_t;
 typedef fsh::instruction::Float float_t;
 typedef fsh::instruction::None none_t;
 typedef fsh::instruction::TryCatch trycatch_t;
+typedef fsh::instruction::DotOperator dot_t;
 
 void dump(const char *p)
 {
@@ -72,6 +73,7 @@ void dump(void *p)
 %left EQ NEQ
 %left '+' '-'
 %left '*' '/'
+%left '.'
 %precedence NEG
 
 %start input
@@ -129,6 +131,7 @@ expression
     | iteration_expression      {$$ = $1;}
     | exception_expression      {$$ = $1;}
     | part_expression           {$$ = $1;}
+    | dot_expression            {$$ = $1;}
     ;
 
 relational_expression
@@ -278,6 +281,15 @@ part_expression
         pCall->functionArguments = el;
         //std::cout << "func call " << id->name << std::endl;
         $$ = pCall;
+    }
+    ;
+
+dot_expression
+    : IDENTIFIER '.' expression {
+        dot_t *dop = new dot_t();
+        dop->lhs = (inst_t *)$1;
+        dop->rhs = (inst_t *)$3;
+        $$ = dop;
     }
     ;
 

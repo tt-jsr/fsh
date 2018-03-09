@@ -117,7 +117,12 @@ namespace fsh
         return e;
     }
 
-    void Machine::store_variable(const std::string& name, ElementPtr& d)
+    ExecutionContextPtr Machine::GetContext()
+    {
+        return executionContext;
+    }
+
+    void Machine::store_variable(const std::string& name, ElementPtr d)
     {
         executionContext->AddVariable(name, d);
     }

@@ -32,13 +32,14 @@ namespace fsh
         // Register a builtin function.
         void register_builtin(const std::string& name, 
                 std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)>);
-        void store_variable(const std::string& name, ElementPtr& d);
+        void store_variable(const std::string& name, ElementPtr d);
         bool get_variable(const std::string& name, ElementPtr& out);
         bool get_variable(const std::string& name, bool& out);
         bool get_variable(const std::string& name, std::string& out);
         bool get_variable(const std::string& name, int64_t& out);
         bool get_variable(const std::string& name, double& out);
         bool ConvertToBool(ElementPtr);
+        ExecutionContextPtr GetContext();
     private:
         static thread_local std::vector<ElementPtr> datastack;
         ExecutionContextPtr executionContext;

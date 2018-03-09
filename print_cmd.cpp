@@ -66,8 +66,9 @@ namespace fsh
         case ELEMENT_TYPE_LIST:
             {
                 ListPtr lp = e.cast<List>();
-                for (auto & item : lp->items)
+                for (size_t idx = 1; idx < lp->items.size(); ++idx)
                 {
+                    ElementPtr item = lp->items[idx];
                     Print(machine, item);
                     std::cout << ",";
                 }

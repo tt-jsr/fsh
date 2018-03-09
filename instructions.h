@@ -51,6 +51,24 @@ namespace fsh
 
         typedef fsh::instrusive_ptr<BinaryOperator> BinaryOperatorPtr;
 
+        class DotOperator : public Instruction
+        {
+        public:
+            DotOperator()
+            :lhs(nullptr)
+            ,rhs(nullptr)
+            {}
+            ~DotOperator();
+            void Execute(Machine&);
+            InstructionType type() {return INSTRUCTION_DOT_OPERATOR;}
+            std::string type_str();
+            void dump(DumpContext&);
+            InstructionPtr lhs;
+            InstructionPtr rhs;
+        };
+
+        typedef fsh::instrusive_ptr<DotOperator> DotOperatorPtr;
+
         class Identifier : public Instruction
         {
         public:

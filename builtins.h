@@ -14,6 +14,8 @@ namespace fsh
     // Part[list, startidx];
     // Part[list, startidx, endidx];
     ElementPtr Part(Machine&, std::vector<ElementPtr>&);
+    ElementPtr MakeRecord(Machine&, std::vector<ElementPtr>&);
+    IntegerPtr Len(Machine&, std::vector<ElementPtr>&);
 
     /******** Error *********/
     ElementPtr IsError(Machine&, std::vector<ElementPtr>&);
@@ -52,6 +54,7 @@ namespace fsh
     ElementPtr GetElement(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     ObjectPtr GetObject(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     StringPtr GetString(Machine& machine, std::vector<ElementPtr>& args, size_t index);
+    ListPtr GetList(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     IntegerPtr GetInteger(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     FunctionDefinitionPtr GetFunctionDefinition(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     ElementPtr CallFunctionImpl(Machine& machine, FunctionDefinitionPtr funcDef, size_t nItemsOnStack);

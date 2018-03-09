@@ -132,5 +132,32 @@ namespace fsh
         }
         throw std::runtime_error("Trying to part non string or list");
     }
+
+
+    ElementPtr MakeRecord(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ListPtr lst = MakeList(HEAD_TYPE_LIST);
+        size_t idx = 0;
+        for(auto& e : args)
+        {
+            if (!e->IsIdentifier())
+                throw std::runtime_error("MakeRecord: Argument must be an identifier");
+            IdentifierPtr id = e.cast<Identifier>();
+            lst->items.push_back(MakeNone());
+            ExecutionContextPtr ctx = machine.GetContext()->parent;
+            ctx->AddVariable(id->value, MakeInteger(idx));
+            ++idx;
+        }
+        return lst;
+    }
+
+    IntegerPtr Len(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ListPtr lst = GetList(machine, args, 0);
+        if (!lst)
+            throw std::runtime_error("Len: arument must be a list");
+        int64_t s = (int64_t)lst->items.size();
+        return MakeInteger(s-1);
+    }
 }
 

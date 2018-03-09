@@ -31,6 +31,7 @@ H           [a-fA-F0-9]
 \]               {++column;return ']';}
 &               {++column;return '&';}
 :               {++column;return ':';}
+\.               {++column;return '.';}
 \;               {++column;return ';';}
 \>               {++column;return GT;}
 \>=               {column += 2;return GTE;}
@@ -57,8 +58,8 @@ or              {column += 2;return OR;}
                     column += len;
                     return STRING_LITERAL;
                 }
-{D}+\.{D}+ { column += strlen(yytext);yylval = new fsh::instruction::Float(strtod(yytext, nullptr)); return FLOAT; }
 {D}+         { column += strlen(yytext);yylval = new fsh::instruction::Integer(atoi(yytext)); return INTEGER; }
+{D}+\.{D}+ { column += strlen(yytext);yylval = new fsh::instruction::Float(strtod(yytext, nullptr)); return FLOAT; }
 [a-zA-Z_][a-zA-Z0-9_]*   { column += strlen(yytext);yylval = new fsh::instruction::Identifier(yytext); return IDENTIFIER; }
 #.*$ ;
 %%
