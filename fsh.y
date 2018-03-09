@@ -33,6 +33,7 @@ typedef fsh::instruction::Float float_t;
 typedef fsh::instruction::None none_t;
 typedef fsh::instruction::TryCatch trycatch_t;
 typedef fsh::instruction::DotOperator dot_t;
+typedef fsh::instruction::For for_t;
 
 void dump(const char *p)
 {
@@ -65,6 +66,7 @@ void dump(void *p)
 %token IF WHILE THEN ELSE
 %token TRY CATCH
 %token PART
+%token FOR IN
 %token ';'
 %left ','
 %left '='
@@ -132,6 +134,7 @@ expression
     | exception_expression      {$$ = $1;}
     | part_expression           {$$ = $1;}
     | dot_expression            {$$ = $1;}
+    | for_expression            {$$ = $1;}
     ;
 
 relational_expression
@@ -310,6 +313,16 @@ selection_expression
         pWhileIf->if_true = (inst_t *)$5;
         pWhileIf->if_false = (inst_t *)$7;
         $$ = pWhileIf;
+    }
+    ;
+
+for_expression
+    : FOR '[' IDENTIFIER IN expression THEN statement_list ']'  {
+        for_t *pFor = new for_t();
+        pFor->identifier = (inst_t *)$3;
+        pFor->list = (inst_t *)$5;
+        pFor->body = (inst_t *)$7;
+        $$ = pFor;
     }
     ;
 

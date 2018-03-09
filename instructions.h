@@ -241,6 +241,24 @@ namespace fsh
 
         typedef fsh::instrusive_ptr<WhileIf> WhileIfPtr;
 
+        class For : public Instruction
+        {
+        public:
+            For()
+            { }
+
+            ~For() {}
+            void Execute(Machine&);
+            InstructionType type() {return INSTRUCTION_FOR;}
+            std::string type_str();
+            void dump(DumpContext&);
+            InstructionPtr identifier;
+            InstructionPtr list;
+            InstructionPtr body;
+        };
+
+        typedef fsh::instrusive_ptr<For> ForPtr;
+
         class TryCatch : public Instruction
         {
         public:

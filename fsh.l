@@ -51,6 +51,8 @@ catch           {column += 5;return CATCH;}
 Part            {column += 4;return PART;}
 and             {column += 3;return AND;}
 or              {column += 2;return OR;}
+in              {column += 2;return IN;}
+For             {column += 3;return FOR;}
 \"[^\"\n]*\"    {
                     int len = strlen(yytext);
                     std::string s(yytext+1, len-2);

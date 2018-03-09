@@ -435,6 +435,40 @@ namespace fsh
         }
 
         /****************************************************/
+        void For::Execute(Machine& machine)
+        {
+            if (identifier->type() != INSTRUCTION_IDENTIFIER)
+                throw std::runtime_error("For requires an identifier");
+            std::string varname = identifier.cast<Identifier>()->name;
+            list->Execute(machine);
+            ElementPtr e = machine.pop_data();
+            e = machine.resolve(e);
+            if (!e->IsList())
+                throw std::runtime_error("For requires a list");
+            ListPtr lst = e.cast<List>();
+            ElementPtr rtn = MakeNone();
+            for (size_t idx = 1; idx < lst->items.size(); ++idx)
+            {
+                ElementPtr item = lst->items[idx];
+                machine.store_variable(varname, item);
+                body->Execute(machine);
+                rtn = machine.pop_data();
+            }
+            machine.push_data(rtn);
+        }
+
+        std::string For::type_str()
+        {
+            return "For ";
+        }
+
+        void For::dump(DumpContext& ctx)
+        {
+            ctx.strm() << "For ";
+        }
+
+        /****************************************************/
+
         void WhileIf::Execute(Machine& machine)
         {
             if (isWhile)
