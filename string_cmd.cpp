@@ -72,9 +72,9 @@ namespace fsh
         StringPtr chars = GetString(machine, args, 1);
         if (!(sp && chars))
         {
-            return MakeList(HEAD_TYPE_LIST);
+            return MakeList("__list__");
         }
-        ListPtr lst = MakeList(HEAD_TYPE_LIST);
+        ListPtr lst = MakeList("__list__");
         std::string s;
         for (auto it = sp->value.begin(); it != sp->value.end(); ++it)
         {

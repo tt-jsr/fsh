@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include <sstream>
+#include <iostream>
 #include <cassert>
 #include "common.h"
 #include "machine.h"
@@ -115,6 +116,49 @@ namespace fsh
             }
         }
         return e;
+    }
+
+    size_t Machine::get_record_field(const std::string& list, ElementPtr e)
+    {
+        if (!e->IsIdentifier())
+            throw std::runtime_error("Expected identifier");
+        auto itRecord = record_fields.find(list);
+        if (itRecord == record_fields.end())
+        {
+            std::stringstream strm;
+            strm << "Record \"" << list << "\" not defined";
+            throw std::runtime_error(strm.str());
+        }
+        std::string& id = e.cast<Identifier>()->value;
+        auto itField = itRecord->second.find(id);
+        if (itField == itRecord->second.end())
+        {
+            std::stringstream strm;
+            strm << "Field " << list << "." << id << " not defined";
+            throw std::runtime_error(strm.str());
+        }
+        return itField->second;
+    }
+
+    void Machine::add_record_field(const std::string& list, const std::string& field, size_t idx)
+    {
+        auto itRecord = record_fields.find(list);
+        if (itRecord == record_fields.end())
+        {
+            auto pr = record_fields.emplace(list, FieldMap_t());
+            itRecord = pr.first;
+        }
+        itRecord->second[field] = idx;
+    }
+
+    FieldMap_t * Machine::get_field_map(const std::string& list)
+    {
+        auto itRecord = record_fields.find(list);
+        if (itRecord == record_fields.end())
+        {
+            return nullptr;
+        }
+        return &itRecord->second;
     }
 
     ExecutionContextPtr Machine::GetContext()

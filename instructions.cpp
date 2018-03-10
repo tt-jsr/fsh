@@ -302,13 +302,7 @@ namespace fsh
                     throw std::runtime_error("Assignment must be right of dot operator");
                 bop->lhs->Execute(machine);
                 ElementPtr e = machine.pop_data();
-                e = machine.resolve(e);
-                if (!e->IsInteger())
-                    throw std::runtime_error("dot operator requires integer");
-                int64_t idx = e.cast<fsh::Integer>()->value;
-                ++idx;
-                if (idx >= lst->items.size())
-                    throw std::runtime_error("field out of range");
+                int64_t idx = machine.get_record_field(lst->listtype, e);
                 bop->rhs->Execute(machine);
                 e = machine.pop_data();
                 e = machine.resolve(e);
@@ -318,14 +312,8 @@ namespace fsh
             }
             rhs->Execute(machine);
             ElementPtr rdata = machine.pop_data();
-            rdata = machine.resolve(rdata);
-            if (rdata->IsInteger() == false)
-                throw std::runtime_error("rhs is required to be an integer");
-
-            int64_t idx = rdata.cast<fsh::Integer>()->value;
-            if ((idx+1) >= lst->items.size())
-                throw std::runtime_error("indexout of range");
-            machine.push_data(lst->items[idx+1]);
+            int64_t idx = machine.get_record_field(lst->listtype, rdata);
+            machine.push_data(lst->items[idx]);
         }
 
         void DotOperator::dump(DumpContext& ctx)
@@ -447,7 +435,7 @@ namespace fsh
                 throw std::runtime_error("For requires a list");
             ListPtr lst = e.cast<List>();
             ElementPtr rtn = MakeNone();
-            for (size_t idx = 1; idx < lst->items.size(); ++idx)
+            for (size_t idx = 0; idx < lst->items.size(); ++idx)
             {
                 ElementPtr item = lst->items[idx];
                 machine.store_variable(varname, item);
@@ -751,7 +739,7 @@ namespace fsh
         {
             if (isList)
             {
-                fsh::ListPtr lp = fsh::MakeList(HEAD_TYPE_LIST);
+                fsh::ListPtr lp = fsh::MakeList("__list__");
                 for (auto& in : expressions)
                 {
                     in->Execute(machine);

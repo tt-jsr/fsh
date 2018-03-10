@@ -176,6 +176,13 @@ void Test1::UnitTestControl(int n)
         CPPUNIT_ASSERT(machine.get_variable("result",  nvalue));
         CPPUNIT_ASSERT(nvalue == 0);
         break;
+    case 4:
+        CPPUNIT_ASSERT(machine.get_variable("count",  nvalue));
+        CPPUNIT_ASSERT(nvalue == 4);
+
+        CPPUNIT_ASSERT(machine.get_variable("rtn",  nvalue));
+        CPPUNIT_ASSERT(nvalue == 4);
+        break;
     }
 }
 
@@ -230,3 +237,8 @@ void Test1::testFunctions()
     machine.register_unittest(f);
     StartParser("functions.fsh");
 }
+
+void Test1::testList()
+{
+}
+

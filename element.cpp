@@ -7,11 +7,10 @@
 
 namespace fsh
 {
-    ListPtr MakeList(HeadType ht)
+    ListPtr MakeList(const char *lt)
     {
         ListPtr r(new List());
-        HeadPtr hp(new Head(ht));
-        r->items.push_back(hp);
+        r->listtype = lt;
         return r;
     }
 

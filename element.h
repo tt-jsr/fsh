@@ -22,7 +22,6 @@ namespace fsh
         ,ELEMENT_TYPE_INTEGER
         ,ELEMENT_TYPE_FLOAT
         ,ELEMENT_TYPE_LIST
-        ,ELEMENT_TYPE_HEAD
         ,ELEMENT_TYPE_ERROR
         ,ELEMENT_TYPE_IDENTIFIER
         ,ELEMENT_TYPE_FUNCTION_DEFINITION
@@ -40,7 +39,6 @@ namespace fsh
         bool IsFloat() {return type() == ELEMENT_TYPE_FLOAT;}
         bool IsString() {return type() == ELEMENT_TYPE_STRING;}
         bool IsList() {return type() == ELEMENT_TYPE_LIST;}
-        bool IsHead() {return type() == ELEMENT_TYPE_HEAD;}
         bool IsError() {return type() == ELEMENT_TYPE_ERROR;}
         bool IsIdentifier() {return type() == ELEMENT_TYPE_IDENTIFIER;}
         bool IsFunctionDefinition() {return type() == ELEMENT_TYPE_FUNCTION_DEFINITION;}
@@ -52,24 +50,6 @@ namespace fsh
     };
 
     typedef instrusive_ptr<Element> ElementPtr;
-
-    enum HeadType
-    {
-        HEAD_TYPE_COMMAND
-        , HEAD_TYPE_ERROR
-        , HEAD_TYPE_LIST
-    };
-
-    struct Head : public Element
-    {
-        Head(HeadType ht)
-        :value(ht)
-        {}
-
-        virtual ElementType type() {return ELEMENT_TYPE_HEAD;}
-        HeadType value;
-    };
-    typedef instrusive_ptr<Head> HeadPtr;
 
     struct None : public Element
     {
@@ -158,6 +138,7 @@ namespace fsh
         size_t size() {return items.size();}
         virtual ElementType type() {return ELEMENT_TYPE_LIST;}
         std::vector<ElementPtr> items;
+        std::string listtype;
     };
 
     typedef instrusive_ptr<List> ListPtr;
@@ -227,7 +208,7 @@ namespace fsh
     ErrorPtr MakeError(const std::string& s, bool b);
     IntegerPtr MakeInteger(int64_t);
     FloatPtr MakeFloat(double);
-    ListPtr MakeList(HeadType);
+    ListPtr MakeList(const char *);
     IdentifierPtr MakeIdentifier(const std::string&);
     FunctionDefinitionPtr MakeFunctionDefinition();
     NonePtr MakeNone();

@@ -16,6 +16,9 @@ namespace fsh
         typedef fsh::instrusive_ptr<Instruction> InstructionPtr;
     }
 
+    typedef std::map<std::string, size_t> FieldMap_t;
+    typedef std::map<std::string, FieldMap_t> RecordMap_t;
+
     class Machine
     {
     public:
@@ -40,9 +43,13 @@ namespace fsh
         bool get_variable(const std::string& name, double& out);
         bool ConvertToBool(ElementPtr);
         ExecutionContextPtr GetContext();
+        size_t get_record_field(const std::string& list, ElementPtr);
+        void add_record_field(const std::string& list, const std::string& field, size_t idx);
+        FieldMap_t * get_field_map(const std::string&);
     private:
         static thread_local std::vector<ElementPtr> datastack;
         ExecutionContextPtr executionContext;
+        RecordMap_t record_fields;
     private_impl:
         void reset();
         ElementPtr pop_data();

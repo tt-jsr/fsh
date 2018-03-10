@@ -74,24 +74,6 @@ namespace fsh
                 }
             }
             break;
-        case ELEMENT_TYPE_HEAD:
-            {
-                HeadPtr hp = e.cast<Head>();
-                switch (hp->value)
-                {
-                    case HEAD_TYPE_COMMAND:
-                        std::cout << "COMMAND";
-                        break;
-                    case HEAD_TYPE_ERROR:
-                        std::cout << "ERROR";
-                        break;
-                    case HEAD_TYPE_LIST:
-                        std::cout << "LIST";
-                        break;
-
-                }
-            }
-            break;
         case ELEMENT_TYPE_FUNCTION_DEFINITION:
             {
                 std::cout << "FunctionDefinition";

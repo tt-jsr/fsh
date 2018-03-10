@@ -72,6 +72,19 @@ namespace fsh
         return ep.cast<Integer>();
     }
 
+    IdentifierPtr GetIdentifier(Machine& machine, std::vector<ElementPtr>& args, size_t index)
+    {
+        ElementPtr ep = GetElement(machine, args, index);
+        if(ep.get() == nullptr)
+            return IdentifierPtr();
+
+        if (ep->type() != ELEMENT_TYPE_IDENTIFIER)
+        {
+            return IdentifierPtr();
+        }
+        return ep.cast<Identifier>();
+    }
+
     FunctionDefinitionPtr GetFunctionDefinition(Machine& machine, std::vector<ElementPtr>& args, size_t index)
     {
         ElementPtr ep = GetElement(machine, args, index);
@@ -168,6 +181,7 @@ namespace fsh
 
         // List
         machine.register_builtin("Part", fsh::Part);
+        machine.register_builtin("DefineRecord", fsh::DefineRecord);
         machine.register_builtin("MakeRecord", fsh::MakeRecord);
         machine.register_builtin("Len", fsh::Len);
 

@@ -30,13 +30,9 @@ namespace fsh
     ElementPtr Part(int64_t start, int64_t end, const std::vector<ElementPtr>& src)
     {
         if(start <0)
-            start = src.size()+ start;
-        else
-            ++start;
+            start = src.size() + start;
         if (end < 0)
             end = src.size() + end;
-        else
-            ++end;
         if (start < 0 || end < 0)
             throw std::runtime_error("Invalid part");
         if (start > end)
@@ -44,7 +40,7 @@ namespace fsh
         if (start > src.size() || end > src.size())
             throw std::runtime_error("Invalid part");
 
-        ListPtr rtn = MakeList(HEAD_TYPE_LIST);  // Parting loses the original list type
+        ListPtr rtn = MakeList("__list__");  // Parting loses the original list type
         for (size_t idx = start; idx < end; ++idx)
         {
             rtn->items.push_back(src[idx]);
@@ -71,7 +67,7 @@ namespace fsh
     {
         if (e->IsList())
         {
-            return e.cast<List>()->items.size() - 1;
+            return e.cast<List>()->items.size();
         }
         if (e->IsString())
         {
@@ -134,30 +130,64 @@ namespace fsh
     }
 
 
+    ElementPtr DefineRecord(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        StringPtr sp = GetString(machine, args, 0);
+        if (!sp)
+            throw std::runtime_error("MakeRecord: First argument must be the name of the list");
+
+        if (machine.get_field_map(sp->value) != nullptr)
+        {
+            std::stringstream strm;
+            strm << "DefineRecord: record \"" << sp->value << "\" already exists";
+            throw std::runtime_error(strm.str());
+        }
+        size_t idx = 0;
+        for (size_t idx = 1; idx < args.size(); idx++)
+        {
+            IdentifierPtr id = GetIdentifier(machine, args, idx);
+            if (!id)
+                throw std::runtime_error("MakeRecord: Argument must be an identifier");
+            machine.add_record_field(sp->value, id->value, idx-1);
+        }
+        return MakeNone();
+    }
+
     ElementPtr MakeRecord(Machine& machine, std::vector<ElementPtr>& args)
     {
-        ListPtr lst = MakeList(HEAD_TYPE_LIST);
-        size_t idx = 0;
-        for(auto& e : args)
+        StringPtr sp = GetString(machine, args, 0);
+        if (!sp)
+            throw std::runtime_error("MakeRecord: First argument must be the name of the list");
+        FieldMap_t *pFields = machine.get_field_map(sp->value);
+        if (pFields == nullptr)
         {
-            if (!e->IsIdentifier())
-                throw std::runtime_error("MakeRecord: Argument must be an identifier");
-            IdentifierPtr id = e.cast<Identifier>();
+            std::stringstream strm;
+            strm << "Record " << sp->value << " doe not exist";
+            throw std::runtime_error(strm.str());
+        }
+
+        ListPtr lst = MakeList(sp->value.c_str());
+        size_t nfields = pFields->size();
+        for (size_t idx = 0; idx < nfields; idx++)
+        {
             lst->items.push_back(MakeNone());
-            ExecutionContextPtr ctx = machine.GetContext()->parent;
-            ctx->AddVariable(id->value, MakeInteger(idx));
-            ++idx;
         }
         return lst;
     }
 
     IntegerPtr Len(Machine& machine, std::vector<ElementPtr>& args)
     {
+        StringPtr sp = GetString(machine, args, 0);
+        if (sp)
+        {
+            int64_t s = (int64_t)sp->value.size();
+            return MakeInteger(s);
+        }
         ListPtr lst = GetList(machine, args, 0);
         if (!lst)
-            throw std::runtime_error("Len: arument must be a list");
+            throw std::runtime_error("Len: arument must be a list or string");
         int64_t s = (int64_t)lst->items.size();
-        return MakeInteger(s-1);
+        return MakeInteger(s);
     }
 }
 
