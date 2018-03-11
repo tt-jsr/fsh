@@ -15,7 +15,7 @@ namespace fsh
         StringPtr filename = GetString(machine, args, 0);
         if (filename.get() == nullptr)
         {
-            throw std::runtime_error("Openfile: arg0 is not a string");
+            throw "Openfile: arg0 is not a string";
         }
         StringPtr mode = GetString(machine, args, 1);
         if (mode.get() == nullptr)
@@ -131,7 +131,8 @@ namespace fsh
                     if (nullptr == fgets(buffer, sizeof(buffer), file->fp))
                     {
                         fclose(file->fp);
-                        return MakeNone();
+                        file->fp = nullptr;
+                        return MakeBoolean(false);
                     }
                     //std::cout << buffer << std::endl;
                     return MakeString(buffer);
@@ -155,7 +156,7 @@ namespace fsh
             }
             break;
         }
-        return MakeNone();
+        return MakeBoolean(false);
     }
 
     ElementPtr PipeLine(Machine& machine, std::vector<ElementPtr>& args)
@@ -167,10 +168,15 @@ namespace fsh
 
                     //std::cout << "pipeline" << std::endl;
             data = PipelineStage(machine, args[idx], data);
-            if (data->IsNone())
-                return data;
+            if (data->IsBoolean())
+            {
+                if (data.cast<Boolean>()->value == false)
+                    return data;
+                else
+                    idx = args.size();
+            }
             ++idx;
-            if (idx == args.size())
+            if (idx >= args.size())
                 idx = 0;
         }
         return MakeNone();

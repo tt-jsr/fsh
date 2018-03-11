@@ -1,5 +1,11 @@
+count = 0;
 stageOne = &[line:
-    Print["stage one ", line];
+    If [Find[line, "Token"] > 0
+    then    
+        count = count + 1;
+    else
+        None;
+    ];
     line;
 ];
 
@@ -12,6 +18,7 @@ Try[
     file = OpenFile["common.h", "r"];
     fileOut = OpenFile["junk", "w"];
     PipeLine[file, stageOne, fileOut, stageTwo];
+    Print ["Number of \"Tokens\": ", count];
 catch
     Print [_exception];
 ];

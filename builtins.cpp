@@ -162,6 +162,60 @@ namespace fsh
         return MakeNone();
     }
 
+    ElementPtr ToInt(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr e = GetElement(machine, args, 0);
+        if (!e)
+            throw std::runtime_error("Int[] requires an argument");
+        switch(e->type())
+        {
+        case ELEMENT_TYPE_FLOAT:
+            return MakeInteger((int64_t)(e.cast<Float>()->value));
+        case ELEMENT_TYPE_STRING:
+            return MakeInteger(std::stol(e.cast<String>()->value));
+        case ELEMENT_TYPE_INTEGER:
+            return e;
+        default:
+            throw std::runtime_error("Int[] unconvertable type");
+        }
+    }
+
+    ElementPtr ToFloat(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr e = GetElement(machine, args, 0);
+        if (!e)
+            throw std::runtime_error("Float[] requires an argument");
+        switch(e->type())
+        {
+        case ELEMENT_TYPE_FLOAT:
+            return e;
+        case ELEMENT_TYPE_STRING:
+            return MakeFloat(std::stof(e.cast<String>()->value));
+        case ELEMENT_TYPE_INTEGER:
+            return MakeFloat((double)(e.cast<Integer>()->value));
+        default:
+            throw std::runtime_error("Float[] unconvertable type");
+        }
+    }
+
+    ElementPtr ToString(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr e = GetElement(machine, args, 0);
+        if (!e)
+            throw std::runtime_error("ToString[] requires an argument");
+        switch(e->type())
+        {
+        case ELEMENT_TYPE_FLOAT:
+            return MakeString(std::to_string(e.cast<Float>()->value));
+        case ELEMENT_TYPE_STRING:
+            return e;
+        case ELEMENT_TYPE_INTEGER:
+            return MakeString(std::to_string(e.cast<Integer>()->value));
+        default:
+            throw std::runtime_error("Float[] unconvertable type");
+        }
+    }
+
     void RegisterBuiltIns(Machine& machine)
     {
         // IO
@@ -178,6 +232,7 @@ namespace fsh
         machine.register_builtin("Strcmp", fsh::Strcmp);
         machine.register_builtin("RegMatch", fsh::RegMatch);
         machine.register_builtin("RegSearch", fsh::RegSearch);
+        machine.register_builtin("Find", fsh::Find);
 
         // List
         machine.register_builtin("Part", fsh::Part);
@@ -190,6 +245,9 @@ namespace fsh
         machine.register_builtin("ErrorString", fsh::ErrorString);
         machine.register_builtin("Throw", fsh::Throw);
         machine.register_builtin("UnitTest", fsh::UnitTest);
+        machine.register_builtin("Int", fsh::ToInt);
+        machine.register_builtin("Float", fsh::ToFloat);
+        machine.register_builtin("ToString", fsh::ToString);
     }
 }
 

@@ -101,9 +101,9 @@ primary_expression
     | INTEGER               {$$ = $1;}
     | FLOAT                 {$$ = $1;}
     | STRING_LITERAL        {$$ = $1;}
-    | NONE                  {$$ = new none_t();}
-    | TRUE                  {$$ = new bool_t(true);}
-    | FALSE                 {$$ = new bool_t(false);}
+    | NONE                  {$$ = new none_t(lineno);}
+    | TRUE                  {$$ = new bool_t(lineno, true);}
+    | FALSE                 {$$ = new bool_t(lineno, false);}
     | '(' expression_list ')'    {$$ = $2;}
     | '{' expression_list '}' { 
         el_t *el = (el_t *)$2;
@@ -114,7 +114,7 @@ primary_expression
 
 assignment_expression
     : IDENTIFIER '=' expression {
-        bop_t *bop = new bop_t();
+        bop_t *bop = new bop_t(lineno);
         bop->op = fsh::TOKEN_ASSIGNMENT;
         bop->lhs = (inst_t *)$1;
         bop->rhs = (inst_t *)$3;
@@ -139,56 +139,56 @@ expression
 
 relational_expression
     :expression LT expression {
-        bop_t *bop = new bop_t();
+        bop_t *bop = new bop_t(lineno);
         bop->op = fsh::TOKEN_LT;
         bop->lhs = (inst_t *)$1;
         bop->rhs = (inst_t *)$3;
         $$ = bop;
     }
     |expression LTE expression {
-        bop_t *bop = new bop_t();
+        bop_t *bop = new bop_t(lineno);
         bop->op = fsh::TOKEN_LTE;
         bop->lhs = (inst_t *)$1;
         bop->rhs = (inst_t *)$3;
         $$ = bop;
     }
     |expression GT expression {
-        bop_t *bop = new bop_t();
+        bop_t *bop = new bop_t(lineno);
         bop->op = fsh::TOKEN_GT;
         bop->lhs = (inst_t *)$1;
         bop->rhs = (inst_t *)$3;
         $$ = bop;
     }
     |expression GTE expression {
-        bop_t *bop = new bop_t();
+        bop_t *bop = new bop_t(lineno);
         bop->op = fsh::TOKEN_GTE;
         bop->lhs = (inst_t *)$1;
         bop->rhs = (inst_t *)$3;
         $$ = bop;
     }
     |expression EQ expression {
-        bop_t *bop = new bop_t();
+        bop_t *bop = new bop_t(lineno);
         bop->op = fsh::TOKEN_EQ;
         bop->lhs = (inst_t *)$1;
         bop->rhs = (inst_t *)$3;
         $$ = bop;
     }
     |expression NEQ expression {
-        bop_t *bop = new bop_t();
+        bop_t *bop = new bop_t(lineno);
         bop->op = fsh::TOKEN_NEQ;
         bop->lhs = (inst_t *)$1;
         bop->rhs = (inst_t *)$3;
         $$ = bop;
     }
     |expression AND expression {
-        bop_t *bop = new bop_t();
+        bop_t *bop = new bop_t(lineno);
         bop->op = fsh::TOKEN_AND;
         bop->lhs = (inst_t *)$1;
         bop->rhs = (inst_t *)$3;
         $$ = bop;
     }
     |expression OR expression {
-        bop_t *bop = new bop_t();
+        bop_t *bop = new bop_t(lineno);
         bop->op = fsh::TOKEN_OR;
         bop->lhs = (inst_t *)$1;
         bop->rhs = (inst_t *)$3;
@@ -198,28 +198,28 @@ relational_expression
 
 math_expression
     :expression '+' expression {
-        bop_t *bop = new bop_t();
+        bop_t *bop = new bop_t(lineno);
         bop->op = fsh::TOKEN_PLUS;
         bop->lhs = (inst_t *)$1;
         bop->rhs = (inst_t *)$3;
         $$ = bop;
     }
     | expression '-' expression {
-        bop_t *bop = new bop_t();
+        bop_t *bop = new bop_t(lineno);
         bop->op = fsh::TOKEN_MINUS;
         bop->lhs = (inst_t *)$1;
         bop->rhs = (inst_t *)$3;
         $$ = bop;
     }
     | expression '*' expression {
-        bop_t *bop = new bop_t();
+        bop_t *bop = new bop_t(lineno);
         bop->op = fsh::TOKEN_MULTIPLY;
         bop->lhs = (inst_t *)$1;
         bop->rhs = (inst_t *)$3;
         $$ = bop;
     }
     | expression '/' expression {
-        bop_t *bop = new bop_t();
+        bop_t *bop = new bop_t(lineno);
         bop->op = fsh::TOKEN_DIVIDE;
         bop->lhs = (inst_t *)$1;
         bop->rhs = (inst_t *)$3;
@@ -242,32 +242,32 @@ math_expression
 
 part_expression
     : PART '[' expression ',' expression ':' expression ']' {
-        call_t *pCall = new call_t();
+        call_t *pCall = new call_t(lineno);
         pCall->name = "Part";
-        el_t *el = new fsh::instruction::ExpressionList();
+        el_t *el = new fsh::instruction::ExpressionList(lineno);
         el->expressions.push_back((inst_t *)$3);
         el->expressions.push_back((inst_t *)$5);
-        el->expressions.push_back(new str_t(":"));
+        el->expressions.push_back(new str_t(lineno, ":"));
         el->expressions.push_back((inst_t *)$7);
         pCall->functionArguments = el;
         //std::cout << "func call " << id->name << std::endl;
         $$ = pCall;
     }
     | PART '[' expression ',' expression ':' ']' {
-        call_t *pCall = new call_t();
+        call_t *pCall = new call_t(lineno);
         pCall->name = "Part";
-        el_t *el = new fsh::instruction::ExpressionList();
+        el_t *el = new fsh::instruction::ExpressionList(lineno);
         el->expressions.push_back((inst_t *)$3);
         el->expressions.push_back((inst_t *)$5);
-        el->expressions.push_back(new str_t(":"));
+        el->expressions.push_back(new str_t(lineno, ":"));
         pCall->functionArguments = el;
         //std::cout << "func call " << id->name << std::endl;
         $$ = pCall;
     }
     | PART '[' expression ',' expression ']' {
-        call_t *pCall = new call_t();
+        call_t *pCall = new call_t(lineno);
         pCall->name = "Part";
-        el_t *el = new fsh::instruction::ExpressionList();
+        el_t *el = new fsh::instruction::ExpressionList(lineno);
         el->expressions.push_back((inst_t *)$3);
         el->expressions.push_back((inst_t *)$5);
         pCall->functionArguments = el;
@@ -275,11 +275,11 @@ part_expression
         $$ = pCall;
     }
     | PART '[' expression ',' ':' expression ']' {
-        call_t *pCall = new call_t();
+        call_t *pCall = new call_t(lineno);
         pCall->name = "Part";
-        el_t *el = new fsh::instruction::ExpressionList();
+        el_t *el = new fsh::instruction::ExpressionList(lineno);
         el->expressions.push_back((inst_t *)$3);
-        el->expressions.push_back(new str_t(":"));
+        el->expressions.push_back(new str_t(lineno, ":"));
         el->expressions.push_back((inst_t *)$6);
         pCall->functionArguments = el;
         //std::cout << "func call " << id->name << std::endl;
@@ -289,7 +289,7 @@ part_expression
 
 dot_expression
     : IDENTIFIER '.' expression {
-        dot_t *dop = new dot_t();
+        dot_t *dop = new dot_t(lineno);
         dop->lhs = (inst_t *)$1;
         dop->rhs = (inst_t *)$3;
         $$ = dop;
@@ -298,7 +298,7 @@ dot_expression
 
 exception_expression
     : TRY '[' statement_list  CATCH statement_list  ']'  {
-        trycatch_t *pException = new trycatch_t();
+        trycatch_t *pException = new trycatch_t(lineno);
         pException->try_ = (inst_t *)$3;
         pException->catch_ = (inst_t *)$5;
         $$ = pException;
@@ -307,7 +307,7 @@ exception_expression
 
 selection_expression
     : IF '[' expression_list  THEN statement_list  ELSE statement_list  ']'  {
-        wif_t *pWhileIf = new wif_t();
+        wif_t *pWhileIf = new wif_t(lineno);
         pWhileIf->isWhile = false;
         pWhileIf->condition = (inst_t *)$3;
         pWhileIf->if_true = (inst_t *)$5;
@@ -318,7 +318,7 @@ selection_expression
 
 for_expression
     : FOR '[' IDENTIFIER IN expression THEN statement_list ']'  {
-        for_t *pFor = new for_t();
+        for_t *pFor = new for_t(lineno);
         pFor->identifier = (inst_t *)$3;
         pFor->list = (inst_t *)$5;
         pFor->body = (inst_t *)$7;
@@ -328,7 +328,7 @@ for_expression
 
 iteration_expression
     : WHILE '[' expression_list  THEN statement_list  ELSE statement_list  ']'  {
-        wif_t *pWhileIf = new wif_t();
+        wif_t *pWhileIf = new wif_t(lineno);
         pWhileIf->isWhile = true;
         pWhileIf->condition = (inst_t *)$3;
         pWhileIf->if_true = (inst_t *)$5;
@@ -339,7 +339,7 @@ iteration_expression
 
 function_definition
     : '&' '[' identifier_list ':' statement_list ']' {
-        fdef_t *pDef = new fdef_t();
+        fdef_t *pDef = new fdef_t(lineno);
         inst_t *arg3 = (inst_t *)$3;
         assert(arg3->type() == fsh::instruction::INSTRUCTION_IDENTIFIER
             || arg3->type() == fsh::instruction::INSTRUCTION_IDENTIFIER_LIST);
@@ -366,7 +366,7 @@ function_definition
         $$ = pDef;
     }
     |'&' '[' statement_list ']' {
-        fsh::instruction::FunctionDef *pDef = new fsh::instruction::FunctionDef();
+        fsh::instruction::FunctionDef *pDef = new fsh::instruction::FunctionDef(lineno);
         pDef->functionBody = (fsh::instruction::Instruction *)$3;
         $$ = pDef;
     }
@@ -374,7 +374,7 @@ function_definition
 
 function_call
     : IDENTIFIER '[' expression_list ']' {
-        call_t *pCall = new call_t();
+        call_t *pCall = new call_t(lineno);
         iden_t *id = (iden_t *)$1;
         pCall->name = id->name;
         delete id;
@@ -383,7 +383,7 @@ function_call
         $$ = pCall;
     }
     | IDENTIFIER '[' ']' {
-        call_t *pCall = new call_t();
+        call_t *pCall = new call_t(lineno);
         iden_t *id = (iden_t *)$1;
         pCall->name = id->name;
         delete id;
@@ -409,7 +409,7 @@ identifier_list
         else
         {
             assert(((inst_t *)$1)->type() == fsh::instruction::INSTRUCTION_IDENTIFIER);
-            il_t *il = new il_t();
+            il_t *il = new il_t(lineno);
             il->identifiers.push_back((iden_t *)$1);
             il->identifiers.push_back(arg3);
             $$ = il;
@@ -433,7 +433,7 @@ expression_list
         }
         else
         {
-            el_t *el = new el_t();
+            el_t *el = new el_t(lineno);
             el->expressions.push_back((inst_t *)$1);
             el->expressions.push_back((inst_t *)$3);
             $$ = el;
@@ -457,7 +457,7 @@ statement_list
         el_t *el = nullptr;
         if (arg1->type() != fsh::instruction::INSTRUCTION_EXPRESSION_LIST)
         {
-            el = new el_t();
+            el = new el_t(lineno);
             el->expressions.push_back(arg1);
         }
         else

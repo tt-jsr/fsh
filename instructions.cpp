@@ -171,7 +171,7 @@ namespace fsh
                 if (ldata->type() != fsh::ELEMENT_TYPE_IDENTIFIER)
                 {
                     std::stringstream strm;
-                    strm << "lhs of assignment is not an identifier, got " << ldata->type();
+                    strm << "lhs of assignment is not an identifier, got " << ldata->type() << " line: " << lineno;
                     throw std::runtime_error(strm.str());
                 }
                 machine.store_variable(ldata.cast<fsh::Identifier>()->value, rdata);
@@ -210,7 +210,9 @@ namespace fsh
                 }
                 else
                 {
-                    throw std::runtime_error("Binary Operator: Invalid type");
+                    std::stringstream strm;
+                    strm << "Binary Operator: Invalid type, line: " << lineno;
+                    throw std::runtime_error(strm.str());
                 }
             }
         }
@@ -293,13 +295,21 @@ namespace fsh
             ElementPtr ldata = machine.pop_data();
             ldata = machine.resolve(ldata);
             if (ldata->IsList() == false)
-                throw std::runtime_error("lhs is required to be a list");
+            {
+                std::stringstream strm;
+                strm << "lhs is required tone an identifier, line: " << lineno;
+                throw std::runtime_error(strm.str());
+            }
             ListPtr lst = ldata.cast<List>();
             if (rhs->type() == INSTRUCTION_BINARY_OPERATOR)
             {
                 BinaryOperatorPtr bop = rhs.cast<BinaryOperator>();
                 if (bop->op != TOKEN_ASSIGNMENT)
-                    throw std::runtime_error("Assignment must be right of dot operator");
+                {
+                    std::stringstream strm;
+                    strm << "Assignment must be right of dot operator, line: " << lineno;
+                    throw std::runtime_error(strm.str());
+                }
                 bop->lhs->Execute(machine);
                 ElementPtr e = machine.pop_data();
                 int64_t idx = machine.get_record_field(lst->listtype, e);
@@ -350,13 +360,13 @@ namespace fsh
             if (machine.get_variable(name, e) == false)
             {
                 std::stringstream strm;
-                strm << "Function \"" << name << "\" not found";
+                strm << "Function \"" << name << "\" not found, line: " << lineno;
                 throw std::runtime_error(strm.str());
             }
             if (e->IsFunctionDefinition() == false)
             {
                 std::stringstream strm;
-                strm << "Name \"" << name << "\" is not a function";
+                strm << "Name \"" << name << "\" is not a function, line: " << lineno;
                 throw std::runtime_error(strm.str());
             }
 
@@ -426,13 +436,21 @@ namespace fsh
         void For::Execute(Machine& machine)
         {
             if (identifier->type() != INSTRUCTION_IDENTIFIER)
-                throw std::runtime_error("For requires an identifier");
+            {
+                std::stringstream strm;
+                strm << "For requires an identifier, line: " << lineno;
+                throw std::runtime_error(strm.str());
+            }
             std::string varname = identifier.cast<Identifier>()->name;
             list->Execute(machine);
             ElementPtr e = machine.pop_data();
             e = machine.resolve(e);
             if (!e->IsList())
-                throw std::runtime_error("For requires a list");
+            {
+                std::stringstream strm;
+                strm << "For requires a list, line: " << lineno;
+                throw std::runtime_error(strm.str());
+            }
             ListPtr lst = e.cast<List>();
             ElementPtr rtn = MakeNone();
             for (size_t idx = 0; idx < lst->items.size(); ++idx)

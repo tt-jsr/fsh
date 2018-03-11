@@ -22,11 +22,13 @@ namespace fsh
         class Instruction : public fsh::instrusive_base
         {
         public:
+            Instruction(size_t l):lineno(l){}
             virtual ~Instruction(){}
             virtual void Execute(Machine&) = 0;
             virtual instruction::InstructionType type() = 0;
             virtual std::string type_str() = 0;
             virtual void dump(DumpContext&) = 0;
+            size_t lineno;
         };
 
         typedef fsh::instrusive_ptr<Instruction> InstructionPtr;
@@ -34,8 +36,9 @@ namespace fsh
         class BinaryOperator : public Instruction
         {
         public:
-            BinaryOperator()
-            :lhs(nullptr)
+            BinaryOperator(size_t l)
+            :Instruction(l)
+            ,lhs(nullptr)
             ,rhs(nullptr)
             {}
             ~BinaryOperator();
@@ -54,8 +57,9 @@ namespace fsh
         class DotOperator : public Instruction
         {
         public:
-            DotOperator()
-            :lhs(nullptr)
+            DotOperator(size_t l)
+            :Instruction(l)
+            ,lhs(nullptr)
             ,rhs(nullptr)
             {}
             ~DotOperator();
@@ -72,11 +76,13 @@ namespace fsh
         class Identifier : public Instruction
         {
         public:
-            Identifier()
+            Identifier(size_t l)
+            :Instruction(l)
             { }
 
-            Identifier(const char *p)
-            :name(p)
+            Identifier(size_t l, const char *p)
+            :Instruction(l)
+            ,name(p)
             { }
 
             ~Identifier() {}
@@ -92,12 +98,14 @@ namespace fsh
         class Integer : public Instruction
         {
         public:
-            Integer()
-            :value(0)
+            Integer(size_t l)
+            :Instruction(l)
+            ,value(0)
             { }
 
-            Integer(int64_t n)
-            :value(n)
+            Integer(size_t l, int64_t n)
+            :Instruction(l)
+            ,value(n)
             {}
 
             ~Integer() {}
@@ -113,11 +121,13 @@ namespace fsh
         class String : public Instruction
         {
         public:
-            String()
+            String(size_t l)
+            :Instruction(l)
             { }
 
-            String(const std::string& s)
-            :value(s)
+            String(size_t l, const std::string& s)
+            :Instruction(l)
+            ,value(s)
             {}
 
             ~String() {}
@@ -133,7 +143,8 @@ namespace fsh
         class None : public Instruction
         {
         public:
-            None()
+            None(size_t l)
+            :Instruction(l)
             { }
 
             ~None() {}
@@ -148,11 +159,14 @@ namespace fsh
         class Boolean : public Instruction
         {
         public:
-            Boolean()
-            :value(false)
+            Boolean(size_t l)
+            :Instruction(l)
+            ,value(false)
             { }
-            Boolean(bool b)
-            : value(b)
+
+            Boolean(size_t l, bool b)
+            :Instruction(l)
+            ,value(b)
             { }
 
             ~Boolean() {}
@@ -168,12 +182,14 @@ namespace fsh
         class Float : public Instruction
         {
         public:
-            Float()
-            :value(0.0)
+            Float(size_t l)
+            :Instruction(l)
+            ,value(0.0)
             { }
 
-            Float(double n)
-            :value(n)
+            Float(size_t l, double n)
+            :Instruction(l)
+            ,value(n)
             {}
 
             ~Float() {}
@@ -207,8 +223,9 @@ namespace fsh
         class ExpressionList : public Instruction
         {
         public:
-            ExpressionList()
-            :isList(false)
+            ExpressionList(size_t l)
+            :Instruction(l)
+            ,isList(false)
             { }
 
             ~ExpressionList() {}
@@ -225,7 +242,8 @@ namespace fsh
         class WhileIf : public Instruction
         {
         public:
-            WhileIf()
+            WhileIf(size_t l)
+            :Instruction(l)
             { }
 
             ~WhileIf() {}
@@ -244,7 +262,8 @@ namespace fsh
         class For : public Instruction
         {
         public:
-            For()
+            For(size_t l)
+            :Instruction(l)
             { }
 
             ~For() {}
@@ -262,7 +281,8 @@ namespace fsh
         class TryCatch : public Instruction
         {
         public:
-            TryCatch()
+            TryCatch(size_t l)
+            :Instruction(l)
             { }
 
             ~TryCatch() {}
@@ -279,7 +299,8 @@ namespace fsh
         class IdentifierList : public Instruction
         {
         public:
-            IdentifierList()
+            IdentifierList(size_t l)
+            :Instruction(l)
             { }
 
             ~IdentifierList() {}
@@ -295,7 +316,8 @@ namespace fsh
         class FunctionCall : public Instruction
         {
         public:
-            FunctionCall()
+            FunctionCall(size_t l)
+            :Instruction(l)
             { }
             void Execute(Machine&);
             InstructionType type() {return INSTRUCTION_FUNCTION_CALL;}
@@ -310,7 +332,8 @@ namespace fsh
         class FunctionDef : public Instruction
         {
         public:
-            FunctionDef()
+            FunctionDef(size_t l)
+            :Instruction(l)
             { }
             void Execute(Machine&);
             InstructionType type() {return INSTRUCTION_FUNCTION_DEF;}

@@ -66,6 +66,21 @@ namespace fsh
         return MakeNone();
     }
 
+    ElementPtr Find(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        StringPtr s = GetString(machine, args, 0);
+        if (!s)
+            return MakeInteger(-1);
+        StringPtr search = GetString(machine, args, 1);
+        if (!search)
+            return MakeInteger(-1);
+
+        size_t pos = s->value.find(search->value);
+        if (pos == std::string::npos)
+            return MakeInteger(-1);
+        return MakeInteger(pos);
+    }
+
     ElementPtr Split(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr sp = GetString(machine, args, 0);

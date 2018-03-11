@@ -9,13 +9,14 @@ using namespace fsh;
 extern "C" int yylex();
 extern "C" int yyparse();
 extern "C" FILE *yyin;
+extern "C" char * yytext;
 extern uint64_t lineno;
 extern uint64_t column;
 
 Machine machine;
 
 void yyerror(const char *s) {
-    std::cout << "EEK, parse error!  Message: " << s << " line: " << lineno << ":" << column << std::endl;
+    std::cout << "Syntax error: " << s << " line: " << lineno << ":" << column << " " << yytext << std::endl;
 	// might as well halt now:
 	exit(-1);
 }
@@ -23,7 +24,7 @@ void yyerror(const char *s) {
 int main(int argc, char *argv[])
 {
 	// open a file handle to a particular file:
-	FILE *myfile = fopen("junk.fsh", "r");
+	FILE *myfile = fopen("io.fsh", "r");
 	// make sure it's valid:
 	if (!myfile) {
         std::cout << "Cannot open io.fsh" << std::endl;

@@ -14,7 +14,11 @@ L           [a-zA-Z_]
 E           [Ee][+-]?{D}+
 H           [a-fA-F0-9]
 
+%x          str
+
 %%
+            std::string quotedstring;
+
 [ \t]       {++column;}
 [\n]        {++lineno;column = 0;}
 \+             {++column;return '+';}
@@ -53,16 +57,45 @@ and             {column += 3;return AND;}
 or              {column += 2;return OR;}
 in              {column += 2;return IN;}
 For             {column += 3;return FOR;}
-\"[^\"\n]*\"    {
-                    int len = strlen(yytext);
-                    std::string s(yytext+1, len-2);
-                    yylval = new fsh::instruction::String(s); 
-                    column += len;
+\"              {quotedstring.clear(); BEGIN(str);}
+<str>\"         {
+                    BEGIN(INITIAL);
+                    yylval = new fsh::instruction::String(lineno, quotedstring); 
+                    column += 1;
                     return STRING_LITERAL;
                 }
-{D}+         { column += strlen(yytext);yylval = new fsh::instruction::Integer(atoi(yytext)); return INTEGER; }
-{D}+\.{D}+ { column += strlen(yytext);yylval = new fsh::instruction::Float(strtod(yytext, nullptr)); return FLOAT; }
-[a-zA-Z_][a-zA-Z0-9_]*   { column += strlen(yytext);yylval = new fsh::instruction::Identifier(yytext); return IDENTIFIER; }
+<str>\n         { /* Unterminated string - error */
+                }
+
+<str>\\n        quotedstring.push_back('\n');
+<str>\\t        quotedstring.push_back('\t');
+<str>\\(.|\n)   quotedstring.push_back(yytext[1]);
+<str>[^\\\n\"]+  {
+                    char *yptr = yytext;
+                    while(*yptr)
+                    {
+                        quotedstring.push_back(*yptr++);
+                        column += 1;
+                    }
+                }
+
+{D}+         { 
+    column += strlen(yytext);
+    yylval = new fsh::instruction::Integer(lineno, atoi(yytext)); 
+    return INTEGER; 
+}
+
+{D}+\.{D}+ { 
+    column += strlen(yytext);
+    yylval = new fsh::instruction::Float(lineno, strtod(yytext, nullptr)); 
+    return FLOAT; 
+}
+
+[a-zA-Z_][a-zA-Z0-9_]*   { 
+    column += strlen(yytext);
+    yylval = new fsh::instruction::Identifier(lineno, yytext); 
+    return IDENTIFIER; 
+}
 #.*$ ;
 %%
 

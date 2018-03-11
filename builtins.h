@@ -9,6 +9,9 @@ namespace fsh
 
     //Print[arg1, srg2, ...];
     ElementPtr Print(Machine&, std::vector<ElementPtr>&);
+    ElementPtr ToInt(Machine&, std::vector<ElementPtr>&);
+    ElementPtr ToFloat(Machine&, std::vector<ElementPtr>&);
+    ElementPtr ToString(Machine&, std::vector<ElementPtr>&);
 
     /********* List *********/
     // Part[list, startidx];
@@ -45,6 +48,7 @@ namespace fsh
     ElementPtr Strcmp(Machine&, std::vector<ElementPtr>&);
     ElementPtr RegMatch(Machine&, std::vector<ElementPtr>&);
     ElementPtr RegSearch(Machine&, std::vector<ElementPtr>&);
+    ElementPtr Find(Machine&, std::vector<ElementPtr>&);
 
     /***********************************************
      * Helpers for built in functions
