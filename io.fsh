@@ -1,24 +1,29 @@
-count = 0;
 stageOne = &[line:
     If [Find[line, "Token"] > 0
     then    
-        count = count + 1;
+        Print ["***", line, "***"];
     else
-        None;
+        Print[line];
     ];
-    line;
+    True;
 ];
 
 stageTwo = &[line2:
-    Print["stage two ", line2];
+    #Print["stage two ", line2];
     line2;
 ];
 
-Try[
-    file = OpenFile["common.h", "r"];
-    fileOut = OpenFile["junk", "w"];
-    PipeLine[file, stageOne, fileOut, stageTwo];
-    Print ["Number of \"Tokens\": ", count];
+#Try[
+    #file = OpenFile["common.h", "r"];
+    #fileOut = OpenFile["junk", "w"];
+    #PipeLine[file, stageOne, fileOut, stageTwo];
+    #Print ["Number of \"Tokens\": ", count];
+#catch
+    #Print [_exception];
+#];
+
+Try [
+    ReadProcess[stageOne, "cat common.h | grep Token"];
 catch
-    Print [_exception];
+    Print["Exception: ", _exception];
 ];

@@ -35,7 +35,7 @@ namespace fsh
         return fh;
     }
 
-    ErrorPtr ReadFile(Machine& machine, std::vector<ElementPtr>& args)
+    ElementPtr ReadFile(Machine& machine, std::vector<ElementPtr>& args)
     {
         bool stripnl;
         machine.get_variable("__stripnl", stripnl);
@@ -43,17 +43,18 @@ namespace fsh
         FunctionDefinitionPtr fd = GetFunctionDefinition(machine, args, 0);
         if (fd.get() == nullptr)
         {
-            ErrorPtr e = MakeError("Expected function", false);
-            return e;
+            throw std::runtime_error("ReadFile: Expected function for arg 0");
         }
 
         StringPtr sp = GetString(machine, args, 1);
         if (sp.get() == nullptr)
-            return MakeError("Expected filename", false);
+            throw std::runtime_error("ReadFile: Expected filename for arg 2");
         FILE *fp = fopen(sp->value.c_str(), "r");
         if (fp == nullptr)
         {
-            return MakeError("Unable to open file", false);
+            std::stringstream strm;
+            strm << "ReadFile: Unable to open " << sp->value;
+            throw std::runtime_error(strm.str());
         }
         char buffer[1024];
         while (true)
@@ -61,7 +62,7 @@ namespace fsh
             if (nullptr == fgets(buffer, sizeof(buffer), fp))
             {
                 fclose(fp);
-                return MakeError("success", true);
+                return MakeNone();
             }
             if (stripnl)
             {
@@ -80,19 +81,80 @@ namespace fsh
                 if (b == false)
                 {
                     fclose(fp);
-                    return MakeError("", true);
+                    return MakeNone();
                 }
             }
             catch (std::exception)
             {
                 machine.pop_context();
                 fclose(fp);
-                return MakeError("Exception caught", false);
+                throw;
             }
         }
         fclose(fp);
-        return MakeError("success", true);
+        return MakeNone();
     }
+
+    ElementPtr ReadProcess(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        bool stripnl;
+        machine.get_variable("__stripnl", stripnl);
+
+        FunctionDefinitionPtr fd = GetFunctionDefinition(machine, args, 0);
+        if (fd.get() == nullptr)
+        {
+            throw std::runtime_error("ReadProcess: Expected function for arg 0");
+        }
+
+        StringPtr sp = GetString(machine, args, 1);
+        if (sp.get() == nullptr)
+            throw std::runtime_error("ReadProcess: Expected process for arg 2");
+        FILE *fp = popen(sp->value.c_str(), "r");
+        if (fp == nullptr)
+        {
+            std::stringstream strm;
+            strm << "ReadProcess: Unable to open " << sp->value;
+            throw std::runtime_error(strm.str());
+        }
+        char buffer[1024];
+        while (true)
+        {
+            if (nullptr == fgets(buffer, sizeof(buffer), fp))
+            {
+                pclose(fp);
+                return MakeNone();
+            }
+            if (stripnl)
+            {
+                int len = strlen(buffer);
+                if (buffer[len-1] ==  '\n')
+                    buffer[len-1] = '\0';
+            }
+            ElementPtr e = MakeString(buffer);
+            machine.push_data(e);
+            try
+            {
+                machine.push_context();
+                ElementPtr r = CallFunctionImpl(machine, fd, 1);
+                machine.pop_context();
+                bool b = machine.ConvertToBool(r);
+                if (b == false)
+                {
+                    pclose(fp);
+                    return MakeNone();
+                }
+            }
+            catch (std::exception)
+            {
+                machine.pop_context();
+                pclose(fp);
+                throw;
+            }
+        }
+        pclose(fp);
+        return MakeNone();
+    }
+
 
     ElementPtr PipelineStage(Machine& machine, ElementPtr stage, ElementPtr data)
     {

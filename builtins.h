@@ -37,7 +37,10 @@ namespace fsh
     // ReadFile[func, "filename"];
     //      func is defined as &[line : body...];
     //      __stripnl=True to strip the ending newline
-    ErrorPtr ReadFile(Machine&, std::vector<ElementPtr>&);
+    ElementPtr ReadFile(Machine&, std::vector<ElementPtr>&);
+
+    //ReadProcess[func, "processname", "r" or "w"];
+    ElementPtr ReadProcess(Machine&, std::vector<ElementPtr>&);
 
     /*********** String ************/
     ElementPtr Trim(Machine&, std::vector<ElementPtr>&);
