@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstdio>
 #include <algorithm>
+#include <sstream>
 #include "common.h"
 #include "element.h"
 #include "machine.h"
@@ -198,22 +199,112 @@ namespace fsh
         }
     }
 
+    std::string toString(Machine& machine, ElementPtr e)
+    {
+        switch(e->type())
+        {
+        case ELEMENT_TYPE_INTEGER:
+            {
+                IntegerPtr n = e.cast<Integer>();
+                return std::to_string(n->value);
+            }
+            break;
+        case ELEMENT_TYPE_BOOLEAN:
+            {
+                BooleanPtr n = e.cast<Boolean>();
+                if (n->value)
+                    return "True";
+                else
+                    return "False";
+            }
+            break;
+        case ELEMENT_TYPE_FLOAT:
+            {
+                FloatPtr f = e.cast<Float>();
+                return std::to_string(f->value);
+            }
+            break;
+        case ELEMENT_TYPE_ERROR:
+            {
+                ErrorPtr ep = e.cast<Error>();
+                return ep->msg;
+            }
+            break;
+        case ELEMENT_TYPE_IDENTIFIER:
+            {
+                IdentifierPtr id = e.cast<Identifier>();
+                ElementPtr e;
+                if (machine.get_variable(id->value, e))
+                {
+                    if (e->IsIdentifier())
+                        return e.cast<Identifier>()->value;
+                    else
+                        return toString(machine, e);
+                }
+                else
+                    return id->value;
+            }
+            break;
+        case ELEMENT_TYPE_NONE:
+            {
+                return "None";
+            }
+            break;
+        case ELEMENT_TYPE_STRING:
+            {
+                ElementPtr r = machine.resolve(e);
+                assert(r->IsString());
+                return r.cast<String>()->value;
+            }
+            break;
+        case ELEMENT_TYPE_LIST:
+            {
+                ListPtr lp = e.cast<List>();
+                std::string rtn;
+                for (size_t idx = 0; idx < lp->items.size(); ++idx)
+                {
+                    ElementPtr item = lp->items[idx];
+                    rtn.push_back('\'');
+                    std::string s = toString(machine, item);
+                    rtn += s;
+                    rtn.push_back('\'');
+                    if (idx < lp->items.size()-1)
+                        rtn.push_back(',');
+                }
+                return rtn;
+            }
+            break;
+        case ELEMENT_TYPE_FUNCTION_DEFINITION:
+            {
+                return "FunctionDefinition";
+            }
+            break;
+        default:
+            {
+                std::stringstream strm;
+                strm << "(" << e->type() << ")";
+                return strm.str();
+            }
+            break;
+        }
+    }
+
     ElementPtr ToString(Machine& machine, std::vector<ElementPtr>& args)
     {
         ElementPtr e = GetElement(machine, args, 0);
         if (!e)
             throw std::runtime_error("ToString[] requires an argument");
-        switch(e->type())
+        return MakeString(toString(machine, e));
+    }
+
+    ElementPtr Print(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        for (auto& e : args)
         {
-        case ELEMENT_TYPE_FLOAT:
-            return MakeString(std::to_string(e.cast<Float>()->value));
-        case ELEMENT_TYPE_STRING:
-            return e;
-        case ELEMENT_TYPE_INTEGER:
-            return MakeString(std::to_string(e.cast<Integer>()->value));
-        default:
-            throw std::runtime_error("Float[] unconvertable type");
+            std::cout << toString(machine, e);
         }
+        std::cout << std::endl;
+        return MakeNone();
     }
 
     void RegisterBuiltIns(Machine& machine)

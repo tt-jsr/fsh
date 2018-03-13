@@ -71,4 +71,5 @@ namespace fsh
     IdentifierPtr GetIdentifier(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     FunctionDefinitionPtr GetFunctionDefinition(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     ElementPtr CallFunctionImpl(Machine& machine, FunctionDefinitionPtr funcDef, size_t nItemsOnStack);
+    std::string toString(Machine& machine, ElementPtr e);
 }

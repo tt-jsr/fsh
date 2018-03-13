@@ -24,7 +24,7 @@ void yyerror(const char *s) {
 int main(int argc, char *argv[])
 {
 	// open a file handle to a particular file:
-	FILE *myfile = fopen("io.fsh", "r");
+	FILE *myfile = fopen("junk.fsh", "r");
 	// make sure it's valid:
 	if (!myfile) {
         std::cout << "Cannot open io.fsh" << std::endl;

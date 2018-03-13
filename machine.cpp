@@ -2,8 +2,10 @@
 #include <sstream>
 #include <iostream>
 #include <cassert>
+#include <cctype>
 #include "common.h"
 #include "machine.h"
+#include "builtins.h"
 #include "instructions.h"
 
 namespace fsh
@@ -106,6 +108,20 @@ namespace fsh
         datastack.push_back(d);
     }
 
+    std::string collect_var(const char *& p)
+    {
+        ++p; // get pass the '$'
+        if (*p == '{')
+            ++p;
+        std::string rtn;
+        while (*p && (isalnum(*p) || *p == '_')) 
+        {
+            rtn.push_back(*p);
+            ++p;
+        }
+        return rtn;
+    }
+
     ElementPtr Machine::resolve(ElementPtr e)
     {
         if (e->IsIdentifier())
@@ -116,6 +132,47 @@ namespace fsh
             {
                 return rtn;
             }
+        }
+        if (e->IsString())
+        {
+            StringPtr sp = e.cast<String>();
+            std::string s;
+            const char *p = sp->value.c_str();
+            if (sp->value.find_first_of("$") == std::string::npos)
+                return sp;  // No substitutions, just return
+            while (*p)
+            {
+                switch(*p)
+                {
+                case '\\':
+                    ++p;
+                    s.push_back(*p);
+                    ++p;
+                    break;
+                case '$':
+                    {
+                        ElementPtr e;
+                        std::string var = collect_var(p);
+                        if (get_variable(var, e))
+                        {
+                            s += toString(*this, e);
+                        }
+                        else
+                        {
+                            s += "${";
+                            s += var;
+                            s += "}";
+                        }
+                    }   
+                    if (*p)
+                        ++p;
+                    break;
+                default:
+                    s.push_back(*p);
+                    ++p;
+                }
+            }
+            return MakeString(s);
         }
         return e;
     }
