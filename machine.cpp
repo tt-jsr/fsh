@@ -130,6 +130,8 @@ namespace fsh
             IdentifierPtr id = e.cast<Identifier>();
             if (get_variable(id->value, rtn))
             {
+                if(rtn->IsString())
+                    return resolve(rtn);
                 return rtn;
             }
         }
