@@ -84,8 +84,8 @@ namespace fsh
     ElementPtr Split(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr sp = GetString(machine, args, 0);
-        StringPtr chars = GetString(machine, args, 1);
-        if (!(sp && chars))
+        StringPtr separators = GetString(machine, args, 1);
+        if (!(sp && separators))
         {
             return MakeList("__list__");
         }
@@ -93,7 +93,7 @@ namespace fsh
         std::string s;
         for (auto it = sp->value.begin(); it != sp->value.end(); ++it)
         {
-            if (chars->value.find_first_of(*it) != std::string::npos)
+            if (separators->value.find_first_of(*it) != std::string::npos)
             {
                 StringPtr item = MakeString(s);
                 lst->items.push_back(item);

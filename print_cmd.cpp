@@ -66,11 +66,14 @@ namespace fsh
         case ELEMENT_TYPE_LIST:
             {
                 ListPtr lp = e.cast<List>();
-                for (size_t idx = 1; idx < lp->items.size(); ++idx)
+                for (size_t idx = 0; idx < lp->items.size(); ++idx)
                 {
                     ElementPtr item = lp->items[idx];
+                    std::cout << "'";
                     Print(machine, item);
-                    std::cout << ",";
+                    std::cout << "'";
+                    if (idx < lp->items.size()-1)
+                        std::cout << ",";
                 }
             }
             break;
@@ -80,7 +83,7 @@ namespace fsh
             }
             break;
         default:
-            std::cout << " Print[] no handler ";
+            std::cout << "(" << e->type() << ")";
             break;
         }
     }

@@ -15,12 +15,12 @@ namespace fsh
         StringPtr filename = GetString(machine, args, 0);
         if (filename.get() == nullptr)
         {
-            throw "Openfile: arg0 is not a string";
+            throw "Openfile: process name is not a string";
         }
         StringPtr mode = GetString(machine, args, 1);
         if (mode.get() == nullptr)
         {
-            throw std::runtime_error("Openfile: arg1 is not a string");
+            throw std::runtime_error("OpenProcess: mode is not a string");
         }
         FileHandlePtr fh = MakeFileHandle();
         if (mode->value == "r" || mode->value == "rw")
@@ -30,6 +30,32 @@ namespace fsh
         {
             std::stringstream strm;
             strm << "Openfile: cannot open " << filename->value;
+            throw std::runtime_error(strm.str());
+        }
+        return fh;
+    }
+
+    FileHandlePtr OpenProcess(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        StringPtr processName = GetString(machine, args, 0);
+        if (processName.get() == nullptr)
+        {
+            throw "OpenProcess: process name is not a string";
+        }
+        StringPtr mode = GetString(machine, args, 1);
+        if (mode.get() == nullptr)
+        {
+            throw std::runtime_error("Openfile: mode is not a string");
+        }
+        FileHandlePtr fh = MakeFileHandle();
+        if (mode->value == "r" || mode->value == "rw")
+            fh->bRead = true;
+        fh->isPipe = true;
+        fh->fp = popen(processName->value.c_str(), mode->value.c_str());
+        if (fh->fp == nullptr)
+        {
+            std::stringstream strm;
+            strm << "OpenProcess: cannot open " << processName->value;
             throw std::runtime_error(strm.str());
         }
         return fh;
@@ -192,7 +218,10 @@ namespace fsh
                     char buffer[1024];
                     if (nullptr == fgets(buffer, sizeof(buffer), file->fp))
                     {
-                        fclose(file->fp);
+                        if (file->isPipe)
+                            pclose(file->fp);
+                        else
+                            fclose(file->fp);
                         file->fp = nullptr;
                         return MakeBoolean(false);
                     }

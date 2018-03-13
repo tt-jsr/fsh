@@ -178,16 +178,20 @@ namespace fsh
         FileHandle()
         :fp(nullptr)
         ,bRead(false)
+        ,isPipe(false)
         {}
         ~FileHandle()
         {
-            if (fp)
+            if (fp && !isPipe)
                 fclose(fp);
+            if (fp && isPipe)
+                pclose(fp);
             fp = nullptr;
         }
         virtual ElementType type() {return ELEMENT_TYPE_FILE_HANDLE;}
         FILE *fp;
         bool bRead;
+        bool isPipe;
     };
 
     typedef instrusive_ptr<FileHandle> FileHandlePtr;

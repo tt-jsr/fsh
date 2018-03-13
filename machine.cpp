@@ -55,6 +55,8 @@ namespace fsh
         case ELEMENT_TYPE_INTEGER:
             return e.cast<Integer>()->value != 0;
             break;
+        case ELEMENT_TYPE_STRING:
+            return e.cast<String>()->value.empty() == false;
         case ELEMENT_TYPE_IDENTIFIER:
             {
                 IdentifierPtr id = e.cast<Identifier>();

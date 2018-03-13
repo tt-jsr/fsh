@@ -238,7 +238,70 @@ void Test1::testFunctions()
     StartParser("functions.fsh");
 }
 
+void Test1::UnitTestList(int n)
+{
+}
+
 void Test1::testList()
 {
+}
+
+void Test1::UnitTestString(int n)
+{
+    std::string svalue;
+    fsh::ElementPtr e;
+
+    switch (n)
+    {
+    case 1:
+        CPPUNIT_ASSERT(machine.get_variable("tl",  svalue));
+        CPPUNIT_ASSERT(svalue == "trim this   ");
+
+        CPPUNIT_ASSERT(machine.get_variable("tr",  svalue));
+        CPPUNIT_ASSERT(svalue == "   trim this");
+
+        CPPUNIT_ASSERT(machine.get_variable("t",  svalue));
+        CPPUNIT_ASSERT(svalue == "trim this");
+        break;
+    case 2:
+        CPPUNIT_ASSERT(machine.get_variable("parts",  e));
+        if (e->IsList())
+        {
+            fsh::ListPtr lst = e.cast<fsh::List>();
+            CPPUNIT_ASSERT(lst->items.size() == 4);
+            CPPUNIT_ASSERT(lst->items[0].cast<fsh::String>()->value == "col1");
+            CPPUNIT_ASSERT(lst->items[1].cast<fsh::String>()->value == "col2");
+            CPPUNIT_ASSERT(lst->items[2].cast<fsh::String>()->value == "col3");
+            CPPUNIT_ASSERT(lst->items[3].cast<fsh::String>()->value == "col4");
+        }
+        CPPUNIT_ASSERT(machine.get_variable("parts2",  e));
+        if (e->IsList())
+        {
+            fsh::ListPtr lst = e.cast<fsh::List>();
+            CPPUNIT_ASSERT(lst->items.size() == 8);
+        }
+        break;
+    case 3:
+        CPPUNIT_ASSERT(machine.get_variable("s1",  svalue));
+        CPPUNIT_ASSERT(svalue == "e");
+
+        CPPUNIT_ASSERT(machine.get_variable("s2",  svalue));
+        CPPUNIT_ASSERT(svalue == "ll");
+
+        CPPUNIT_ASSERT(machine.get_variable("s3",  svalue));
+        CPPUNIT_ASSERT(svalue == "Hel");
+
+        CPPUNIT_ASSERT(machine.get_variable("s4",  svalue));
+        CPPUNIT_ASSERT(svalue == "lo World");
+        break;
+    }
+}
+
+void Test1::testString()
+{
+    machine.reset();
+    std::function<void (int)> f = std::bind(&Test1::UnitTestString, this, std::placeholders::_1);
+    machine.register_unittest(f);
+    StartParser("string.fsh");
 }
 

@@ -32,6 +32,9 @@ namespace fsh
 
     // OpenFile["filename", "r"];
     FileHandlePtr OpenFile(Machine&, std::vector<ElementPtr>&);
+
+    // OpenProcess["filename", "r"];
+    FileHandlePtr OpenProcess(Machine&, std::vector<ElementPtr>&);
     ElementPtr PipeLine(Machine&, std::vector<ElementPtr>&);
 
     // ReadFile[func, "filename"];
@@ -41,6 +44,7 @@ namespace fsh
 
     //ReadProcess[func, "processname", "r" or "w"];
     ElementPtr ReadProcess(Machine&, std::vector<ElementPtr>&);
+    ElementPtr WriteProcess(Machine&, std::vector<ElementPtr>&);
 
     /*********** String ************/
     ElementPtr Trim(Machine&, std::vector<ElementPtr>&);

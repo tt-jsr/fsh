@@ -223,6 +223,7 @@ namespace fsh
         machine.register_builtin("ReadFile", fsh::ReadFile);
         machine.register_builtin("OpenFile", fsh::OpenFile);
         machine.register_builtin("PipeLine", fsh::PipeLine);
+        machine.register_builtin("OpenProcess", fsh::OpenProcess);
         machine.register_builtin("ReadProcess", fsh::ReadProcess);
 
         // String
