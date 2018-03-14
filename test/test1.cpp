@@ -249,6 +249,7 @@ void Test1::testList()
 void Test1::UnitTestString(int n)
 {
     std::string svalue;
+    bool bvalue;
     fsh::ElementPtr e;
 
     switch (n)
@@ -293,6 +294,22 @@ void Test1::UnitTestString(int n)
 
         CPPUNIT_ASSERT(machine.get_variable("s4",  svalue));
         CPPUNIT_ASSERT(svalue == "lo World");
+        break;
+    case 4:
+        CPPUNIT_ASSERT(machine.get_variable("a3",  svalue));
+        CPPUNIT_ASSERT(svalue == "Hello World");
+
+        CPPUNIT_ASSERT(machine.get_variable("b1",  bvalue));
+        CPPUNIT_ASSERT(bvalue == false);
+
+        CPPUNIT_ASSERT(machine.get_variable("b2",  bvalue));
+        CPPUNIT_ASSERT(bvalue == true);
+
+        CPPUNIT_ASSERT(machine.get_variable("b3",  bvalue));
+        CPPUNIT_ASSERT(bvalue == false);
+
+        CPPUNIT_ASSERT(machine.get_variable("b4",  bvalue));
+        CPPUNIT_ASSERT(bvalue == true);
         break;
     }
 }

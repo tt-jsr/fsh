@@ -75,12 +75,19 @@ namespace fsh
         StringPtr sp = GetString(machine, args, 1);
         if (sp.get() == nullptr)
             throw std::runtime_error("ReadFile: Expected filename for arg 2");
-        FILE *fp = fopen(sp->value.c_str(), "r");
-        if (fp == nullptr)
+
+        FILE *fp = nullptr;
+        if (sp->value == "stdin")
+            fp = stdin;
+        else
         {
-            std::stringstream strm;
-            strm << "ReadFile: Unable to open " << sp->value;
-            throw std::runtime_error(strm.str());
+            fp = fopen(sp->value.c_str(), "r");
+            if (fp == nullptr)
+            {
+                std::stringstream strm;
+                strm << "ReadFile: Unable to open " << sp->value;
+                throw std::runtime_error(strm.str());
+            }
         }
         char buffer[1024];
         while (true)
@@ -103,8 +110,7 @@ namespace fsh
                 machine.push_context();
                 ElementPtr r = CallFunctionImpl(machine, fd, 1);
                 machine.pop_context();
-                bool b = machine.ConvertToBool(r);
-                if (b == false)
+                if (r->IsBoolean() && r.cast<Boolean>()->value == false)
                 {
                     fclose(fp);
                     return MakeNone();
@@ -163,8 +169,7 @@ namespace fsh
                 machine.push_context();
                 ElementPtr r = CallFunctionImpl(machine, fd, 1);
                 machine.pop_context();
-                bool b = machine.ConvertToBool(r);
-                if (b == false)
+                if (r->IsBoolean() && r.cast<Boolean>()->value == false)
                 {
                     pclose(fp);
                     return MakeNone();

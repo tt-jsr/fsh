@@ -87,6 +87,24 @@ namespace fsh
                 break;
             }
         }
+        
+        void ExecuteString(Machine& machine, int op, fsh::StringPtr lhs, fsh::StringPtr rhs)
+        {
+            switch(op)
+            {
+            case TOKEN_PLUS:
+                machine.push_data(MakeString(lhs->value + rhs->value));
+                break;
+            case TOKEN_EQ:
+                machine.push_data(MakeBoolean(lhs->value == rhs->value));
+                break;
+            case TOKEN_NEQ:
+                machine.push_data(MakeBoolean(lhs->value != rhs->value));
+                break;
+            default:
+                throw std::runtime_error("Invalid operator with strings");
+            }
+        }
 
         BinaryOperator::~BinaryOperator()
         {
@@ -188,8 +206,11 @@ namespace fsh
                 ElementPtr rdata = machine.pop_data();
                 rdata = machine.resolve(rdata);
 
-
-                if (rdata->IsFloat() && ldata->IsInteger())
+                if (rdata->IsString() && ldata->IsString())
+                {
+                    ExecuteString(machine, op, ldata.cast<fsh::String>(), rdata.cast<fsh::String>());
+                }
+                else if (rdata->IsFloat() && ldata->IsInteger())
                 {
                     fsh::FloatPtr l = MakeFloat((double)ldata.cast<fsh::Integer>()->value);
                     fsh::FloatPtr r = rdata.cast<fsh::Float>();
@@ -211,7 +232,7 @@ namespace fsh
                 else
                 {
                     std::stringstream strm;
-                    strm << "Binary Operator: Invalid type, line: " << lineno;
+                    strm << "Binary Operator: Invalid types, line: " << lineno;
                     throw std::runtime_error(strm.str());
                 }
             }

@@ -37,5 +37,19 @@ example2= &[
     PipeLine[ls, parse, print];
 ];
 
-example2[];
+
+cmdFunc = &[line:
+    If [line == "q"
+    then
+        False;
+    else
+        Print [line];
+    ];
+];
+
+userInput = &[
+    ReadFile[cmdFunc, "stdin", __stripnl=True];
+];
+
+userInput[];
 

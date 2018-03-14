@@ -307,6 +307,11 @@ namespace fsh
         return MakeNone();
     }
 
+    ElementPtr Eval(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        throw std::runtime_error("Eval is not implemented");
+    }
+
     void RegisterBuiltIns(Machine& machine)
     {
         // IO
@@ -341,6 +346,7 @@ namespace fsh
         machine.register_builtin("Int", fsh::ToInt);
         machine.register_builtin("Float", fsh::ToFloat);
         machine.register_builtin("ToString", fsh::ToString);
+        machine.register_builtin("Eval", fsh::Eval);
     }
 }
 
