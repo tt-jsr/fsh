@@ -40,12 +40,19 @@ namespace fsh
         if (start > src.size() || end > src.size())
             throw std::runtime_error("Invalid part");
 
-        ListPtr rtn = MakeList("__list__");  // Parting loses the original list type
-        for (size_t idx = start; idx < end; ++idx)
+        if (end-start== 1)
         {
-            rtn->items.push_back(src[idx]);
+            return src[start];
         }
-        return rtn;
+        else
+        {
+            ListPtr rtn = MakeList("__list__");  // Parting loses the original list type
+            for (size_t idx = start; idx < end; ++idx)
+            {
+                rtn->items.push_back(src[idx]);
+            }
+            return rtn;
+        }
     }
 
     ElementType GetElementType(size_t idx, std::vector<ElementPtr>& args)
