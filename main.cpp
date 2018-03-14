@@ -16,7 +16,7 @@ extern uint64_t column;
 Machine machine;
 
 void yyerror(const char *s) {
-    std::cout << "Syntax error: " << s << " line: " << lineno << ":" << column << " " << yytext << std::endl;
+    std::cout << "Syntax error: " << s << " line: " << lineno << ":" << column << " \"" << yytext << "\"" << std::endl;
 	// might as well halt now:
 	exit(-1);
 }

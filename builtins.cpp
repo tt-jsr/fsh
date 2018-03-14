@@ -309,6 +309,12 @@ namespace fsh
 
     ElementPtr Eval(Machine& machine, std::vector<ElementPtr>& args)
     {
+        StringPtr sp = GetString(machine, args, 0);
+        if (!sp)
+        {
+            throw std::runtime_error("Eval requires a string argument");
+        }
+
         throw std::runtime_error("Eval is not implemented");
     }
 

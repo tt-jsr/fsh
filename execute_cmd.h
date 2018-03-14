@@ -1,5 +1,0 @@
-
-void Execute(List& list)
-{
-
-}

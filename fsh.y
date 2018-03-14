@@ -390,6 +390,14 @@ function_call
         //std::cout << "func call  " << id->name << std::endl;
         $$ = pCall;
     }
+    //| dot_expression '[' ']' {
+        //call_t *pCall = new call_t(lineno);
+        //iden_t *id = (iden_t *)$1;
+        //pCall->name = id->name;
+        //delete id;
+        ////std::cout << "func call  " << id->name << std::endl;
+        //$$ = pCall;
+    //}
     ;
 
 identifier_list
