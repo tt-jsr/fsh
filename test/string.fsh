@@ -16,10 +16,10 @@ UnitTest[2];
 
 
 s = "Hello World";
-s1 = Part[s, 1];
-s2 = Part[s, 2:4];
-s3 = Part[s, :3];
-s4 = Part[s, 3:];
+s1 = s[[1]];
+s2 = s[[2:4]];
+s3 = s[[:3]];
+s4 = s[[3:]];
 UnitTest[3];
 
 a = "Hello ";

@@ -43,6 +43,8 @@ H           [a-fA-F0-9]
 \<=               {++column;return LTE;}
 ==               {++column;return EQ;}
 \!=               {column += 2;return NEQ;}
+\[\[            {column += 2;return DOUBLE_BRACKET_OPEN;}
+\]\]            {column += 2;return DOUBLE_BRACKET_CLOSE;}
 None            {column += 4;return NONE;}
 True            {column += 4;return TRUE;}
 False           {column += 5;return FALSE;}
@@ -52,7 +54,6 @@ If              {column += 2;return IF;}
 While           {column += 5;return WHILE;}
 Try             {column += 5;return TRY;}
 catch           {column += 5;return CATCH;}
-Part            {column += 4;return PART;}
 and             {column += 3;return AND;}
 or              {column += 2;return OR;}
 in              {column += 2;return IN;}

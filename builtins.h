@@ -18,6 +18,7 @@ namespace fsh
     // Part[list, startidx];
     // Part[list, startidx, endidx];
     ElementPtr Part(Machine&, std::vector<ElementPtr>&);
+    ElementPtr Subscript(Machine&, std::vector<ElementPtr>&);
     ElementPtr DefineRecord(Machine&, std::vector<ElementPtr>&);
     ElementPtr MakeRecord(Machine&, std::vector<ElementPtr>&);
     IntegerPtr Len(Machine&, std::vector<ElementPtr>&);

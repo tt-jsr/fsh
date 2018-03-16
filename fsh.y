@@ -65,8 +65,9 @@ void dump(void *p)
 %token NONE TRUE FALSE
 %token IF WHILE THEN ELSE
 %token TRY CATCH
-%token PART
 %token FOR IN
+%token DOUBLE_BRACKET_OPEN
+%token DOUBLE_BRACKET_CLOSE
 %token ';'
 %left ','
 %left '='
@@ -132,9 +133,9 @@ expression
     | selection_expression      {$$ = $1;}
     | iteration_expression      {$$ = $1;}
     | exception_expression      {$$ = $1;}
-    | part_expression           {$$ = $1;}
     | dot_expression            {$$ = $1;}
     | for_expression            {$$ = $1;}
+    | subscript_expression      {$$ = $1;}
     ;
 
 relational_expression
@@ -240,47 +241,47 @@ math_expression
     }
     ;
 
-part_expression
-    : PART '[' expression ',' expression ':' expression ']' {
+subscript_expression
+    : primary_expression DOUBLE_BRACKET_OPEN  expression ':' expression DOUBLE_BRACKET_CLOSE {
         call_t *pCall = new call_t(lineno);
-        pCall->call = new iden_t(lineno, "Part");
+        pCall->call = new iden_t(lineno, "Subscript");
         el_t *el = new fsh::instruction::ExpressionList(lineno);
+        el->expressions.push_back((inst_t *)$1);
         el->expressions.push_back((inst_t *)$3);
-        el->expressions.push_back((inst_t *)$5);
         el->expressions.push_back(new str_t(lineno, ":"));
-        el->expressions.push_back((inst_t *)$7);
-        pCall->functionArguments = el;
-        //std::cout << "func call " << id->name << std::endl;
-        $$ = pCall;
-    }
-    | PART '[' expression ',' expression ':' ']' {
-        call_t *pCall = new call_t(lineno);
-        pCall->call = new iden_t(lineno, "Part");
-        el_t *el = new fsh::instruction::ExpressionList(lineno);
-        el->expressions.push_back((inst_t *)$3);
-        el->expressions.push_back((inst_t *)$5);
-        el->expressions.push_back(new str_t(lineno, ":"));
-        pCall->functionArguments = el;
-        //std::cout << "func call " << id->name << std::endl;
-        $$ = pCall;
-    }
-    | PART '[' expression ',' expression ']' {
-        call_t *pCall = new call_t(lineno);
-        pCall->call = new iden_t(lineno, "Part");
-        el_t *el = new fsh::instruction::ExpressionList(lineno);
-        el->expressions.push_back((inst_t *)$3);
         el->expressions.push_back((inst_t *)$5);
         pCall->functionArguments = el;
         //std::cout << "func call " << id->name << std::endl;
         $$ = pCall;
     }
-    | PART '[' expression ',' ':' expression ']' {
+    | primary_expression DOUBLE_BRACKET_OPEN  expression ':' DOUBLE_BRACKET_CLOSE {
         call_t *pCall = new call_t(lineno);
-        pCall->call = new iden_t(lineno, "Part");
+        pCall->call = new iden_t(lineno, "Subscript");
         el_t *el = new fsh::instruction::ExpressionList(lineno);
+        el->expressions.push_back((inst_t *)$1);
         el->expressions.push_back((inst_t *)$3);
         el->expressions.push_back(new str_t(lineno, ":"));
-        el->expressions.push_back((inst_t *)$6);
+        pCall->functionArguments = el;
+        //std::cout << "func call " << id->name << std::endl;
+        $$ = pCall;
+    }
+    | primary_expression DOUBLE_BRACKET_OPEN  expression DOUBLE_BRACKET_CLOSE {
+        call_t *pCall = new call_t(lineno);
+        pCall->call = new iden_t(lineno, "Subscript");
+        el_t *el = new fsh::instruction::ExpressionList(lineno);
+        el->expressions.push_back((inst_t *)$1);
+        el->expressions.push_back((inst_t *)$3);
+        pCall->functionArguments = el;
+        //std::cout << "func call " << id->name << std::endl;
+        $$ = pCall;
+    }
+    | primary_expression DOUBLE_BRACKET_OPEN  ':' expression DOUBLE_BRACKET_CLOSE {
+        call_t *pCall = new call_t(lineno);
+        pCall->call = new iden_t(lineno, "Subscript");
+        el_t *el = new fsh::instruction::ExpressionList(lineno);
+        el->expressions.push_back((inst_t *)$1);
+        el->expressions.push_back(new str_t(lineno, ":"));
+        el->expressions.push_back((inst_t *)$4);
         pCall->functionArguments = el;
         //std::cout << "func call " << id->name << std::endl;
         $$ = pCall;
@@ -387,14 +388,6 @@ function_call
         //std::cout << "func call  " << id->name << std::endl;
         $$ = pCall;
     }
-    //| dot_expression '[' ']' {
-        //call_t *pCall = new call_t(lineno);
-        //iden_t *id = (iden_t *)$1;
-        //pCall->name = id->name;
-        //delete id;
-        ////std::cout << "func call  " << id->name << std::endl;
-        //$$ = pCall;
-    //}
     ;
 
 identifier_list

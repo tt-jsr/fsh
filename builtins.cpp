@@ -340,6 +340,7 @@ namespace fsh
 
         // List
         machine.register_builtin("Part", fsh::Part);
+        machine.register_builtin("Subscript", fsh::Subscript);
         machine.register_builtin("DefineRecord", fsh::DefineRecord);
         machine.register_builtin("MakeRecord", fsh::MakeRecord);
         machine.register_builtin("Len", fsh::Len);
