@@ -162,6 +162,7 @@ void Test1::UnitTestControl(int n)
 {
     bool bvalue;
     int64_t nvalue;
+    std::string svalue;
     switch (n)
     {
     case 1:
@@ -171,6 +172,9 @@ void Test1::UnitTestControl(int n)
     case 2:
         CPPUNIT_ASSERT(machine.get_variable("result",  bvalue));
         CPPUNIT_ASSERT(bvalue == false);
+
+        CPPUNIT_ASSERT(machine.get_variable("ifval",  svalue));
+        CPPUNIT_ASSERT(svalue == "boo");
         break;
     case 3:
         CPPUNIT_ASSERT(machine.get_variable("result",  nvalue));

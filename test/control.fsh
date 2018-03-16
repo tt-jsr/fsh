@@ -17,6 +17,7 @@ result = If [val < 10
     then
         True;
     else
+        ifval = "boo";
         False;
 ];
 
