@@ -29,7 +29,6 @@ namespace fsh
         ,ELEMENT_TYPE_BOOLEAN
         ,ELEMENT_TYPE_OBJECT
         ,ELEMENT_TYPE_FILE_HANDLE
-        ,ELEMENT_TYPE_PART
     };
 
     struct Element : public instrusive_base
@@ -46,7 +45,6 @@ namespace fsh
         bool IsBoolean() {return type() == ELEMENT_TYPE_BOOLEAN;}
         bool IsObject() {return type() ==ELEMENT_TYPE_OBJECT;}
         bool IsFileHandle() {return type() == ELEMENT_TYPE_FILE_HANDLE;}
-        bool IsPart() {return type() == ELEMENT_TYPE_PART;}
     };
 
     typedef instrusive_ptr<Element> ElementPtr;
@@ -168,6 +166,7 @@ namespace fsh
         std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> builtInBody;
         instruction::InstructionPtr functionBody;   // Only for shell defined functions
         std::vector<std::string> arg_names;
+        std::vector<ElementPtr> boundArgs;
         bool isBuiltIn;
     };
 
@@ -195,15 +194,6 @@ namespace fsh
     };
 
     typedef instrusive_ptr<FileHandle> FileHandlePtr;
-
-    struct Part : public Element
-    {
-        virtual ElementType type() {return ELEMENT_TYPE_PART;}
-        int64_t start;
-        int64_t end;
-    };
-
-    typedef instrusive_ptr<Part> PartPtr;
 
     struct ExecutionContext;
     typedef instrusive_ptr<ExecutionContext> ExecutionContextPtr;

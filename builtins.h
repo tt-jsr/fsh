@@ -13,6 +13,7 @@ namespace fsh
     ElementPtr ToFloat(Machine&, std::vector<ElementPtr>&);
     ElementPtr ToString(Machine&, std::vector<ElementPtr>&);
     ElementPtr Eval(Machine&, std::vector<ElementPtr>&);
+    ElementPtr Bind(Machine&, std::vector<ElementPtr>&);
 
     /********* List *********/
     // Part[list, startidx];

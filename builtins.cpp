@@ -101,6 +101,33 @@ namespace fsh
         return ep.cast<FunctionDefinition>();
     }
 
+    void RearraingeArgs(std::vector<ElementPtr>& boundArgs, std::vector<ElementPtr>& args, std::vector<ElementPtr>& out)
+    {
+        out.resize(boundArgs.size());
+        // Process _n arguments first
+        for (size_t outIdx = 0; outIdx < out.size(); ++outIdx)
+        {
+            ElementPtr e = boundArgs[outIdx];
+            if (e->IsIdentifier())
+            {
+                std::string n = e.cast<Identifier>()->value;
+                if (n[0] == '_')
+                {
+                    size_t dst = strtol(&n[1], nullptr, 10);
+                    if (dst-1 >= args.size())
+                        throw std::runtime_error("Bind: Positional argument out of range");
+                    out[outIdx] = args[dst-1];
+                }
+                else
+                    throw std::runtime_error("Bind invalid position argument");
+            }
+            else
+            {
+                out[outIdx] = e;
+            }
+        }
+    }
+
     // You must push_context() before calling this function, and pop_context
     // after it returns!
     ElementPtr CallFunctionImpl(Machine& machine, FunctionDefinitionPtr funcDef, size_t nItemsOnStack)
@@ -115,6 +142,12 @@ namespace fsh
                 --nItemsOnStack;
             }
             std::reverse(arguments.begin(), arguments.end());
+            if (funcDef->boundArgs.size())
+            {
+                std::vector<ElementPtr> tmp;
+                RearraingeArgs(funcDef->boundArgs, arguments, tmp);
+                arguments = std::move(tmp);
+            }
             ElementPtr rtn = funcDef->builtInBody(machine, arguments);
             rtn = machine.resolve(rtn);
             return rtn;
@@ -129,6 +162,12 @@ namespace fsh
                 --nItemsOnStack;
             }
             std::reverse(dataArgs.begin(), dataArgs.end());
+            if (funcDef->boundArgs.size())
+            {
+                std::vector<ElementPtr> tmp;
+                RearraingeArgs(funcDef->boundArgs, dataArgs, tmp);
+                dataArgs = std::move(tmp);
+            }
             size_t dataArgIdx = 0;
             for (; dataArgIdx < dataArgs.size() && dataArgIdx < funcDef->arg_names.size(); ++dataArgIdx)
             {
@@ -318,6 +357,26 @@ namespace fsh
         throw std::runtime_error("Eval is not implemented");
     }
 
+    ElementPtr Bind(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr e = GetElement(machine, args, 0);
+        if (!e->IsFunctionDefinition())
+            throw std::runtime_error("Bind requires function");
+
+        FunctionDefinitionPtr funcSrc = e.cast<FunctionDefinition>();
+        if (funcSrc->boundArgs.size())
+            throw std::runtime_error("Bind: Cannot bind to a bound function");
+        FunctionDefinitionPtr funcDst = MakeFunctionDefinition();
+        funcDst->builtInBody = funcSrc->builtInBody;
+        funcDst->functionBody = funcSrc->functionBody;
+        funcDst->arg_names = funcSrc->arg_names;
+        for (size_t idx = 1; idx < args.size(); ++idx)
+        {
+            funcDst->boundArgs.push_back(args[idx]);
+        }
+        return funcDst;
+    }
+
     void RegisterBuiltIns(Machine& machine)
     {
         // IO
@@ -354,6 +413,7 @@ namespace fsh
         machine.register_builtin("Float", fsh::ToFloat);
         machine.register_builtin("ToString", fsh::ToString);
         machine.register_builtin("Eval", fsh::Eval);
+        machine.register_builtin("Bind", fsh::Bind);
     }
 }
 

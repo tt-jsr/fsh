@@ -119,6 +119,7 @@ namespace fsh
             rtn.push_back(*p);
             ++p;
         }
+        --p;
         return rtn;
     }
 
