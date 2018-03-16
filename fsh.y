@@ -243,7 +243,7 @@ math_expression
 part_expression
     : PART '[' expression ',' expression ':' expression ']' {
         call_t *pCall = new call_t(lineno);
-        pCall->name = "Part";
+        pCall->call = new iden_t(lineno, "Part");
         el_t *el = new fsh::instruction::ExpressionList(lineno);
         el->expressions.push_back((inst_t *)$3);
         el->expressions.push_back((inst_t *)$5);
@@ -255,7 +255,7 @@ part_expression
     }
     | PART '[' expression ',' expression ':' ']' {
         call_t *pCall = new call_t(lineno);
-        pCall->name = "Part";
+        pCall->call = new iden_t(lineno, "Part");
         el_t *el = new fsh::instruction::ExpressionList(lineno);
         el->expressions.push_back((inst_t *)$3);
         el->expressions.push_back((inst_t *)$5);
@@ -266,7 +266,7 @@ part_expression
     }
     | PART '[' expression ',' expression ']' {
         call_t *pCall = new call_t(lineno);
-        pCall->name = "Part";
+        pCall->call = new iden_t(lineno, "Part");
         el_t *el = new fsh::instruction::ExpressionList(lineno);
         el->expressions.push_back((inst_t *)$3);
         el->expressions.push_back((inst_t *)$5);
@@ -276,7 +276,7 @@ part_expression
     }
     | PART '[' expression ',' ':' expression ']' {
         call_t *pCall = new call_t(lineno);
-        pCall->name = "Part";
+        pCall->call = new iden_t(lineno, "Part");
         el_t *el = new fsh::instruction::ExpressionList(lineno);
         el->expressions.push_back((inst_t *)$3);
         el->expressions.push_back(new str_t(lineno, ":"));
@@ -373,20 +373,17 @@ function_definition
     ;
 
 function_call
-    : IDENTIFIER '[' expression_list ']' {
+    : primary_expression '[' expression_list ']' {
         call_t *pCall = new call_t(lineno);
-        iden_t *id = (iden_t *)$1;
-        pCall->name = id->name;
-        delete id;
+        pCall->call = (inst_t *)$1;
         pCall->functionArguments = (inst_t *)$3;
         //std::cout << "func call " << id->name << std::endl;
         $$ = pCall;
     }
-    | IDENTIFIER '[' ']' {
+    | primary_expression '[' ']' {
         call_t *pCall = new call_t(lineno);
         iden_t *id = (iden_t *)$1;
-        pCall->name = id->name;
-        delete id;
+        pCall->call = (inst_t *)$1;
         //std::cout << "func call  " << id->name << std::endl;
         $$ = pCall;
     }

@@ -371,23 +371,29 @@ namespace fsh
         std::string FunctionCall::type_str()
         {
             std::stringstream strm;
-            strm << "FUNCTION_CALL(" << name << ")";
+            strm << "FUNCTION_CALL";
             return strm.str();
         }
 
         void FunctionCall::Execute(Machine& machine)
         {
             fsh::ElementPtr e;
-            if (machine.get_variable(name, e) == false)
+            call->Execute(machine);
+            e = machine.pop_data();
+            if (e->IsIdentifier())
             {
-                std::stringstream strm;
-                strm << "Function \"" << name << "\" not found, line: " << lineno;
-                throw std::runtime_error(strm.str());
+                fsh::IdentifierPtr id = e.cast<fsh::Identifier>();
+                if (machine.get_variable(id->value, e) == false)
+                {
+                    std::stringstream strm;
+                    strm << "Function \"" << id->value << "\" not found, line: " << lineno;
+                    throw std::runtime_error(strm.str());
+                }
             }
             if (e->IsFunctionDefinition() == false)
             {
                 std::stringstream strm;
-                strm << "Name \"" << name << "\" is not a function, line: " << lineno;
+                strm << "expression is not a function, line: " << lineno;
                 throw std::runtime_error(strm.str());
             }
 
@@ -414,8 +420,12 @@ namespace fsh
 
         void FunctionCall::dump(DumpContext& ctx)
         {
-            ctx.strm() << "FunctionCall " << name << std::endl;
+            ctx.strm() << "FunctionCall "<< std::endl;
             ctx.inc();
+            ctx.strm() << "call:" << std::endl;
+            ctx.inc();
+            call->dump(ctx);
+            ctx.dec();
             ctx.strm() << "arguments:" << std::endl;
             ctx.inc();
             if (functionArguments)

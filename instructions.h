@@ -324,7 +324,7 @@ namespace fsh
             std::string type_str();
             void dump(DumpContext&);
             InstructionPtr functionArguments;
-            std::string name;
+            InstructionPtr call;
         };
 
         typedef fsh::instrusive_ptr<FunctionCall> FunctionCallPtr;
