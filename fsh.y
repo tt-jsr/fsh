@@ -113,6 +113,11 @@ primary_expression
         el->isList = true;
         $$ = $2; 
     }
+    | '{' '}' { 
+        el_t *el = new el_t(lineno);
+        el->isList = true;
+        $$ = el;
+    }
     ;
 
 assignment_expression

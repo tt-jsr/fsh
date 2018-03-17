@@ -23,6 +23,7 @@ namespace fsh
     ElementPtr DefineRecord(Machine&, std::vector<ElementPtr>&);
     ElementPtr MakeRecord(Machine&, std::vector<ElementPtr>&);
     IntegerPtr Len(Machine&, std::vector<ElementPtr>&);
+    ElementPtr Append(Machine&, std::vector<ElementPtr>&);
     ListPtr SetRecordType(Machine&, std::vector<ElementPtr>&);
 
     /******** Error *********/

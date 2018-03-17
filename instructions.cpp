@@ -344,6 +344,8 @@ namespace fsh
             rhs->Execute(machine);
             ElementPtr rdata = machine.pop_data();
             int64_t idx = machine.get_record_field(lst->listtype, rdata);
+            if (idx >= lst->items.size())
+                throw std::runtime_error("record field out of range");
             machine.push_data(lst->items[idx]);
         }
 

@@ -43,8 +43,16 @@ namespace fsh
         bool get_variable(const std::string& name, double& out);
         bool ConvertToBool(ElementPtr);
         ExecutionContextPtr GetContext();
+        // Given a listtype and an Identifier of the fieldname, return the index into the list
         size_t get_record_field(const std::string& list, ElementPtr);
+
+        // Given a listtype and and fieldname, return the index into the list.
+        size_t get_record_field(const std::string& list, const std::string& fieldname);
+
         void add_record_field(const std::string& list, const std::string& field, size_t idx);
+
+        // Given a name in dotted format, return the field of the list
+        bool get_list_field(const std::string& name, ElementPtr& out);
         FieldMap_t * get_field_map(const std::string&);
     private:
         static thread_local std::vector<ElementPtr> datastack;

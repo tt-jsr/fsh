@@ -114,7 +114,7 @@ namespace fsh
         if (*p == '{')
             ++p;
         std::string rtn;
-        while (*p && (isalnum(*p) || *p == '_')) 
+        while (*p && (isalnum(*p) || *p == '_' || *p == '.')) 
         {
             rtn.push_back(*p);
             ++p;
@@ -156,7 +156,12 @@ namespace fsh
                     {
                         ElementPtr e;
                         std::string var = collect_var(p);
-                        if (get_variable(var, e))
+                        size_t pos = var.find_first_of('.');
+                        if (pos != std::string::npos)
+                            get_list_field(var, e);
+                        else 
+                            get_variable(var, e);
+                        if (e)
                         {
                             s += toString(*this, e);
                         }
@@ -184,6 +189,11 @@ namespace fsh
     {
         if (!e->IsIdentifier())
             throw std::runtime_error("Expected identifier");
+        return get_record_field(list, e.cast<Identifier>()->value);
+    }
+
+    size_t Machine::get_record_field(const std::string& list, const std::string& fieldname)
+    {
         auto itRecord = record_fields.find(list);
         if (itRecord == record_fields.end())
         {
@@ -191,12 +201,11 @@ namespace fsh
             strm << "Record \"" << list << "\" not defined";
             throw std::runtime_error(strm.str());
         }
-        std::string& id = e.cast<Identifier>()->value;
-        auto itField = itRecord->second.find(id);
+        auto itField = itRecord->second.find(fieldname);
         if (itField == itRecord->second.end())
         {
             std::stringstream strm;
-            strm << "Field " << list << "." << id << " not defined";
+            strm << "Field " << list << "." << fieldname << " not defined";
             throw std::runtime_error(strm.str());
         }
         return itField->second;
@@ -231,6 +240,27 @@ namespace fsh
     void Machine::store_variable(const std::string& name, ElementPtr d)
     {
         executionContext->AddVariable(name, d);
+    }
+
+    bool Machine::get_list_field(const std::string& name, ElementPtr& out)
+    {
+        size_t pos = name.find_first_of('.');
+        if (pos == std::string::npos)
+            return false;
+        std::string var = name.substr(0, pos);
+        std::string fieldName = name.substr(pos+1);
+        ElementPtr e;
+        if (get_variable(var, e) == false)
+            return false;
+        if (e->IsList() == false)
+            return false;
+        ListPtr lp = e.cast<List>();
+
+        size_t idx = get_record_field(lp->listtype, fieldName);
+        if (idx >= lp->items.size())
+            throw std::runtime_error("List fieldname out of range");
+        out = lp->items[idx];
+        return true;
     }
 
     bool Machine::get_variable(const std::string& name, ElementPtr& out)

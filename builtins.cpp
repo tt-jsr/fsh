@@ -150,6 +150,7 @@ namespace fsh
                 }
                 else
                 {
+                    e = machine.resolve(e);
                     arguments.push_back(e);
                 }
                 --nItemsOnStack;
@@ -193,7 +194,8 @@ namespace fsh
             size_t dataArgIdx = 0;
             for (; dataArgIdx < dataArgs.size() && dataArgIdx < funcDef->arg_names.size(); ++dataArgIdx)
             {
-                machine.store_variable(funcDef->arg_names[dataArgIdx], dataArgs[dataArgIdx]);
+                ElementPtr e = machine.resolve(dataArgs[dataArgIdx]);
+                machine.store_variable(funcDef->arg_names[dataArgIdx], e);
             }
             // Any named arguments that the caller did not provide, we set to None
             for (;dataArgIdx < funcDef->arg_names.size(); ++dataArgIdx)
@@ -425,6 +427,7 @@ namespace fsh
         machine.register_builtin("DefineRecord", fsh::DefineRecord);
         machine.register_builtin("MakeRecord", fsh::MakeRecord);
         machine.register_builtin("Len", fsh::Len);
+        machine.register_builtin("Append", fsh::Append);
         machine.register_builtin("SetRecordType", fsh::SetRecordType);
 
         // Misc

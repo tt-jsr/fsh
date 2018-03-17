@@ -219,9 +219,22 @@ namespace fsh
         }
         ListPtr lst = GetList(machine, args, 0);
         if (!lst)
-            throw std::runtime_error("Len: arument must be a list or string");
+            throw std::runtime_error("Len: argument must be a list or string");
         int64_t s = (int64_t)lst->items.size();
         return MakeInteger(s);
+    }
+
+    ElementPtr Append(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ListPtr lst = GetList(machine, args, 0);
+        if (!lst)
+            throw std::runtime_error("Append: argument must be a list");
+        ElementPtr e = GetElement(machine, args, 1);
+        if (!e)
+            throw std::runtime_error("Append: requires second argument");
+
+        lst->items.push_back(e);
+        return MakeInteger(lst->items.size()-1);
     }
 
     ListPtr SetRecordType(Machine& machine, std::vector<ElementPtr>& args)
