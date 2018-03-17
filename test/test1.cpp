@@ -231,6 +231,38 @@ void Test1::UnitTestFunctions(int n)
         CPPUNIT_ASSERT(machine.get_variable("ans",  ivalue));
         CPPUNIT_ASSERT(ivalue == 8);
         break;
+    case 7:
+        CPPUNIT_ASSERT(machine.get_variable("line",  svalue));
+        CPPUNIT_ASSERT(svalue == "hello");
+
+        CPPUNIT_ASSERT(machine.get_variable("attr",  svalue));
+        CPPUNIT_ASSERT(svalue == "world");
+        break;
+    case 8:
+        CPPUNIT_ASSERT(machine.get_variable("arg1",  svalue));
+        CPPUNIT_ASSERT(svalue == "hello");
+        CPPUNIT_ASSERT(machine.get_variable("arg2",  svalue));
+        CPPUNIT_ASSERT(svalue == "cruel");
+        CPPUNIT_ASSERT(machine.get_variable("arg3",  svalue));
+        CPPUNIT_ASSERT(svalue == "world");
+        break;
+    case 9:
+        CPPUNIT_ASSERT(machine.get_variable("arg1",  svalue));
+        CPPUNIT_ASSERT(svalue == "cruel");
+        CPPUNIT_ASSERT(machine.get_variable("arg2",  svalue));
+        CPPUNIT_ASSERT(svalue == "hello");
+        CPPUNIT_ASSERT(machine.get_variable("arg3",  svalue));
+        CPPUNIT_ASSERT(svalue == "world");
+        break;
+    case 10:
+        CPPUNIT_ASSERT(machine.get_variable("arg1",  svalue));
+        CPPUNIT_ASSERT(svalue == "cruel");
+        CPPUNIT_ASSERT(machine.get_variable("arg2",  svalue));
+        CPPUNIT_ASSERT(svalue == "hello");
+        CPPUNIT_ASSERT(machine.get_variable("arg3",  svalue));
+        CPPUNIT_ASSERT(svalue == "world");
+        CPPUNIT_ASSERT(machine.get_variable("attr",  svalue));
+        CPPUNIT_ASSERT(svalue == "value");
     }
 }
 

@@ -42,13 +42,42 @@ var = foo[&[msg:
 
 UnitTest[5];
 
+#####################################
+# Test function calling function
 foo = &[arg1, arg2:
     arg1 - arg2;
 ];
 
-fooBind = &[arg:
+foofoo = &[arg:
     v = foo[10, arg];
 ];
 
-ans = fooBind[2];
+ans = foofoo[2];
 UnitTest[6];
+
+#######################################
+# Test attributes and Bind
+foo = &[line: 
+    UnitTest[7];
+];
+
+foo["hello", attr->"world"];
+
+############################
+#test bind
+foo = &[testno, arg1, arg2, arg3:
+    UnitTest[testno];
+];
+
+f2 = Bind[foo, _1, _2, _3, "world"];
+f2[8, "hello", "cruel"];
+
+f2 = Bind[foo, 9, _3, _2, "world"];
+f2["hello", "cruel"];
+
+###################################
+# Test bind with an attribute
+f2 = Bind[foo, 10, _3, _2, "world", attr->"value"];
+f2["hello", "cruel"];
+
+
