@@ -202,6 +202,23 @@ namespace fsh
 
         typedef fsh::instrusive_ptr<Float> FloatPtr;
 
+        class Attribute : public Instruction
+        {
+        public:
+            Attribute(size_t l)
+            :Instruction(l)
+            { }
+
+            void Execute(Machine&);
+            InstructionType type() {return INSTRUCTION_ATTRIBUTE;}
+            std::string type_str();
+            void dump(DumpContext&);
+            InstructionPtr name;
+            InstructionPtr value;
+        };
+
+        typedef fsh::instrusive_ptr<Attribute> AttributePtr;
+
         /*
         class ElementWrapper : public Instruction
         {

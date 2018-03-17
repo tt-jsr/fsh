@@ -29,6 +29,7 @@ namespace fsh
         ,ELEMENT_TYPE_BOOLEAN
         ,ELEMENT_TYPE_OBJECT
         ,ELEMENT_TYPE_FILE_HANDLE
+        ,ELEMENT_TYPE_ATTRIBUTE
     };
 
     struct Element : public instrusive_base
@@ -45,6 +46,7 @@ namespace fsh
         bool IsBoolean() {return type() == ELEMENT_TYPE_BOOLEAN;}
         bool IsObject() {return type() ==ELEMENT_TYPE_OBJECT;}
         bool IsFileHandle() {return type() == ELEMENT_TYPE_FILE_HANDLE;}
+        bool IsAttribute() {return type() == ELEMENT_TYPE_ATTRIBUTE;}
     };
 
     typedef instrusive_ptr<Element> ElementPtr;
@@ -129,6 +131,17 @@ namespace fsh
     };
     typedef instrusive_ptr<Float> FloatPtr;
 
+    struct Attribute : public Element
+    {
+        Attribute()
+        {}
+
+        virtual ElementType type() {return ELEMENT_TYPE_ATTRIBUTE;}
+        IdentifierPtr name;
+        ElementPtr value;
+    };
+    typedef instrusive_ptr<Attribute> AttributePtr;
+
     struct List : public Element
     {
         void Add(const std::string&);
@@ -178,6 +191,7 @@ namespace fsh
         :fp(nullptr)
         ,bRead(false)
         ,isPipe(false)
+        ,stripnl(false)
         {}
         ~FileHandle()
         {
@@ -191,6 +205,7 @@ namespace fsh
         FILE *fp;
         bool bRead;
         bool isPipe;
+        bool stripnl;
     };
 
     typedef instrusive_ptr<FileHandle> FileHandlePtr;
@@ -209,5 +224,6 @@ namespace fsh
     BooleanPtr MakeBoolean(bool);
     ObjectPtr MakeObject(ObjectBase *, uint64_t);
     FileHandlePtr MakeFileHandle();
+    AttributePtr MakeAttribute(IdentifierPtr name, ElementPtr value);
 }
 

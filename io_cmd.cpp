@@ -12,6 +12,9 @@ namespace fsh
 {
     FileHandlePtr OpenFile(Machine& machine, std::vector<ElementPtr>& args)
     {
+        bool stripnl;
+        machine.get_variable("__stripnl", stripnl);
+
         StringPtr filename = GetString(machine, args, 0);
         if (filename.get() == nullptr)
         {
@@ -32,11 +35,15 @@ namespace fsh
             strm << "Openfile: cannot open " << filename->value;
             throw std::runtime_error(strm.str());
         }
+        fh->stripnl= stripnl;
         return fh;
     }
 
     FileHandlePtr OpenProcess(Machine& machine, std::vector<ElementPtr>& args)
     {
+        bool stripnl;
+        machine.get_variable("__stripnl", stripnl);
+
         StringPtr processName = GetString(machine, args, 0);
         if (processName.get() == nullptr)
         {
@@ -58,6 +65,7 @@ namespace fsh
             strm << "OpenProcess: cannot open " << processName->value;
             throw std::runtime_error(strm.str());
         }
+        fh->stripnl = stripnl;
         return fh;
     }
 
@@ -108,7 +116,7 @@ namespace fsh
             try
             {
                 machine.push_context();
-                ElementPtr r = CallFunctionImpl(machine, fd, 1);
+                ElementPtr r = CallFunctionImpl(machine, false, fd, 1);
                 machine.pop_context();
                 if (r->IsBoolean() && r.cast<Boolean>()->value == false)
                 {
@@ -167,7 +175,7 @@ namespace fsh
             try
             {
                 machine.push_context();
-                ElementPtr r = CallFunctionImpl(machine, fd, 1);
+                ElementPtr r = CallFunctionImpl(machine, false, fd, 1);
                 machine.pop_context();
                 if (r->IsBoolean() && r.cast<Boolean>()->value == false)
                 {
@@ -202,7 +210,7 @@ namespace fsh
                 machine.push_context();
                 try
                 {
-                    ElementPtr rtn =  CallFunctionImpl(machine, func, 1);
+                    ElementPtr rtn =  CallFunctionImpl(machine, false, func, 1);
                     machine.pop_context();
                     return rtn;
                 }
@@ -231,6 +239,12 @@ namespace fsh
                         return MakeBoolean(false);
                     }
                     //std::cout << buffer << std::endl;
+                    if (file->stripnl)
+                    {
+                        int len = strlen(buffer);
+                        if (buffer[len-1] ==  '\n')
+                            buffer[len-1] = '\0';
+                    }
                     return MakeString(buffer);
                 }
                 else

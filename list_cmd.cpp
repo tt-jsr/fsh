@@ -223,5 +223,17 @@ namespace fsh
         int64_t s = (int64_t)lst->items.size();
         return MakeInteger(s);
     }
+
+    ListPtr SetRecordType(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ListPtr lp = GetList(machine, args, 0);
+        if (!lp)
+            throw std::runtime_error("SetRecordType: Arg1 must be a list");
+        StringPtr sp = GetString(machine, args, 1);
+        if (!sp)
+            throw std::runtime_error("SetRecordType: Arg2 must be a string");
+        lp->listtype = sp->value;
+        return lp;
+    }
 }
 

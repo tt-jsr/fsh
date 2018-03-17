@@ -101,13 +101,11 @@ namespace fsh
         return ep.cast<FunctionDefinition>();
     }
 
-    void RearraingeArgs(std::vector<ElementPtr>& boundArgs, std::vector<ElementPtr>& args, std::vector<ElementPtr>& out)
+    void RearraingeArgs(Machine& machine, std::vector<ElementPtr>& boundArgs, std::vector<ElementPtr>& args, std::vector<ElementPtr>& out)
     {
-        out.resize(boundArgs.size());
         // Process _n arguments first
-        for (size_t outIdx = 0; outIdx < out.size(); ++outIdx)
+        for (auto e : boundArgs)
         {
-            ElementPtr e = boundArgs[outIdx];
             if (e->IsIdentifier())
             {
                 std::string n = e.cast<Identifier>()->value;
@@ -116,21 +114,27 @@ namespace fsh
                     size_t dst = strtol(&n[1], nullptr, 10);
                     if (dst-1 >= args.size())
                         throw std::runtime_error("Bind: Positional argument out of range");
-                    out[outIdx] = args[dst-1];
+                    out.push_back(args[dst-1]);
                 }
                 else
                     throw std::runtime_error("Bind invalid position argument");
             }
             else
             {
-                out[outIdx] = e;
+                if (e->IsAttribute())
+                {
+                    AttributePtr attr = e.cast<Attribute>();
+                    machine.store_variable(attr->name->value, attr->value);
+                }
+                else
+                    out.push_back(e);
             }
         }
     }
 
     // You must push_context() before calling this function, and pop_context
     // after it returns!
-    ElementPtr CallFunctionImpl(Machine& machine, FunctionDefinitionPtr funcDef, size_t nItemsOnStack)
+    ElementPtr CallFunctionImpl(Machine& machine, bool isBind, FunctionDefinitionPtr funcDef, size_t nItemsOnStack)
     {
         if (funcDef->isBuiltIn)
         {
@@ -138,14 +142,23 @@ namespace fsh
             std::vector<ElementPtr> arguments;
             while(nItemsOnStack)
             {
-                arguments.push_back(machine.pop_data());
+                ElementPtr e = machine.pop_data();
+                if (e->IsAttribute() && isBind == false)
+                {
+                    AttributePtr attr = e.cast<Attribute>();
+                    machine.store_variable(attr->name->value, attr->value);
+                }
+                else
+                {
+                    arguments.push_back(e);
+                }
                 --nItemsOnStack;
             }
             std::reverse(arguments.begin(), arguments.end());
             if (funcDef->boundArgs.size())
             {
                 std::vector<ElementPtr> tmp;
-                RearraingeArgs(funcDef->boundArgs, arguments, tmp);
+                RearraingeArgs(machine, funcDef->boundArgs, arguments, tmp);
                 arguments = std::move(tmp);
             }
             ElementPtr rtn = funcDef->builtInBody(machine, arguments);
@@ -158,14 +171,23 @@ namespace fsh
             // Execute each argument and put the result into the dataArgs vector
             while (nItemsOnStack)
             {
-                dataArgs.push_back(machine.pop_data());
+                ElementPtr e = machine.pop_data();
+                if (e->IsAttribute() && isBind == false)
+                {
+                    AttributePtr attr = e.cast<Attribute>();
+                    machine.store_variable(attr->name->value, attr->value);
+                }
+                else
+                {
+                    dataArgs.push_back(e);
+                }
                 --nItemsOnStack;
             }
             std::reverse(dataArgs.begin(), dataArgs.end());
             if (funcDef->boundArgs.size())
             {
                 std::vector<ElementPtr> tmp;
-                RearraingeArgs(funcDef->boundArgs, dataArgs, tmp);
+                RearraingeArgs(machine, funcDef->boundArgs, dataArgs, tmp);
                 dataArgs = std::move(tmp);
             }
             size_t dataArgIdx = 0;
@@ -403,6 +425,7 @@ namespace fsh
         machine.register_builtin("DefineRecord", fsh::DefineRecord);
         machine.register_builtin("MakeRecord", fsh::MakeRecord);
         machine.register_builtin("Len", fsh::Len);
+        machine.register_builtin("SetRecordType", fsh::SetRecordType);
 
         // Misc
         machine.register_builtin("IsError", fsh::IsError);

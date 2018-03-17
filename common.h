@@ -74,6 +74,7 @@ namespace fsh
             ,INSTRUCTION_TRYCATCH
             ,INSTRUCTION_DOT_OPERATOR
             ,INSTRUCTION_FOR
+            ,INSTRUCTION_ATTRIBUTE
         };
     }
 

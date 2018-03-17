@@ -380,9 +380,12 @@ namespace fsh
             fsh::ElementPtr e;
             call->Execute(machine);
             e = machine.pop_data();
+            bool isBind(false);
             if (e->IsIdentifier())
             {
                 fsh::IdentifierPtr id = e.cast<fsh::Identifier>();
+                if (id->value == "Bind")
+                    isBind = true;
                 if (machine.get_variable(id->value, e) == false)
                 {
                     std::stringstream strm;
@@ -406,7 +409,7 @@ namespace fsh
             size_t nItemsOnStack = machine.size_data() - top;
             try
             {
-                ElementPtr rtn = fsh::CallFunctionImpl(machine, funcDef, nItemsOnStack);
+                ElementPtr rtn = fsh::CallFunctionImpl(machine, isBind, funcDef, nItemsOnStack);
                 assert(!rtn->IsIdentifier());
                 machine.pop_context();
                 machine.push_data(rtn);
@@ -760,6 +763,40 @@ namespace fsh
         {
             std::stringstream strm;
             strm << "Float(" << value << ")";
+            return strm.str();
+        }
+
+        /*****************************************************/
+
+        void Attribute::Execute(Machine& machine)
+        {
+            name->Execute(machine);
+            ElementPtr n = machine.pop_data();
+            assert(n->IsIdentifier());
+            value->Execute(machine);
+            ElementPtr v = machine.pop_data();
+            machine.push_data(MakeAttribute(n.cast<fsh::Identifier>(), v));
+        }
+
+        void Attribute::dump(DumpContext& ctx)
+        {
+            ctx.strm() << "attribute" << std::endl;
+            ctx.inc();
+            ctx.strm() << "name:" << std::endl;
+            ctx.inc();
+            name->dump(ctx);
+            ctx.dec();
+            ctx.strm() << "value:" << std::endl;
+            ctx.inc();
+            value->dump(ctx);
+            ctx.dec();
+            ctx.dec();
+        }
+
+        std::string Attribute::type_str()
+        {
+            std::stringstream strm;
+            strm << "Attribute";
             return strm.str();
         }
 

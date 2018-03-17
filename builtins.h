@@ -23,6 +23,7 @@ namespace fsh
     ElementPtr DefineRecord(Machine&, std::vector<ElementPtr>&);
     ElementPtr MakeRecord(Machine&, std::vector<ElementPtr>&);
     IntegerPtr Len(Machine&, std::vector<ElementPtr>&);
+    ListPtr SetRecordType(Machine&, std::vector<ElementPtr>&);
 
     /******** Error *********/
     ElementPtr IsError(Machine&, std::vector<ElementPtr>&);
@@ -73,6 +74,6 @@ namespace fsh
     IntegerPtr GetInteger(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     IdentifierPtr GetIdentifier(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     FunctionDefinitionPtr GetFunctionDefinition(Machine& machine, std::vector<ElementPtr>& args, size_t index);
-    ElementPtr CallFunctionImpl(Machine& machine, FunctionDefinitionPtr funcDef, size_t nItemsOnStack);
+    ElementPtr CallFunctionImpl(Machine& machine, bool isBind, FunctionDefinitionPtr funcDef, size_t nItemsOnStack);
     std::string toString(Machine& machine, ElementPtr e);
 }

@@ -34,6 +34,7 @@ typedef fsh::instruction::None none_t;
 typedef fsh::instruction::TryCatch trycatch_t;
 typedef fsh::instruction::DotOperator dot_t;
 typedef fsh::instruction::For for_t;
+typedef fsh::instruction::Attribute attr_t;
 
 void dump(const char *p)
 {
@@ -68,6 +69,7 @@ void dump(void *p)
 %token FOR IN
 %token DOUBLE_BRACKET_OPEN
 %token DOUBLE_BRACKET_CLOSE
+%token RIGHT_ARROW
 %token ';'
 %left ','
 %left '='
@@ -241,6 +243,15 @@ math_expression
     }
     ;
 
+attribute_expression
+    : IDENTIFIER RIGHT_ARROW expression {
+        attr_t *pAttr = new attr_t(lineno);
+        pAttr->name = (inst_t *)$1;
+        pAttr->value = (inst_t *)$3;
+        $$ = pAttr;
+    }
+    ;
+
 subscript_expression
     : primary_expression DOUBLE_BRACKET_OPEN  expression ':' expression DOUBLE_BRACKET_CLOSE {
         call_t *pCall = new call_t(lineno);
@@ -374,7 +385,7 @@ function_definition
     ;
 
 function_call
-    : primary_expression '[' expression_list ']' {
+    : primary_expression '[' call_expression_list ']' {
         call_t *pCall = new call_t(lineno);
         pCall->call = (inst_t *)$1;
         pCall->functionArguments = (inst_t *)$3;
@@ -422,6 +433,50 @@ expression_list
     }
     |expression_list ',' expression  {
         //std::cout << "expression_list list  "  << std::endl;
+        inst_t *ip = (inst_t *)$1;
+        if (ip->type() == fsh::instruction::INSTRUCTION_EXPRESSION_LIST)
+        {
+            el_t *el = (el_t *)$1;
+            el->expressions.push_back((inst_t *)$3);
+            $$ = el;
+        }
+        else
+        {
+            el_t *el = new el_t(lineno);
+            el->expressions.push_back((inst_t *)$1);
+            el->expressions.push_back((inst_t *)$3);
+            $$ = el;
+        }
+    }
+    ;
+
+call_expression_list
+    :expression {
+        //std::cout << "expression_list exp  " << std::endl;
+        $$ = $1;
+    }
+    | attribute_expression {
+        //std::cout << "expression_list exp  " << std::endl;
+        $$ = $1;
+    }
+    | expression_list ',' expression  {
+        //std::cout << "expression_list list  "  << std::endl;
+        inst_t *ip = (inst_t *)$1;
+        if (ip->type() == fsh::instruction::INSTRUCTION_EXPRESSION_LIST)
+        {
+            el_t *el = (el_t *)$1;
+            el->expressions.push_back((inst_t *)$3);
+            $$ = el;
+        }
+        else
+        {
+            el_t *el = new el_t(lineno);
+            el->expressions.push_back((inst_t *)$1);
+            el->expressions.push_back((inst_t *)$3);
+            $$ = el;
+        }
+    }
+    | expression_list ',' attribute_expression {
         inst_t *ip = (inst_t *)$1;
         if (ip->type() == fsh::instruction::INSTRUCTION_EXPRESSION_LIST)
         {

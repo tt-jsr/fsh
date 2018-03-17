@@ -42,6 +42,7 @@ H           [a-fA-F0-9]
 \<               {++column;return LT;}
 \<=               {++column;return LTE;}
 ==               {++column;return EQ;}
+->              {column += 2;return RIGHT_ARROW;}
 \!=               {column += 2;return NEQ;}
 \[\[            {column += 2;return DOUBLE_BRACKET_OPEN;}
 \]\]            {column += 2;return DOUBLE_BRACKET_CLOSE;}

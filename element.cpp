@@ -66,4 +66,12 @@ namespace fsh
         op->pObject = p;
         return op;
     }
+
+    AttributePtr MakeAttribute(IdentifierPtr n, ElementPtr v)
+    {
+        AttributePtr ap(new Attribute());
+        ap->name = n;
+        ap->value = v;
+        return ap;
+    }
 }
