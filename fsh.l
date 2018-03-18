@@ -4,7 +4,7 @@
 #include "common.h"
 #include "instructions.h"
 using namespace std;
-#define YY_DECL extern "C" int yylex()
+#define YY_DECL extern int yylex()
 uint64_t lineno = 1;
 uint64_t column = 0;
 %}

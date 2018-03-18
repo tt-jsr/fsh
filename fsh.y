@@ -9,9 +9,9 @@
 using namespace std;
 
 // stuff from flex that bison needs to know about:
-extern "C" int yylex();
-extern "C" int yyparse();
-extern "C" FILE *yyin;
+extern int yylex();
+extern int yyparse();
+extern FILE *yyin;
 extern uint64_t lineno;
 extern uint64_t column;
 void Execute(fsh::instruction::Instruction *pInst);

@@ -18,9 +18,9 @@ int main (int argc, char* argv[])
 }
 
 
-extern "C" int yylex();
-extern "C" int yyparse();
-extern "C" FILE *yyin;
+extern int yylex();
+extern int yyparse();
+extern FILE *yyin;
 extern uint64_t lineno;
 extern uint64_t column;
 

@@ -6,10 +6,10 @@
 
 using namespace fsh;
 
-extern "C" int yylex();
-extern "C" int yyparse();
-extern "C" FILE *yyin;
-extern "C" char * yytext;
+extern int yylex();
+extern int yyparse();
+extern FILE *yyin;
+extern char * yytext;
 extern uint64_t lineno;
 extern uint64_t column;
 
