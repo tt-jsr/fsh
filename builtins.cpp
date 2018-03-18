@@ -393,6 +393,7 @@ namespace fsh
         FunctionDefinitionPtr funcDst = MakeFunctionDefinition();
         funcDst->builtInBody = funcSrc->builtInBody;
         funcDst->functionBody = funcSrc->functionBody;
+        funcDst->isBuiltIn= funcSrc->isBuiltIn;
         funcDst->arg_names = funcSrc->arg_names;
         for (size_t idx = 1; idx < args.size(); ++idx)
         {
@@ -420,6 +421,7 @@ namespace fsh
         machine.register_builtin("RegMatch", fsh::RegMatch);
         machine.register_builtin("RegSearch", fsh::RegSearch);
         machine.register_builtin("Find", fsh::Find);
+        machine.register_builtin("Format", fsh::Format);
 
         // List
         machine.register_builtin("Part", fsh::Part);

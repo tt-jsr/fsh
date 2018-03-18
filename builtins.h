@@ -42,6 +42,9 @@ namespace fsh
     /*
      * Bind[f, arg1, arg2, ...];
      * Binds arguments to the function f. Returns a new function.
+     * The arguments to bind define the arguments to the target function, (the function
+     * being bound to). Position arguments _1, _2, ... define which arguments will be 
+     * taken from the caller
      * Examples:
      *     foo = Bind[f, "hello", _1, _2];
      *     foo Is a function that takes two arguments represented by_1, _2.
@@ -118,15 +121,16 @@ namespace fsh
     ElementPtr WriteProcess(Machine&, std::vector<ElementPtr>&);
 
     /*********** String ************/
-    ElementPtr Trim(Machine&, std::vector<ElementPtr>&);
-    ElementPtr TrimLeft(Machine&, std::vector<ElementPtr>&);
-    ElementPtr TrimRight(Machine&, std::vector<ElementPtr>&);
+    StringPtr Trim(Machine&, std::vector<ElementPtr>&);
+    StringPtr TrimLeft(Machine&, std::vector<ElementPtr>&);
+    StringPtr TrimRight(Machine&, std::vector<ElementPtr>&);
     // Split["", chars];
-    ElementPtr Split(Machine&, std::vector<ElementPtr>&);
-    ElementPtr Strcmp(Machine&, std::vector<ElementPtr>&);
+    ListPtr Split(Machine&, std::vector<ElementPtr>&);
+    IntegerPtr Strcmp(Machine&, std::vector<ElementPtr>&);
     ElementPtr RegMatch(Machine&, std::vector<ElementPtr>&);
     ElementPtr RegSearch(Machine&, std::vector<ElementPtr>&);
-    ElementPtr Find(Machine&, std::vector<ElementPtr>&);
+    IntegerPtr Find(Machine&, std::vector<ElementPtr>&);
+    StringPtr Format(Machine&, std::vector<ElementPtr>&);
 
     /***********************************************
      * Helpers for built in functions

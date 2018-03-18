@@ -12,8 +12,17 @@ extern uint64_t lineno;
 extern uint64_t column;
 extern fsh::Machine machine;
 
+void Test1::UnitTestException(const char *p)
+{
+    std::cout << std::endl << p << std::endl;
+    CPPUNIT_ASSERT(false);
+}
+
 bool Test1::StartParser(const char *fname)
 {
+    std::function<void (const char *)> f = std::bind(&Test1::UnitTestException, this, std::placeholders::_1);
+    machine.unittest_exception = f;
+
 	// open a file handle to a particular file:
 	FILE *myfile = fopen(fname, "r");
 	// make sure it's valid:

@@ -37,6 +37,10 @@ namespace fsh
         }
         catch (std::runtime_error& ex)
         {
+            if (unittest_exception)
+            {
+                unittest_exception(ex.what());
+            }
             return MakeError(ex.what(), false);
         }
     }
@@ -108,21 +112,6 @@ namespace fsh
         datastack.push_back(d);
     }
 
-    std::string collect_var(const char *& p)
-    {
-        ++p; // get pass the '$'
-        if (*p == '{')
-            ++p;
-        std::string rtn;
-        while (*p && (isalnum(*p) || *p == '_' || *p == '.')) 
-        {
-            rtn.push_back(*p);
-            ++p;
-        }
-        --p;
-        return rtn;
-    }
-
     ElementPtr Machine::resolve(ElementPtr e)
     {
         if (e->IsIdentifier())
@@ -131,56 +120,8 @@ namespace fsh
             IdentifierPtr id = e.cast<Identifier>();
             if (get_variable(id->value, rtn))
             {
-                if(rtn->IsString())
-                    return resolve(rtn);
                 return rtn;
             }
-        }
-        if (e->IsString())
-        {
-            StringPtr sp = e.cast<String>();
-            std::string s;
-            const char *p = sp->value.c_str();
-            if (sp->value.find_first_of("$") == std::string::npos)
-                return sp;  // No substitutions, just return
-            while (*p)
-            {
-                switch(*p)
-                {
-                case '\\':
-                    ++p;
-                    s.push_back(*p);
-                    ++p;
-                    break;
-                case '$':
-                    {
-                        ElementPtr e;
-                        std::string var = collect_var(p);
-                        size_t pos = var.find_first_of('.');
-                        if (pos != std::string::npos)
-                            get_list_field(var, e);
-                        else 
-                            get_variable(var, e);
-                        if (e)
-                        {
-                            s += toString(*this, e);
-                        }
-                        else
-                        {
-                            s += "${";
-                            s += var;
-                            s += "}";
-                        }
-                    }   
-                    if (*p)
-                        ++p;
-                    break;
-                default:
-                    s.push_back(*p);
-                    ++p;
-                }
-            }
-            return MakeString(s);
         }
         return e;
     }

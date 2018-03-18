@@ -67,6 +67,7 @@ namespace fsh
         void push_context();
         void pop_context();
         std::function<void (int)> unittest_callback;
+        std::function<void (const char *)> unittest_exception;
     };
 }
 

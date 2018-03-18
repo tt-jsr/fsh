@@ -21,6 +21,7 @@ public:
     void tearDown();
     void ValidateBool(const char *varname, bool expected);
     bool StartParser(const char *);
+    void UnitTestException(const char *);
     void UnitTestControl(int);
     void UnitTestFunctions(int);
     void UnitTestList(int);

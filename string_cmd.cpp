@@ -33,7 +33,7 @@ namespace
 
 namespace fsh
 {
-    ElementPtr Trim(Machine& machine, std::vector<ElementPtr>& args)
+    StringPtr Trim(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr sp = GetString(machine, args, 0);
         if (sp)
@@ -41,10 +41,10 @@ namespace fsh
             std::string s = sp->value;
             return MakeString(trim(s));
         }
-        return MakeNone();
+        throw std::runtime_error("Trim requires a string argument");
     }
 
-    ElementPtr TrimLeft(Machine& machine, std::vector<ElementPtr>& args)
+    StringPtr TrimLeft(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr sp = GetString(machine, args, 0);
         if (sp)
@@ -52,10 +52,10 @@ namespace fsh
             std::string s = sp->value;
             return MakeString(ltrim(s));
         }
-        return MakeNone();
+        throw std::runtime_error("Trim requires a string argument");
     }
 
-    ElementPtr TrimRight(Machine& machine, std::vector<ElementPtr>& args)
+    StringPtr TrimRight(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr sp = GetString(machine, args, 0);
         if (sp)
@@ -63,10 +63,10 @@ namespace fsh
             std::string s = sp->value;
             return MakeString(rtrim(s));
         }
-        return MakeNone();
+        throw std::runtime_error("Trim requires a string argument");
     }
 
-    ElementPtr Find(Machine& machine, std::vector<ElementPtr>& args)
+    IntegerPtr Find(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr s = GetString(machine, args, 0);
         if (!s)
@@ -81,7 +81,61 @@ namespace fsh
         return MakeInteger(pos);
     }
 
-    ElementPtr Split(Machine& machine, std::vector<ElementPtr>& args)
+    int collect_argnum(const char *& p)
+    {
+        ++p; // get pass the '{'
+        if (*p == '}')
+        {
+            ++p;
+            return -1;
+        }
+        std::string arg;
+        while (*p && isdigit(*p))
+        {
+            arg.push_back(*p);
+            ++p;
+        }
+        if (*p != '}')
+            return -1;
+        return std::stol(arg);
+    }
+
+    StringPtr Format(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        StringPtr sp = GetString(machine, args, 0);
+        if (!sp)
+            throw std::runtime_error("Format requires a string argument");
+        std::string rtn;
+        const char *p = sp->value.c_str();
+        while (*p)
+        {
+            switch(*p)
+            {
+            case '\\':
+                ++p;
+                rtn.push_back(*p);
+                ++p;
+                break;
+            case '{':
+                {
+                    int idx = collect_argnum(p);
+                    ++idx;
+                    if (idx < 0 || idx >= args.size())
+                        throw std::runtime_error("Format: index out of range");
+                    rtn += toString(machine, args[idx]);
+                }   
+                if (*p)
+                    ++p;
+                break;
+            default:
+                rtn.push_back(*p);
+                ++p;
+            }
+        }
+        return MakeString(rtn);
+    }
+
+    ListPtr Split(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr sp = GetString(machine, args, 0);
         StringPtr separators = GetString(machine, args, 1);
@@ -112,7 +166,7 @@ namespace fsh
         return lst;
     }
 
-    ElementPtr Strcmp(Machine& machine, std::vector<ElementPtr>& args)
+    IntegerPtr Strcmp(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr s1 = GetString(machine, args, 0);
         if (!s1)

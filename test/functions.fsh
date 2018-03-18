@@ -72,12 +72,12 @@ foo = &[testno, arg1, arg2, arg3:
 f2 = Bind[foo, _1, _2, _3, "world"];
 f2[8, "hello", "cruel"];
 
-f2 = Bind[foo, 9, _3, _2, "world"];
+f2 = Bind[foo, 9, _2, _1, "world"];
 f2["hello", "cruel"];
 
 ###################################
 # Test bind with an attribute
-f2 = Bind[foo, 10, _3, _2, "world", attr->"value"];
+f2 = Bind[foo, 10, _2, _1, "world", attr->"value"];
 f2["hello", "cruel"];
 
 
