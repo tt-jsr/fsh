@@ -226,7 +226,7 @@ namespace fsh
         return MakeNone();
     }
 
-    ElementPtr ToInt(Machine& machine, std::vector<ElementPtr>& args)
+    IntegerPtr ToInt(Machine& machine, std::vector<ElementPtr>& args)
     {
         ElementPtr e = GetElement(machine, args, 0);
         if (!e)
@@ -238,13 +238,13 @@ namespace fsh
         case ELEMENT_TYPE_STRING:
             return MakeInteger(std::stol(e.cast<String>()->value));
         case ELEMENT_TYPE_INTEGER:
-            return e;
+            return e.cast<Integer>();
         default:
             throw std::runtime_error("Int[] unconvertable type");
         }
     }
 
-    ElementPtr ToFloat(Machine& machine, std::vector<ElementPtr>& args)
+    FloatPtr ToFloat(Machine& machine, std::vector<ElementPtr>& args)
     {
         ElementPtr e = GetElement(machine, args, 0);
         if (!e)
@@ -252,7 +252,7 @@ namespace fsh
         switch(e->type())
         {
         case ELEMENT_TYPE_FLOAT:
-            return e;
+            return e.cast<Float>();
         case ELEMENT_TYPE_STRING:
             return MakeFloat(std::stof(e.cast<String>()->value));
         case ELEMENT_TYPE_INTEGER:
@@ -352,7 +352,7 @@ namespace fsh
         }
     }
 
-    ElementPtr ToString(Machine& machine, std::vector<ElementPtr>& args)
+    StringPtr ToString(Machine& machine, std::vector<ElementPtr>& args)
     {
         ElementPtr e = GetElement(machine, args, 0);
         if (!e)
@@ -381,7 +381,7 @@ namespace fsh
         throw std::runtime_error("Eval is not implemented");
     }
 
-    ElementPtr Bind(Machine& machine, std::vector<ElementPtr>& args)
+    FunctionDefinitionPtr Bind(Machine& machine, std::vector<ElementPtr>& args)
     {
         ElementPtr e = GetElement(machine, args, 0);
         if (!e->IsFunctionDefinition())

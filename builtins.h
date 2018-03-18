@@ -7,23 +7,89 @@ namespace fsh
 
     void RegisterBuiltIns(Machine& machine);
 
-    //Print[arg1, srg2, ...];
+    /* Print[arg1, srg2, ...];
+     * Print accepts a variablenumber of arguments
+     * Returns None
+     */
     ElementPtr Print(Machine&, std::vector<ElementPtr>&);
-    ElementPtr ToInt(Machine&, std::vector<ElementPtr>&);
-    ElementPtr ToFloat(Machine&, std::vector<ElementPtr>&);
-    ElementPtr ToString(Machine&, std::vector<ElementPtr>&);
+
+    /* Converts to an Integer
+     * Throws exception if argument is not a String, Float or Int
+     * Returns Integer
+     * Example: ToInt[34.8]; ToInt["27"];
+     */
+    IntegerPtr ToInt(Machine&, std::vector<ElementPtr>&);
+
+    /* Converts to an Float
+     * Throws exception if argument is not a String, Float or Int
+     * Returns Float
+     * Example: ToFloat[34]; ToFloat["27.6"];
+     */
+    FloatPtr ToFloat(Machine&, std::vector<ElementPtr>&);
+
+    /* Converts to an String
+     * Throws exception if argument is not a String, Float or Int
+     * Returns String
+     * Example: ToString[34]; ToString[27.6];
+     */
+    StringPtr ToString(Machine&, std::vector<ElementPtr>&);
+
+    /*
+     * Not implemented
+     */
     ElementPtr Eval(Machine&, std::vector<ElementPtr>&);
-    ElementPtr Bind(Machine&, std::vector<ElementPtr>&);
+
+    /*
+     * Bind[f, arg1, arg2, ...];
+     * Binds arguments to the function f. Returns a new function.
+     * Examples:
+     *     foo = Bind[f, "hello", _1, _2];
+     *     foo Is a function that takes two arguments represented by_1, _2.
+     *     f will be called as f["hello", _1, _2];
+     *
+     *     foo = Bind[f, _2, _1];
+     *     foo Is a function that takes two arguments represented by_1, _2.
+     *     f will be called as f[_2, __1];
+     *     Notice the arguments have been swapped.
+     *
+     *     foo = Bind[f, "hello", "world"];
+     *     foo Is a function that takes no arguments.
+     *     f will be called as f["hello", "world"];
+     *
+     *     foo = Bind[f, "hello", _1, "world"];
+     *     foo Is a function that takes one argument.
+     *     f will be called as f["hello", _1, "world"];
+     *
+     *   You can also bind a function attribute
+     *     foo = Bind[f, _1, _2, _3, attr->value];
+     *     foo Is a function that takes three arguments.
+     *     f will be called as f[_1, _2, _3, attr->value];
+     *
+     * Returns a function
+     */
+    FunctionDefinitionPtr Bind(Machine&, std::vector<ElementPtr>&);
 
     /********* List *********/
-    // Part[list, startidx];
-    // Part[list, startidx, endidx];
+    /* Returns an item from a list
+     * Throws exception 
+     * Returns Element of the list
+     * Example: Part[lst, 7];
+     */
     ElementPtr Part(Machine&, std::vector<ElementPtr>&);
-    ElementPtr Subscript(Machine&, std::vector<ElementPtr>&);
-    ElementPtr DefineRecord(Machine&, std::vector<ElementPtr>&);
-    ElementPtr MakeRecord(Machine&, std::vector<ElementPtr>&);
+
+    /* DefineRecord[record_name, field1, field2, field3, ...];
+     *    Creates a record
+     *    Throws exception
+     *    Returns None
+     *    Example: DefineRecord["fstat", type, mode, size, ctime, name];
+     */
+    NonePtr DefineRecord(Machine&, std::vector<ElementPtr>&);
+
+    /* MakeRecord*/
+    ListPtr MakeRecord(Machine&, std::vector<ElementPtr>&);
     IntegerPtr Len(Machine&, std::vector<ElementPtr>&);
-    ElementPtr Append(Machine&, std::vector<ElementPtr>&);
+
+    IntegerPtr Append(Machine&, std::vector<ElementPtr>&);
     ListPtr SetRecordType(Machine&, std::vector<ElementPtr>&);
 
     /******** Error *********/
@@ -66,6 +132,7 @@ namespace fsh
      * Helpers for built in functions
      */
 
+    ElementPtr Subscript(Machine&, std::vector<ElementPtr>&);
     ElementPtr UnitTest(Machine&, std::vector<ElementPtr>&);
 
     ElementPtr GetElement(Machine& machine, std::vector<ElementPtr>& args, size_t index);

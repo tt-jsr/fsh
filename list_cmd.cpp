@@ -164,7 +164,7 @@ namespace fsh
     }
 
 
-    ElementPtr DefineRecord(Machine& machine, std::vector<ElementPtr>& args)
+    NonePtr DefineRecord(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr sp = GetString(machine, args, 0);
         if (!sp)
@@ -187,7 +187,7 @@ namespace fsh
         return MakeNone();
     }
 
-    ElementPtr MakeRecord(Machine& machine, std::vector<ElementPtr>& args)
+    ListPtr MakeRecord(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr sp = GetString(machine, args, 0);
         if (!sp)
@@ -224,7 +224,7 @@ namespace fsh
         return MakeInteger(s);
     }
 
-    ElementPtr Append(Machine& machine, std::vector<ElementPtr>& args)
+    IntegerPtr Append(Machine& machine, std::vector<ElementPtr>& args)
     {
         ListPtr lst = GetList(machine, args, 0);
         if (!lst)
