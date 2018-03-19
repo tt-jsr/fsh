@@ -70,6 +70,7 @@ void dump(void *p)
 %token DOUBLE_BRACKET_OPEN
 %token DOUBLE_BRACKET_CLOSE
 %token RIGHT_ARROW
+%token COMMAND_LINE
 %token ';'
 %left ','
 %left '='
@@ -86,7 +87,9 @@ void dump(void *p)
 %% /* The grammar follows. */
 input:
     %empty
-    | input toplev
+    | input toplev {
+        std::cout << "> ";
+    }
     ;
 
 toplev
@@ -96,6 +99,11 @@ toplev
         //pInst->dump(ctx);
         //std::cout << "***********************************" << std::endl;
         Execute(pInst);
+    }
+    | COMMAND_LINE {
+        char *p =(char *)$1;
+        std::cout << p << std::endl;
+        free(p);
     }
     ;
 

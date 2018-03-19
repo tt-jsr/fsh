@@ -12,13 +12,12 @@ extern FILE *yyin;
 extern char * yytext;
 extern uint64_t lineno;
 extern uint64_t column;
+extern void command_line();
 
 Machine machine;
 
 void yyerror(const char *s) {
     std::cout << "Syntax error: " << s << " line: " << lineno << ":" << column << " \"" << yytext << "\"" << std::endl;
-	// might as well halt now:
-	exit(-1);
 }
 
 int main(int argc, char *argv[])
@@ -39,4 +38,5 @@ int main(int argc, char *argv[])
 	do {
 		yyparse();
 	} while (!feof(yyin));
+    command_line();
 }

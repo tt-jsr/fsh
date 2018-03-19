@@ -19,31 +19,31 @@ H           [a-fA-F0-9]
 %%
             std::string quotedstring;
 
-[ \t]       {++column;}
-[\n]        {++lineno;column = 0;}
-\+             {++column;return '+';}
--             {++column;return '-';}
-\*             {++column;return '*';}
-\/             {++column;return '/';}
-=             {++column;return '=';}
-\(             {++column;return '(';}
-\)             {++column;return ')';}
-\{             {++column;return '{';}
-\}             {++column;return '}';}
+[ \t]           {++column;}
+[\n]            {++lineno;column = 0;}
+\+              {++column;return '+';}
+-               {++column;return '-';}
+\*              {++column;return '*';}
+\/              {++column;return '/';}
+=               {++column;return '=';}
+\(              {++column;return '(';}
+\)              {++column;return ')';}
+\{              {++column;return '{';}
+\}              {++column;return '}';}
 ,               {++column;return ',';}
-\[               {++column;return '[';}
-\]               {++column;return ']';}
+\[              {++column;return '[';}
+\]              {++column;return ']';}
 &               {++column;return '&';}
 :               {++column;return ':';}
-\.               {++column;return '.';}
-\;               {++column;return ';';}
-\>               {++column;return GT;}
-\>=               {column += 2;return GTE;}
-\<               {++column;return LT;}
-\<=               {++column;return LTE;}
-==               {++column;return EQ;}
+\.              {++column;return '.';}
+\;              {++column;return ';';}
+\>              {++column;return GT;}
+\>=             {column += 2;return GTE;}
+\<              {++column;return LT;}
+\<=             {++column;return LTE;}
+==              {++column;return EQ;}
 ->              {column += 2;return RIGHT_ARROW;}
-\!=               {column += 2;return NEQ;}
+\!=             {column += 2;return NEQ;}
 \[\[            {column += 2;return DOUBLE_BRACKET_OPEN;}
 \]\]            {column += 2;return DOUBLE_BRACKET_CLOSE;}
 None            {column += 4;return NONE;}
@@ -59,6 +59,7 @@ and             {column += 3;return AND;}
 or              {column += 2;return OR;}
 in              {column += 2;return IN;}
 For             {column += 3;return FOR;}
+exit            {column += 4;exit(-1);}
 \"              {quotedstring.clear(); BEGIN(str);}
 <str>\"         {
                     BEGIN(INITIAL);
@@ -81,6 +82,11 @@ For             {column += 3;return FOR;}
                     }
                 }
 
+^\/.*$           {column += 2;
+                  yylval = strdup(yytext+1);
+                  return COMMAND_LINE;
+}
+
 {D}+         { 
     column += strlen(yytext);
     yylval = new fsh::instruction::Integer(lineno, atoi(yytext)); 
@@ -100,4 +106,16 @@ For             {column += 3;return FOR;}
 }
 #.*$ ;
 %%
+
+void command_line()
+{
+	do {
+        yyin = stdin;
+        YY_BUFFER_STATE bs = yy_create_buffer(yyin, YY_BUF_SIZE);
+        yy_switch_to_buffer(bs);
+        yy_flush_buffer(bs);
+		yyparse();
+        yy_delete_buffer(bs);
+	} while (true);
+}
 
