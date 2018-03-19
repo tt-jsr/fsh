@@ -14,6 +14,8 @@ extern int yyparse();
 extern FILE *yyin;
 extern uint64_t lineno;
 extern uint64_t column;
+extern bool commandMode;
+extern bool interactive;
 void Execute(fsh::instruction::Instruction *pInst);
  
 extern void yyerror(const char *s);
@@ -87,9 +89,7 @@ void dump(void *p)
 %% /* The grammar follows. */
 input:
     %empty
-    | input toplev {
-        std::cout << "> ";
-    }
+    | input toplev 
     ;
 
 toplev
@@ -99,11 +99,19 @@ toplev
         //pInst->dump(ctx);
         //std::cout << "***********************************" << std::endl;
         Execute(pInst);
+        if (interactive)
+        {
+            std::cout << "[]: ";
+        }
     }
     | COMMAND_LINE {
-        char *p =(char *)$1;
-        std::cout << p << std::endl;
-        free(p);
+        if ($1)
+        {
+            char *p =(char *)$1;
+            system(p);
+            free(p);
+            std::cout << "> ";
+        }
     }
     ;
 

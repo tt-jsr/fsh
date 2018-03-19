@@ -7,6 +7,8 @@ using namespace std;
 #define YY_DECL extern int yylex()
 uint64_t lineno = 1;
 uint64_t column = 0;
+bool commandMode = false;
+bool interactive = false;
 %}
 
 D           [0-9]
@@ -15,6 +17,7 @@ E           [Ee][+-]?{D}+
 H           [a-fA-F0-9]
 
 %x          str
+%x          cmd
 
 %%
             std::string quotedstring;
@@ -82,10 +85,21 @@ exit            {column += 4;exit(-1);}
                     }
                 }
 
-^\/.*$           {column += 2;
-                  yylval = strdup(yytext+1);
-                  return COMMAND_LINE;
-}
+^\/$            {column += 1;
+                 BEGIN(cmd);
+                 commandMode = true;
+                }
+<cmd>^[^/].+$        {column += strlen(yytext);
+                 char *p = strdup(yytext);
+                 yylval = p;
+                 return COMMAND_LINE;
+                }
+<cmd>^\/        {column += 1;
+                 BEGIN(INITIAL);
+                 commandMode= false;
+                 yylval = nullptr;
+                 return COMMAND_LINE;
+                }
 
 {D}+         { 
     column += strlen(yytext);
@@ -109,6 +123,11 @@ exit            {column += 4;exit(-1);}
 
 void command_line()
 {
+    interactive = true;
+    if (commandMode)
+        std::cout << ">: ";
+    else
+        std::cout << "[]: ";
 	do {
         yyin = stdin;
         YY_BUFFER_STATE bs = yy_create_buffer(yyin, YY_BUF_SIZE);
