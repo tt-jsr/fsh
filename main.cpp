@@ -38,5 +38,6 @@ int main(int argc, char *argv[])
 	do {
 		yyparse();
 	} while (!feof(yyin));
+    fclose(myfile);
     command_line();
 }

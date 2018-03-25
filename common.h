@@ -75,6 +75,7 @@ namespace fsh
             ,INSTRUCTION_DOT_OPERATOR
             ,INSTRUCTION_FOR
             ,INSTRUCTION_ATTRIBUTE
+            ,INSTRUCTION_SYSTEM
         };
     }
 

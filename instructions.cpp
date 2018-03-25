@@ -343,7 +343,7 @@ namespace fsh
             }
             rhs->Execute(machine);
             ElementPtr rdata = machine.pop_data();
-            int64_t idx = machine.get_record_field(lst->listtype, rdata);
+            size_t idx = machine.get_record_field(lst->listtype, rdata);
             if (idx >= lst->items.size())
                 throw std::runtime_error("record field out of range");
             machine.push_data(lst->items[idx]);
@@ -799,6 +799,26 @@ namespace fsh
         {
             std::stringstream strm;
             strm << "Attribute";
+            return strm.str();
+        }
+
+        /*****************************************************/
+
+        void System::Execute(Machine& machine)
+        {
+            system(value.c_str());
+            machine.push_data(MakeNone());
+        }
+
+        void System::dump(DumpContext& ctx)
+        {
+            ctx.strm() << "system: " << value << std::endl;
+        }
+
+        std::string System::type_str()
+        {
+            std::stringstream strm;
+            strm << "System";
             return strm.str();
         }
 

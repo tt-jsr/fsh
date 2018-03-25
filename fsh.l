@@ -18,6 +18,7 @@ H           [a-fA-F0-9]
 
 %x          str
 %x          cmd
+%x          sys
 
 %%
             std::string quotedstring;
@@ -71,9 +72,11 @@ exit            {column += 4;exit(-1);}
                     return STRING_LITERAL;
                 }
 <str>\n         { /* Unterminated string - error */
+                    ++lineno;
+                    column = 1;
                 }
 
-<str>\\n        quotedstring.push_back('\n');
+<str>\\n        {quotedstring.push_back('\n');++lineno;column=1;}
 <str>\\t        quotedstring.push_back('\t');
 <str>\\(.|\n)   quotedstring.push_back(yytext[1]);
 <str>[^\\\n\"]+  {
@@ -84,23 +87,59 @@ exit            {column += 4;exit(-1);}
                         column += 1;
                     }
                 }
+^\<sh\>$              {column += 4;
+                 BEGIN(sys);
+                }
+<sys>^\<\/sh\>$  {column+=5;
+                 BEGIN(INITIAL);
+                 return ';';
+                }
+<sys>^[^\<]+$    {column += strlen(yytext);
+                 yylval = new fsh::instruction::System(lineno, yytext); 
+                 return SYSTEM; 
+                }
+<sys>\n       {
+                 column = 0;
+                 ++lineno;
+                }
+                 
 
 ^\/$            {column += 1;
                  BEGIN(cmd);
                  commandMode = true;
-                }
-<cmd>^[^/].+$        {column += strlen(yytext);
-                 char *p = strdup(yytext);
-                 yylval = p;
-                 return COMMAND_LINE;
+                 yyterminate();
                 }
 <cmd>^\/        {column += 1;
                  BEGIN(INITIAL);
                  commandMode= false;
-                 yylval = nullptr;
-                 return COMMAND_LINE;
+                 yyterminate();
                 }
-
+<cmd>[^|<>\n&; ]+    {column += strlen(yytext);
+                 yylval = strdup(yytext);
+                 return CMD_WORD;
+                }
+<cmd>\&         {column += 1;
+                 return CMD_AMP;
+                }
+<cmd>\;         {column += 1;
+                 return CMD_SEMI;
+                }
+<cmd>\|         {column += 1;
+                 return CMD_BAR;
+                }
+<cmd>\<         {column += 1;
+                 return CMD_LT;
+                }
+<cmd>\>         {column += 1;
+                 return CMD_GT;
+                }
+<cmd>\>\>       {column += 1;
+                 return CMD_GTGT;
+                }
+<cmd>\n         {lineno += 1;
+                 column = 0;
+                 return CMD_NL;
+                }
 {D}+         { 
     column += strlen(yytext);
     yylval = new fsh::instruction::Integer(lineno, atoi(yytext)); 
@@ -124,17 +163,18 @@ exit            {column += 4;exit(-1);}
 void command_line()
 {
     interactive = true;
-    if (commandMode)
-        std::cout << ">: ";
-    else
-        std::cout << "[]: ";
 	do {
+        if (commandMode)
+            std::cout << ">: ";
+        else
+            std::cout << "[]: ";
         yyin = stdin;
         YY_BUFFER_STATE bs = yy_create_buffer(yyin, YY_BUF_SIZE);
         yy_switch_to_buffer(bs);
         yy_flush_buffer(bs);
 		yyparse();
         yy_delete_buffer(bs);
+         std::cout << "parse returned" << std::endl;
 	} while (true);
 }
 

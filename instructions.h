@@ -15,8 +15,8 @@ namespace fsh
             void indent();
             std::ostream& strm();
 
-            int indent_;
             std::ostream& strm_;
+            int indent_;
         };
 
         class Instruction : public fsh::instrusive_base
@@ -218,6 +218,27 @@ namespace fsh
         };
 
         typedef fsh::instrusive_ptr<Attribute> AttributePtr;
+
+        class System : public Instruction
+        {
+        public:
+            System(size_t l)
+            :Instruction(l)
+            { }
+
+            System(size_t l, const char *p)
+            :Instruction(l)
+            ,value(p)
+            { }
+
+            void Execute(Machine&);
+            InstructionType type() {return INSTRUCTION_SYSTEM;}
+            std::string type_str();
+            void dump(DumpContext&);
+            std::string value;
+        };
+
+        typedef fsh::instrusive_ptr<System> SystemPtr;
 
         /*
         class ElementWrapper : public Instruction

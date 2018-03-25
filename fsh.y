@@ -6,6 +6,8 @@
 #include "instructions.h"
 #include "machine.h"
 #include "builtins.h"
+#include "shell.h"
+
 using namespace std;
 
 // stuff from flex that bison needs to know about:
@@ -37,6 +39,7 @@ typedef fsh::instruction::TryCatch trycatch_t;
 typedef fsh::instruction::DotOperator dot_t;
 typedef fsh::instruction::For for_t;
 typedef fsh::instruction::Attribute attr_t;
+typedef fsh::instruction::System system_t;
 
 void dump(const char *p)
 {
@@ -72,7 +75,15 @@ void dump(void *p)
 %token DOUBLE_BRACKET_OPEN
 %token DOUBLE_BRACKET_CLOSE
 %token RIGHT_ARROW
-%token COMMAND_LINE
+%token SYSTEM
+%token CMD_WORD
+%token CMD_BAR
+%token CMD_LT
+%token CMD_GT
+%token CMD_AMP
+%token CMD_GTGT
+%token CMD_SEMI
+%token CMD_NL
 %token ';'
 %left ','
 %left '='
@@ -104,15 +115,16 @@ toplev
             std::cout << "[]: ";
         }
     }
-    | COMMAND_LINE {
-        if ($1)
-        {
-            char *p =(char *)$1;
-            system(p);
-            free(p);
+    |CMD_WORD {fsh::PushWord((char *)$1);}
+    |CMD_BAR {fsh::PushBar();}
+    |CMD_LT {fsh::PushLT();}
+    |CMD_GT {fsh::PushGT();}
+    |CMD_GTGT {fsh::PushGTGT();}
+    |CMD_AMP {fsh::PushAmp();}
+    |CMD_SEMI {fsh::PushSemi();}
+    |CMD_NL {fsh::PushNL();
             std::cout << "> ";
-        }
-    }
+            }
     ;
 
 primary_expression
@@ -123,6 +135,7 @@ primary_expression
     | NONE                  {$$ = new none_t(lineno);}
     | TRUE                  {$$ = new bool_t(lineno, true);}
     | FALSE                 {$$ = new bool_t(lineno, false);}
+    | SYSTEM                {$$ = $1;}
     | '(' expression_list ')'    {$$ = $2;}
     | '{' expression_list '}' { 
         el_t *el = (el_t *)$2;
@@ -415,7 +428,6 @@ function_call
     }
     | primary_expression '[' ']' {
         call_t *pCall = new call_t(lineno);
-        iden_t *id = (iden_t *)$1;
         pCall->call = (inst_t *)$1;
         //std::cout << "func call  " << id->name << std::endl;
         $$ = pCall;
