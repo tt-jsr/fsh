@@ -123,7 +123,7 @@ toplev
     |CMD_AMP {fsh::PushAmp();}
     |CMD_SEMI {fsh::PushSemi();}
     |CMD_NL {fsh::PushNL();
-            std::cout << "> ";
+            std::cout << "\r> ";
             }
     ;
 

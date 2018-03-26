@@ -165,7 +165,7 @@ void command_line()
     interactive = true;
 	do {
         if (commandMode)
-            std::cout << ">: ";
+            std::cout << "> ";
         else
             std::cout << "[]: ";
         yyin = stdin;
@@ -174,7 +174,6 @@ void command_line()
         yy_flush_buffer(bs);
 		yyparse();
         yy_delete_buffer(bs);
-         std::cout << "parse returned" << std::endl;
 	} while (true);
 }
 

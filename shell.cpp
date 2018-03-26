@@ -161,7 +161,7 @@ namespace fsh
                     cmd.fd_out = open(cmd.file_out.c_str(), flags, PERM_FILE);
                     if (cmd.fd_out < 0)
                     {
-                        std::cout << "Unable to open " << cmd.file_out << " for writing" << std::endl;
+                        std::cout << "Unable to open " << cmd.file_out << " for writing, err: " << strerror(errno) << std::endl;
                         _exit(EXIT_FAILURE);
                     }
                     if (dup2(cmd.fd_out, STDOUT_FILENO) < 0)
@@ -173,10 +173,10 @@ namespace fsh
                 }
                 if (IsFileIn(cmd.redir))
                 {
-                    cmd.fd_in = open(cmd.file_out.c_str(), O_RDONLY);
+                    cmd.fd_in = open(cmd.file_in.c_str(), O_RDONLY);
                     if (cmd.fd_in < 0)
                     {
-                        std::cout << "Unable to open " << cmd.file_out << " for freading" << std::endl;
+                        std::cout << "Unable to open \"" << cmd.file_in << "\" for reading, err: " << strerror(errno) << std::endl;
                         _exit(EXIT_FAILURE);
                     }
                     if (dup2(cmd.fd_in, STDIN_FILENO) < 0)
