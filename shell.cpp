@@ -5,6 +5,9 @@
 #include <fcntl.h>
 #include <sstream>
 #include <iostream>
+#include <wordexp.h>
+#include <dirent.h>
+#include <algorithm>
 #include "common.h"
 #include "shell.h"
 
@@ -224,7 +227,17 @@ namespace fsh
         else if (IsFileOut(cmd.redir))
             cmd.file_out = w;
         else 
-            commandLine.commands.back().args.push_back(w);
+        {
+            wordexp_t p;
+            char **exp_words;
+            int i;
+
+            wordexp(w, &p, 0);
+            exp_words = p.we_wordv;
+            for (i = 0; i < p.we_wordc; i++)
+                commandLine.commands.back().args.emplace_back(exp_words[i]);
+            wordfree(&p);
+        }
         free(w);
     }
 
