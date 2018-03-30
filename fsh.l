@@ -9,6 +9,10 @@ uint64_t lineno = 1;
 uint64_t column = 0;
 bool commandMode = false;
 bool interactive = false;
+
+extern "C" int yywrap() {
+    return 1;
+}
 %}
 
 D           [0-9]

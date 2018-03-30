@@ -22,11 +22,12 @@ void yyerror(const char *s) {
 
 int main(int argc, char *argv[])
 {
+    const char *fname = "junk.fsh";
 	// open a file handle to a particular file:
-	FILE *myfile = fopen("junk.fsh", "r");
+	FILE *myfile = fopen(fname, "r");
 	// make sure it's valid:
 	if (!myfile) {
-        std::cout << "Cannot open io.fsh" << std::endl;
+        std::cout << "Cannot open " << fname << std::endl;
 		return -1;
 	}
 	// set flex to read from it instead of defaulting to STDIN:

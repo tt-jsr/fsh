@@ -1,15 +1,15 @@
 CC=gcc
 CDEBUG = -g -O0
-CPPFLAGS = $(CDEBUG) -I.
+CPPFLAGS = $(CDEBUG) -std=c++11 -I.
 LDFLAGS=-g
-LIBS = -lstdc++ -lfl
+LIBS = -lstdc++ 
 DEPS=common.h element.h execution_context.h machine.h instructions.h builtins.h fsh.y fsh.l shell.h
 
 SRC	= main.cpp execution_context.cpp element.cpp machine.cpp instructions.cpp fsh.tab.cpp lex.yy.cpp err_cmd.cpp io_cmd.cpp builtins.cpp string_cmd.cpp list_cmd.cpp shell.cpp map_cmd.cpp
 
 fsh.tab.o : fsh.y
-	bison -d fsh.y
-	mv fsh.tab.c fsh.tab.cpp
+	#bison -d fsh.y
+	#mv fsh.tab.c fsh.tab.cpp
 	$(CC) -c $(CPPFLAGS) fsh.tab.cpp 
 
 lex.yy.o : fsh.l
@@ -23,5 +23,5 @@ fsh : $(OBJS) $(DEPS)
 	$(CC) $(CPPFLAGS) -o $@ $(OBJS) $(LIBS)
 
 clean: 
-	rm $(OBJS) lex.yy.cpp fsh.tab.h fsh.tab.cpp fsh
+	rm $(OBJS) lex.yy.cpp fsh
 
