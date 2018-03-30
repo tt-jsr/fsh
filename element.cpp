@@ -14,6 +14,12 @@ namespace fsh
         return r;
     }
 
+    MapPtr MakeMap()
+    {
+        MapPtr r(new Map());
+        return r;
+    }
+
     StringPtr MakeString(const std::string& s)
     {
         return StringPtr(new String(s));

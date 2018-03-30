@@ -218,10 +218,18 @@ namespace fsh
             return MakeInteger(s);
         }
         ListPtr lst = GetList(machine, args, 0);
-        if (!lst)
-            throw std::runtime_error("Len: argument must be a list or string");
-        int64_t s = (int64_t)lst->items.size();
-        return MakeInteger(s);
+        if (lst)
+        {
+            int64_t s = (int64_t)lst->items.size();
+            return MakeInteger(s);
+        }
+        MapPtr map = GetMap(machine, args, 0);
+        if (map)
+        {
+            int64_t s = (int64_t)map->map.size();
+            return MakeInteger(s);
+        }
+        throw std::runtime_error("Len: Unsupported type");
     }
 
     IntegerPtr Append(Machine& machine, std::vector<ElementPtr>& args)

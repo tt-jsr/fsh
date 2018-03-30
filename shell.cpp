@@ -288,12 +288,15 @@ namespace fsh
     {
         Command& cmd = commandLine.commands.back();
         cmd.background = true;
+        std::cout << "Background not supported" << std::endl;
+        commandLine.reset();
     }
 
     void PushSemi()
     {
         pid_t w;
         Invoke(commandLine, w);
+        commandLine.reset();
     }
 
     void PushNL()

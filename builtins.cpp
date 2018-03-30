@@ -60,6 +60,19 @@ namespace fsh
         return ep.cast<List>();
     }
 
+    MapPtr GetMap(Machine& machine, std::vector<ElementPtr>& args, size_t index)
+    {
+        ElementPtr ep = GetElement(machine, args, index);
+        if(ep.get() == nullptr)
+            return MapPtr();
+
+        if (ep->type() != ELEMENT_TYPE_MAP)
+        {
+            return MapPtr();
+        }
+        return ep.cast<Map>();
+    }
+
     IntegerPtr GetInteger(Machine& machine, std::vector<ElementPtr>& args, size_t index)
     {
         ElementPtr ep = GetElement(machine, args, index);
@@ -337,6 +350,30 @@ namespace fsh
                 return rtn;
             }
             break;
+        case ELEMENT_TYPE_MAP:
+            {
+                MapPtr mp = e.cast<Map>();
+                std::string rtn;
+                int count = 0;
+                for (auto& pr : mp->map)
+                {
+                    ElementPtr key = pr.first;
+                    ElementPtr value = pr.second;
+                    rtn.push_back('\'');
+                    std::string s = toString(machine, key);
+                    rtn += s;
+                    rtn.push_back('\'');
+                    rtn.push_back(':');
+                    rtn.push_back('\'');
+                    s = toString(machine, value);
+                    rtn += s;
+                    rtn.push_back('\'');
+                    if (count < mp->map.size()-1)
+                        rtn.push_back(',');
+                }
+                return rtn;
+            }
+            break;
         case ELEMENT_TYPE_FUNCTION_DEFINITION:
             {
                 return "FunctionDefinition";
@@ -431,6 +468,12 @@ namespace fsh
         machine.register_builtin("Len", fsh::Len);
         machine.register_builtin("Append", fsh::Append);
         machine.register_builtin("SetRecordType", fsh::SetRecordType);
+
+        // Map
+        machine.register_builtin("CreateMap", fsh::CreateMap);
+        machine.register_builtin("Insert", fsh::Insert);
+        machine.register_builtin("Delete", fsh::Delete);
+        machine.register_builtin("Lookup", fsh::Lookup);
 
         // Misc
         machine.register_builtin("IsError", fsh::IsError);

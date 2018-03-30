@@ -92,6 +92,12 @@ namespace fsh
             return instrusive_ptr<U>(static_cast<U *>(object));
         }
 
+        template<typename U>
+        const instrusive_ptr<U> cast() const
+        {
+            return instrusive_ptr<U>(static_cast<U *>(object));
+        }
+
         template <typename...Args>
         void emplace(Args&&... args)
         {

@@ -72,7 +72,7 @@ namespace fsh
      */
     FunctionDefinitionPtr Bind(Machine&, std::vector<ElementPtr>&);
 
-    /********* List *********/
+    /********* List ****************************************/
     /* Returns an item from a list
      * Throws exception 
      * Returns Element of the list
@@ -94,6 +94,12 @@ namespace fsh
 
     IntegerPtr Append(Machine&, std::vector<ElementPtr>&);
     ListPtr SetRecordType(Machine&, std::vector<ElementPtr>&);
+
+    /******** Map  *********************************/
+    MapPtr CreateMap(Machine&, std::vector<ElementPtr>&);
+    ElementPtr Lookup(Machine&, std::vector<ElementPtr>&);
+    ElementPtr Insert(Machine&, std::vector<ElementPtr>&);
+    ElementPtr Delete(Machine&, std::vector<ElementPtr>&);
 
     /******** Error *********/
     ElementPtr IsError(Machine&, std::vector<ElementPtr>&);
@@ -143,6 +149,7 @@ namespace fsh
     ObjectPtr GetObject(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     StringPtr GetString(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     ListPtr GetList(Machine& machine, std::vector<ElementPtr>& args, size_t index);
+    MapPtr GetMap(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     IntegerPtr GetInteger(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     IdentifierPtr GetIdentifier(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     FunctionDefinitionPtr GetFunctionDefinition(Machine& machine, std::vector<ElementPtr>& args, size_t index);
