@@ -197,7 +197,6 @@ namespace fsh
 
     ElementPtr PipelineStage(Machine& machine, ElementPtr stage, ElementPtr data)
     {
-                    //std::cout << "stage" << std::endl;
         stage = machine.resolve(stage);
         switch (stage->type())
         {
@@ -275,8 +274,6 @@ namespace fsh
         ElementPtr data;
         while (true)
         {
-
-                    //std::cout << "pipeline" << std::endl;
             data = PipelineStage(machine, args[idx], data);
             if (data->IsBoolean())
             {

@@ -148,8 +148,6 @@ namespace fsh
 
     struct List : public Element
     {
-        //void Add(const std::string&);
-        //void Add(int64_t n);
         size_t size() {return items.size();}
         virtual ElementType type() const {return ELEMENT_TYPE_LIST;}
         std::vector<ElementPtr> items;
