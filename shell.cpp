@@ -13,6 +13,8 @@
 
 #define PERM_FILE		(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 
+//#define FD_CHECK
+
 namespace fsh
 {
     static void fd_check(void)
@@ -201,7 +203,9 @@ namespace fsh
                 else
                     cmdname++;
                 const char *cmdpath = argv[0];
+#if defined(FD_CHECK)
                 fd_check();
+#endif
                 execvp(cmdpath, (char *const *)argv);
                 std::cout << "Cannot execute " << cmdpath << std::endl;
                 _exit(EXIT_FAILURE);

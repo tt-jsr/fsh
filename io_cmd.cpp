@@ -28,6 +28,8 @@ namespace fsh
         FileHandlePtr fh = MakeFileHandle();
         if (mode->value == "r" || mode->value == "rw")
             fh->bRead = true;
+        else
+            fh->bRead = false;
         fh->fp = fopen(filename->value.c_str(), mode->value.c_str());
         if (fh->fp == nullptr)
         {
@@ -41,8 +43,10 @@ namespace fsh
 
     FileHandlePtr OpenProcess(Machine& machine, std::vector<ElementPtr>& args)
     {
-        bool stripnl;
+        bool stripnl(false);
+        bool addnl(false);
         machine.get_variable("__stripnl", stripnl);
+        machine.get_variable("__addnl", addnl);
 
         StringPtr processName = GetString(machine, args, 0);
         if (processName.get() == nullptr)
@@ -57,6 +61,8 @@ namespace fsh
         FileHandlePtr fh = MakeFileHandle();
         if (mode->value == "r" || mode->value == "rw")
             fh->bRead = true;
+        else
+            fh->bRead = false;
         fh->isPipe = true;
         fh->fp = popen(processName->value.c_str(), mode->value.c_str());
         if (fh->fp == nullptr)
@@ -66,6 +72,7 @@ namespace fsh
             throw std::runtime_error(strm.str());
         }
         fh->stripnl = stripnl;
+        fh->addnl = addnl;
         return fh;
     }
 
@@ -195,6 +202,81 @@ namespace fsh
     }
 
 
+    ElementPtr PipelineHead(Machine& machine, ElementPtr stage, size_t& listIdx)
+    {
+        stage = machine.resolve(stage);
+        switch (stage->type())
+        {
+        case ELEMENT_TYPE_LIST:
+            {
+                ListPtr lp = stage.cast<List>();
+                if (listIdx == lp->items.size())
+                    return MakeBoolean(false);
+                return lp->items[listIdx++];
+            }
+            break;
+        case ELEMENT_TYPE_FUNCTION_DEFINITION:
+            {
+                    //std::cout << "stage function" << std::endl;
+                FunctionDefinitionPtr func = stage.cast<FunctionDefinition>();
+
+                machine.push_context();
+                try
+                {
+                    ElementPtr rtn =  CallFunctionImpl(machine, false, func, 0);
+                    machine.pop_context();
+                    return rtn;
+                }
+                catch (std::exception e)
+                {
+                    machine.pop_context();
+                    throw;
+                }
+            }
+            break;
+        case ELEMENT_TYPE_FILE_HANDLE:
+            {
+                    //std::cout << "stage file" << std::endl;
+                FileHandlePtr file = stage.cast<FileHandle>();
+                
+                if (file->bRead)
+                {
+                    char buffer[1024];
+                    if (nullptr == fgets(buffer, sizeof(buffer), file->fp))
+                    {
+                        if (file->isPipe)
+                            pclose(file->fp);
+                        else
+                            fclose(file->fp);
+                        file->fp = nullptr;
+                        return MakeBoolean(false);
+                    }
+                    //std::cout << buffer << std::endl;
+                    if (file->stripnl)
+                    {
+                        int len = strlen(buffer);
+                        if (buffer[len-1] ==  '\n')
+                            buffer[len-1] = '\0';
+                    }
+                    return MakeString(buffer);
+                }
+                else
+                {
+                    throw std::runtime_error("Pipeline head cannot be a writer");
+                }
+            }
+            break;
+        default:
+            {
+                std::stringstream strm;
+                strm << "Pipeline: unsupported element: " << stage->type();
+                throw std::runtime_error(strm.str());
+            }
+            break;
+        }
+        return MakeBoolean(false);
+    }
+
     ElementPtr PipelineStage(Machine& machine, ElementPtr stage, ElementPtr data)
     {
         stage = machine.resolve(stage);
@@ -252,8 +334,10 @@ namespace fsh
                     {
                         StringPtr sp = data.cast<String>();
                         fputs(sp->value.c_str(), file->fp);
-                        return data;
+                        if (file->addnl)
+                            fputs("\n", file->fp);
                     }
+                    return data;
                 }
             }
             break;
@@ -272,13 +356,17 @@ namespace fsh
     {
         size_t idx = 0;
         ElementPtr data;
+        size_t listIdx = 0;
         while (true)
         {
-            data = PipelineStage(machine, args[idx], data);
+            if (idx == 0)
+                data = PipelineHead(machine, args[idx], listIdx);
+            else
+                data = PipelineStage(machine, args[idx], data);
             if (data->IsBoolean())
             {
                 if (data.cast<Boolean>()->value == false)
-                    return data;
+                    return MakeNone();
                 else
                     idx = args.size();
             }

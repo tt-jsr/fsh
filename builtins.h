@@ -8,8 +8,9 @@ namespace fsh
     void RegisterBuiltIns(Machine& machine);
 
     /* Print[arg1, srg2, ...];
-     * Print accepts a variablenumber of arguments
+     * Print accepts a variable number of arguments
      * Returns None
+     * Attributes: __addnl->Boolean
      */
     ElementPtr Print(Machine&, std::vector<ElementPtr>&);
 
@@ -27,17 +28,11 @@ namespace fsh
      */
     FloatPtr ToFloat(Machine&, std::vector<ElementPtr>&);
 
-    /* Converts to an String
-     * Throws exception if argument is not a String, Float or Int
+    /* Converts any argument to a String
      * Returns String
      * Example: ToString[34]; ToString[27.6];
      */
     StringPtr ToString(Machine&, std::vector<ElementPtr>&);
-
-    /*
-     * Not implemented
-     */
-    ElementPtr Eval(Machine&, std::vector<ElementPtr>&);
 
     /*
      * Bind[f, arg1, arg2, ...];
@@ -90,6 +85,8 @@ namespace fsh
 
     /* MakeRecord*/
     ListPtr MakeRecord(Machine&, std::vector<ElementPtr>&);
+    
+    /* Returns number of elements in a String, List or Map */
     IntegerPtr Len(Machine&, std::vector<ElementPtr>&);
 
     IntegerPtr Append(Machine&, std::vector<ElementPtr>&);
@@ -114,6 +111,10 @@ namespace fsh
     FileHandlePtr OpenFile(Machine&, std::vector<ElementPtr>&);
 
     // OpenProcess["filename", "r"];
+    // Attributes: __stripnl->Boolean
+    //                When reading, strring the newline
+    //             __addnl->Boolean
+    //                When writing, add a newline
     FileHandlePtr OpenProcess(Machine&, std::vector<ElementPtr>&);
     ElementPtr PipeLine(Machine&, std::vector<ElementPtr>&);
 

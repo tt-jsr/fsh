@@ -399,11 +399,14 @@ namespace fsh
 
     ElementPtr Print(Machine& machine, std::vector<ElementPtr>& args)
     {
+        bool addnl(true);
+        machine.get_variable("__addnl", addnl);
         for (auto& e : args)
         {
             std::cout << toString(machine, e);
         }
-        std::cout << std::endl;
+        if (addnl)
+            std::cout << std::endl;
         return MakeNone();
     }
 

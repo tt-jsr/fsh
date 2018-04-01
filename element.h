@@ -194,6 +194,7 @@ namespace fsh
         ,bRead(false)
         ,isPipe(false)
         ,stripnl(false)
+        ,addnl(false)
         {}
         ~FileHandle()
         {
@@ -208,6 +209,7 @@ namespace fsh
         bool bRead;
         bool isPipe;
         bool stripnl;
+        bool addnl;
     };
 
     typedef instrusive_ptr<FileHandle> FileHandlePtr;

@@ -564,70 +564,14 @@ void Execute(fsh::instruction::Instruction *pInst)
 {
     fsh::instruction::InstructionPtr inst(pInst);
     fsh::ElementPtr e = machine.Execute(inst);
-    switch (e->type())
+    if(e->type() == fsh::ELEMENT_TYPE_ERROR)
     {
-    case fsh::ELEMENT_TYPE_ERROR:
-        {
-            fsh::ErrorPtr ep = e.cast<fsh::Error>();
-            if (ep->bOk == false)
-                std::cout << "Execution returned: " << ep->msg << std::endl;
-        }
-        break;
-    /*
-    case fsh::ELEMENT_TYPE_INTEGER:
-        {
-            fsh::IntegerPtr ip = e.cast<fsh::Integer>();
-            std::cout << ip->value << std::endl;
-        }
-        break;
-    case fsh::ELEMENT_TYPE_FLOAT:
-        {
-            fsh::FloatPtr ip = e.cast<fsh::Float>();
-            std::cout << ip->value << std::endl;
-        }
-        break;
-    case fsh::ELEMENT_TYPE_IDENTIFIER:
-        {
-            fsh::IdentifierPtr id = e.cast<fsh::Identifier>();
-            std::cout << id->name << std::endl;
-        }
-        break;
-    case fsh::ELEMENT_TYPE_NONE:
-        {
-            std::cout << "None" << std::endl;
-        }
-        break;
-    case fsh::ELEMENT_TYPE_STRING:
-        {
-            std::cout << "String" << std::endl;
-        }
-        break;
-    case fsh::ELEMENT_TYPE_LIST:
-        {
-            std::cout << "List" << std::endl;
-        }
-        break;
-    case fsh::ELEMENT_TYPE_HEAD:
-        {
-            std::cout << "Head" << std::endl;
-        }
-        break;
-    case fsh::ELEMENT_TYPE_FUNCTION_BUILTIN:
-        {
-            std::cout << "FunctionBuiltIn" << std::endl;
-        }
-        break;
-    case fsh::ELEMENT_TYPE_FUNCTION_SHELL:
-        {
-            std::cout << "FunctionShell" << std::endl;
-        }
-        break;
-    default:
-        std::cout << "Unhandled return from Execute!" << std::endl;
-        std::cout << "type: " << e->type() << std::endl;
-        break;
-    */
+        fsh::ErrorPtr ep = e.cast<fsh::Error>();
+        if (ep->bOk == false)
+            std::cout << ep->msg << std::endl;
     }
+    if (interactive)
+        std::cout << fsh::toString(machine, e) << std::endl;
 }
 
 
