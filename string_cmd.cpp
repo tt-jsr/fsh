@@ -184,6 +184,22 @@ namespace fsh
         return MakeInteger(n);
     }
 
+    StringPtr SubString(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        StringPtr sp = GetString(machine, args, 0);
+        if (!sp)
+            throw std::runtime_error("SubString: Arg 1 requires a string");
+        IntegerPtr pos = GetInteger(machine, args, 1);
+        if (!pos)
+            throw std::runtime_error("SubString: Arg 2 must be a position");
+        IntegerPtr count = GetInteger(machine, args, 2);
+        if (!count)
+            throw std::runtime_error("SubString: Arg 3 must be a count");
+
+        std::string s = sp->value.substr(pos->value, count->value);
+        return MakeString(s);
+    }
+
     ElementPtr RegSearch(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr str = GetString(machine, args, 0);

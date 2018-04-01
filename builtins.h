@@ -139,6 +139,9 @@ namespace fsh
     IntegerPtr Find(Machine&, std::vector<ElementPtr>&);
     StringPtr Format(Machine&, std::vector<ElementPtr>&);
 
+    // SubString[String, pos, count]
+    StringPtr SubString(Machine&, std::vector<ElementPtr>&);
+
     /***********************************************
      * Helpers for built in functions
      */

@@ -462,6 +462,7 @@ namespace fsh
         machine.register_builtin("RegSearch", fsh::RegSearch);
         machine.register_builtin("Find", fsh::Find);
         machine.register_builtin("Format", fsh::Format);
+        machine.register_builtin("SubString", fsh::SubString);
 
         // List
         machine.register_builtin("Part", fsh::Part);

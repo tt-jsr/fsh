@@ -35,7 +35,7 @@ namespace fsh
             }
             return pop_data();
         }
-        catch (std::runtime_error& ex)
+        catch (std::exception& ex)
         {
             if (unittest_exception)
             {
