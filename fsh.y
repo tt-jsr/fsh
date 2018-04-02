@@ -461,69 +461,62 @@ identifier_list
 
 expression_list
     :expression {
-        //std::cout << "expression_list exp  " << std::endl;
-        $$ = $1;
+        el_t *el = new el_t(lineno);
+        el->expressions.push_back((inst_t *)$1);
+        $$ = el;
     }
     |expression_list ',' expression  {
-        //std::cout << "expression_list list  "  << std::endl;
         inst_t *ip = (inst_t *)$1;
-        if (ip->type() == fsh::instruction::INSTRUCTION_EXPRESSION_LIST)
-        {
-            el_t *el = (el_t *)$1;
-            el->expressions.push_back((inst_t *)$3);
-            $$ = el;
-        }
-        else
-        {
-            el_t *el = new el_t(lineno);
-            el->expressions.push_back((inst_t *)$1);
-            el->expressions.push_back((inst_t *)$3);
-            $$ = el;
-        }
+        assert (ip->type() == fsh::instruction::INSTRUCTION_EXPRESSION_LIST);
+        el_t *el = (el_t *)$1;
+        el->expressions.push_back((inst_t *)$3);
+        $$ = el;
+    }
+    ;
+
+attribute_list
+    :attribute_expression {
+        el_t *el = new el_t(lineno);
+        el->expressions.push_back((inst_t *)$1);
+        $$ = el;
+    }
+    | attribute_list ',' attribute_expression  {
+        inst_t *ip = (inst_t *)$1;
+        assert (ip->type() == fsh::instruction::INSTRUCTION_EXPRESSION_LIST);
+        el_t *el = (el_t *)$1;
+        el->expressions.push_back((inst_t *)$3);
+        $$ = el;
     }
     ;
 
 call_expression_list
     :expression {
-        //std::cout << "expression_list exp  " << std::endl;
-        $$ = $1;
+        el_t *el = new el_t(lineno);
+        el->expressions.push_back((inst_t *)$1);
+        $$ = el;
     }
-    | attribute_expression {
-        //std::cout << "expression_list exp  " << std::endl;
-        $$ = $1;
+    | attribute_list {
+        el_t *el = new el_t(lineno);
+        el->expressions.push_back((inst_t *)$1);
+        $$ = el;
     }
     | expression_list ',' expression  {
-        //std::cout << "expression_list list  "  << std::endl;
         inst_t *ip = (inst_t *)$1;
-        if (ip->type() == fsh::instruction::INSTRUCTION_EXPRESSION_LIST)
-        {
-            el_t *el = (el_t *)$1;
-            el->expressions.push_back((inst_t *)$3);
-            $$ = el;
-        }
-        else
-        {
-            el_t *el = new el_t(lineno);
-            el->expressions.push_back((inst_t *)$1);
-            el->expressions.push_back((inst_t *)$3);
-            $$ = el;
-        }
+        assert (ip->type() == fsh::instruction::INSTRUCTION_EXPRESSION_LIST);
+        el_t *el = (el_t *)$1;
+        el->expressions.push_back((inst_t *)$3);
+        $$ = el;
     }
-    | expression_list ',' attribute_expression {
+    | expression_list ',' attribute_list {
         inst_t *ip = (inst_t *)$1;
-        if (ip->type() == fsh::instruction::INSTRUCTION_EXPRESSION_LIST)
+        assert (ip->type() == fsh::instruction::INSTRUCTION_EXPRESSION_LIST);
+        el_t *el = (el_t *)$1;
+        el_t *el_attr = (el_t *)$3;
+        for (auto e : el_attr->expressions)
         {
-            el_t *el = (el_t *)$1;
             el->expressions.push_back((inst_t *)$3);
-            $$ = el;
         }
-        else
-        {
-            el_t *el = new el_t(lineno);
-            el->expressions.push_back((inst_t *)$1);
-            el->expressions.push_back((inst_t *)$3);
-            $$ = el;
-        }
+        //delete el_attr;
     }
     ;
 

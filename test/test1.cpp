@@ -244,7 +244,9 @@ void Test1::UnitTestFunctions(int n)
         CPPUNIT_ASSERT(machine.get_variable("line",  svalue));
         CPPUNIT_ASSERT(svalue == "hello");
 
-        CPPUNIT_ASSERT(machine.get_variable("attr",  svalue));
+        CPPUNIT_ASSERT(machine.get_variable("attr1",  svalue));
+        CPPUNIT_ASSERT(svalue == "cruel");
+        CPPUNIT_ASSERT(machine.get_variable("attr2",  svalue));
         CPPUNIT_ASSERT(svalue == "world");
         break;
     case 8:

@@ -61,7 +61,7 @@ foo = &[line:
     UnitTest[7];
 ];
 
-foo["hello", attr->"world"];
+foo["hello", attr1->"cruel", attr2->"world"];
 
 ############################
 #test bind
