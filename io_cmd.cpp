@@ -352,7 +352,23 @@ namespace fsh
         return MakeBoolean(false);
     }
 
-    ElementPtr PipeLine(Machine& machine, std::vector<ElementPtr>& args)
+    void ClosePipeLine(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        for (ElementPtr e : args)
+        {
+            if(e->IsFileHandle())
+            {
+                FileHandlePtr fh = e.cast<FileHandle>();
+                if (fh->isPipe && fh->bRead == false)
+                {
+                    pclose(fh->fp);
+                    fh->fp = nullptr;
+                }
+            }
+        }
+    }
+
+    ElementPtr PipeLineImpl(Machine& machine, std::vector<ElementPtr>& args)
     {
         size_t idx = 0;
         ElementPtr data;
@@ -375,6 +391,13 @@ namespace fsh
                 idx = 0;
         }
         return MakeNone();
+    }
+
+    ElementPtr PipeLine(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr e = PipeLineImpl(machine, args);
+        ClosePipeLine(machine, args);
+        return e;
     }
 }
 

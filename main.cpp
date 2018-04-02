@@ -1,4 +1,5 @@
 #include <iostream>
+#include <signal.h>
 #include "common.h"
 #include "machine.h"
 #include "instructions.h"
@@ -20,6 +21,29 @@ void yyerror(const char *s) {
     std::cout << "Syntax error: " << s << " line: " << lineno << ":" << column << " \"" << yytext << "\"" << std::endl;
 }
 
+static struct sigaction entry_int, entry_quit, entry_pipe;
+
+static bool ignore_sig(void)
+{
+	static bool first = true;
+	struct sigaction act_ignore;
+
+	memset(&act_ignore, 0, sizeof(act_ignore));
+	act_ignore.sa_handler = SIG_IGN; /* may generate warning on Solaris */
+	if (first) {
+		first = false;
+		sigaction(SIGINT, &act_ignore, &entry_int);
+		sigaction(SIGQUIT, &act_ignore, &entry_quit);
+		sigaction(SIGPIPE, &act_ignore, &entry_pipe);
+	}
+	else {
+		sigaction(SIGINT, &act_ignore, NULL);
+		sigaction(SIGQUIT, &act_ignore, NULL);
+		sigaction(SIGPIPE, &act_ignore, NULL);
+	}
+	return true;
+}
+
 int main(int argc, char *argv[])
 {
     if (argc < 2)
@@ -38,6 +62,8 @@ int main(int argc, char *argv[])
 	yyin = myfile;
 
     RegisterBuiltIns(machine);
+
+    ignore_sig();
 
 	// parse through the input until there is no more:
 	do {
