@@ -264,7 +264,12 @@ math_expression
     }
     | '-' expression %prec NEG {
         inst_t *p = (inst_t *)$2;
-        if (p->type() == fsh::instruction::INSTRUCTION_INTEGER)
+        if (p->type() == fsh::instruction::INSTRUCTION_IDENTIFIER)
+        {
+            iden_t *pId = (iden_t *)p;
+            pId->negate = true;
+        }
+        else if (p->type() == fsh::instruction::INSTRUCTION_INTEGER)
         {
             int_t *pInt = (int_t *)p;
             pInt->value = -pInt->value;

@@ -120,6 +120,13 @@ namespace fsh
             IdentifierPtr id = e.cast<Identifier>();
             if (get_variable(id->value, rtn))
             {
+                if (id->negate)
+                {
+                    if (rtn->IsInteger())
+                        rtn.cast<Integer>()->value = -rtn.cast<Integer>()->value;
+                    if (rtn->IsFloat())
+                        rtn.cast<Float>()->value = -rtn.cast<Float>()->value;
+                }
                 return rtn;
             }
         }

@@ -78,11 +78,13 @@ namespace fsh
         public:
             Identifier(size_t l)
             :Instruction(l)
+            ,negate(false)
             { }
 
             Identifier(size_t l, const char *p)
             :Instruction(l)
             ,name(p)
+            ,negate(false)
             { }
 
             ~Identifier() {}
@@ -91,6 +93,7 @@ namespace fsh
             std::string type_str();
             void dump(DumpContext&);
             std::string name;
+            bool negate;
         };
 
         typedef fsh::instrusive_ptr<Identifier> IdentifierPtr;

@@ -10,7 +10,7 @@
 
 namespace fsh
 {
-    
+
     namespace instruction
     {
         /*****************************************************/
@@ -87,7 +87,7 @@ namespace fsh
                 break;
             }
         }
-        
+
         void ExecuteString(Machine& machine, int op, fsh::StringPtr lhs, fsh::StringPtr rhs)
         {
             switch(op)
@@ -638,7 +638,8 @@ namespace fsh
         /*****************************************************/
         void Identifier::Execute(Machine& machine)
         {
-            ElementPtr e = fsh::MakeIdentifier(name);
+            fsh::IdentifierPtr e = fsh::MakeIdentifier(name);
+            e->negate = negate;
             machine.push_data(e);
         }
 
@@ -651,7 +652,10 @@ namespace fsh
 
         void Identifier::dump(DumpContext& ctx)
         {
-            ctx.strm() << name << std::endl;
+            if (negate)
+                ctx.strm() << '-' << name << std::endl;
+            else
+                ctx.strm() << name << std::endl;
         }
 
         /*****************************************************/

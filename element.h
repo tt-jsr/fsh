@@ -77,13 +77,18 @@ namespace fsh
 
     struct Identifier : public Element
     {
-        Identifier() {}
+        Identifier()
+        :negate(false)
+        {}
+
         Identifier(const std::string& s)
         :value(s)
+        ,negate(false)
         {}
         
         virtual ElementType type() const {return ELEMENT_TYPE_IDENTIFIER;}
         std::string value;
+        bool negate;
     };
     typedef instrusive_ptr<Identifier> IdentifierPtr;
 
