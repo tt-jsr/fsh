@@ -1,5 +1,7 @@
 %{
 #include <iostream>
+#include <readline/readline.h>
+#include <readline/history.h>
 #include "fsh.tab.h"
 #include "common.h"
 #include "instructions.h"
@@ -168,14 +170,26 @@ void command_line()
 {
     interactive = true;
 	do {
+        char buffer[1024];
+        memset(buffer, 0, sizeof(buffer));
+        char *line;
         if (commandMode)
-            std::cout << "> ";
+            line = readline("> ");
         else
-            std::cout << "[]: ";
-        yyin = stdin;
-        YY_BUFFER_STATE bs = yy_create_buffer(yyin, YY_BUF_SIZE);
-        yy_switch_to_buffer(bs);
-        yy_flush_buffer(bs);
+            line = readline("[]: ");
+        size_t len = strlen(line);
+        if (len > 0)
+            add_history(line);
+        strncpy(buffer, line, sizeof(buffer));
+        buffer[len] = '\n';
+        ++len;
+        buffer[sizeof(buffer)-1] = '\0';
+        buffer[sizeof(buffer)-2] = '\0';
+        //std::cout << buffer << std::endl;
+        free(line);
+        YY_BUFFER_STATE bs = yy_scan_bytes(buffer, len+2);
+        //yy_switch_to_buffer(bs);
+        //yy_flush_buffer(bs);
 		yyparse();
         yy_delete_buffer(bs);
 	} while (true);

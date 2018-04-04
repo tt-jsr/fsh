@@ -2,7 +2,7 @@ CC=gcc
 CDEBUG = -g -O0
 CPPFLAGS = $(CDEBUG) -I.
 LDFLAGS=-g
-LIBS = -lstdc++ 
+LIBS = -lstdc++ -lreadline
 DEPS=common.h element.h execution_context.h machine.h instructions.h builtins.h fsh.y fsh.l shell.h
 
 SRC	= main.cpp execution_context.cpp element.cpp machine.cpp instructions.cpp fsh.tab.cpp lex.yy.cpp err_cmd.cpp io_cmd.cpp builtins.cpp string_cmd.cpp list_cmd.cpp shell.cpp map_cmd.cpp
