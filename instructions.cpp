@@ -398,7 +398,7 @@ namespace fsh
             if (e->IsFunctionDefinition() == false)
             {
                 std::stringstream strm;
-                strm << "expression is not a function, line: " << lineno;
+                strm << "expression is not a function, or expected function argument. line: " << lineno;
                 throw std::runtime_error(strm.str());
             }
 
