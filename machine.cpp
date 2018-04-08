@@ -6,13 +6,17 @@
 #include "common.h"
 #include "machine.h"
 #include "builtins.h"
-#include "instructions.h"
+#include "ast.h"
+#include "bytecode.h"
 
 namespace fsh
 {
     thread_local std::vector<ElementPtr> Machine::datastack;
 
     Machine::Machine(void)
+    :next_string_id(0)
+    ,next_function_id(0)
+    ,ip(0)
     {
         executionContext = MakeExecutionContext();
     }
@@ -22,12 +26,16 @@ namespace fsh
     {
     }
 
-    ElementPtr Machine::Execute(instruction::InstructionPtr i)
+    ElementPtr Machine::Execute()
     {
         try
         {
             datastack.clear();
-            i->Execute(*this);
+            while(ip < byte_code.size())
+            {
+                fsh::Execute(*this, byte_code, ip);
+                ++ip;
+            }
             assert(datastack.size() > 0);
             if (datastack.size() == 0)
             {
@@ -120,13 +128,6 @@ namespace fsh
             IdentifierPtr id = e.cast<Identifier>();
             if (get_variable(id->value, rtn))
             {
-                if (id->negate)
-                {
-                    if (rtn->IsInteger())
-                        rtn.cast<Integer>()->value = -rtn.cast<Integer>()->value;
-                    if (rtn->IsFloat())
-                        rtn.cast<Float>()->value = -rtn.cast<Float>()->value;
-                }
                 return rtn;
             }
         }
@@ -183,6 +184,25 @@ namespace fsh
     ExecutionContextPtr Machine::GetContext()
     {
         return executionContext;
+    }
+
+    ByteCode& Machine::get_byte_code()
+    {
+        return byte_code;
+    }
+
+    std::string Machine::string_table_get(int64_t id)
+    {
+        auto it = string_table.find(id);
+        if (it == string_table.end())
+            throw std::runtime_error("string not found");
+        return it->second;
+    }
+
+    int64_t Machine::string_table_add(const std::string& s)
+    {
+        string_table.emplace(++next_string_id, s);
+        return next_string_id;
     }
 
     void Machine::store_variable(const std::string& name, ElementPtr d)
@@ -276,14 +296,18 @@ namespace fsh
         return false;
     }
 
-    void Machine::register_builtin(const std::string& name, 
-            std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> func)
+    int64_t Machine::registerFunction(FunctionDefinition& fd)
     {
-        FunctionDefinitionPtr f = MakeFunctionDefinition();
-        f->builtInBody = func;
-        f->isBuiltIn = true;
-        ElementPtr e = f.cast<Element>();
-        store_variable(name, e);
+        functions[++next_function_id] = fd;
+        return next_function_id;
+    }
+
+    FunctionDefinition *Machine::getFunction(int64_t id)
+    {
+        auto it = functions.find(id);
+        if (it == functions.end())
+            return nullptr;
+        return &it->second;
     }
 
     void Machine::push_context()
@@ -297,9 +321,6 @@ namespace fsh
     {
         ExecutionContextPtr ec = executionContext->parent;
         executionContext = ec;
-
-        // This crashes for some reason
-        //executionContext = executionContext->parent;
     }
 
     void Machine::register_unittest(std::function<void (int)>& f)

@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <iostream>
 #include "common.h"
-#include "instructions.h"
+#include "ast.h"
 #include "machine.h"
 #include "builtins.h"
 #include "shell.h"
@@ -18,53 +18,31 @@ extern uint64_t lineno;
 extern uint64_t column;
 extern bool commandMode;
 extern bool interactive;
-void Execute(fsh::instruction::Instruction *pInst);
+void AstExecute(fsh::Ast *pAst);
  
 extern void yyerror(const char *s);
 
-typedef fsh::instruction::Instruction inst_t;
-typedef fsh::instruction::BinaryOperator bop_t;
-typedef fsh::instruction::FunctionCall call_t;
-typedef fsh::instruction::FunctionDef fdef_t;
-typedef fsh::instruction::WhileIf wif_t;
-typedef fsh::instruction::ExpressionList el_t;
-typedef fsh::instruction::IdentifierList il_t;
-typedef fsh::instruction::Identifier iden_t;
-typedef fsh::instruction::String str_t;
-typedef fsh::instruction::Boolean bool_t;
-typedef fsh::instruction::Integer int_t;
-typedef fsh::instruction::Float float_t;
-typedef fsh::instruction::None none_t;
-typedef fsh::instruction::TryCatch trycatch_t;
-typedef fsh::instruction::DotOperator dot_t;
-typedef fsh::instruction::For for_t;
-typedef fsh::instruction::Attribute attr_t;
-typedef fsh::instruction::System system_t;
-
-void dump(const char *p)
-{
-    std::cout << p << std::endl;
-}
-
-void dump(void *p)
-{
-    inst_t *ip = (inst_t *)p;
-    switch(ip->type())
-    {
-    case fsh::instruction::INSTRUCTION_IDENTIFIER:
-        std::cout << "IDENTIFIER" << std::endl;
-        break;
-    case fsh::instruction::INSTRUCTION_INTEGER:
-        std::cout << "INTEGER" << std::endl;
-        break;
-    default:
-        std::cout << "enum: " << ip->type() << std::endl;
-        break;
-    }
-}
+typedef fsh::Ast ast_t;
+typedef fsh::ASTBinaryOperator bop_t;
+//typedef fsh::FunctionCall call_t;
+//typedef fsh::FunctionDef fdef_t;
+//typedef fsh::WhileIf wif_t;
+typedef fsh::ASTExpressionList el_t;
+//typedef fsh::IdentifierList il_t;
+//typedef fsh::Identifier iden_t;
+//typedef fsh::String str_t;
+//typedef fsh::Boolean bool_t;
+//typedef fsh::Integer int_t;
+//typedef fsh::Float float_t;
+//typedef fsh::None none_t;
+//typedef fsh::TryCatch trycatch_t;
+//typedef fsh::DotOperator dot_t;
+//typedef fsh::For for_t;
+//typedef fsh::Attribute attr_t;
+//typedef fsh::System system_t;
 %}
 
-%define api.value.type {void *} // Actually is instruction::Instruction
+%define api.value.type {void *} // Actually is Ast
 
 // define the constant-string tokens:
 %token IDENTIFIER INTEGER FLOAT STRING_LITERAL
@@ -105,15 +83,8 @@ input:
 
 toplev
     :statement {
-        //fsh::instruction::DumpContext ctx(std::cout);
-        inst_t *pInst = (inst_t *)$1;
-        //pInst->dump(ctx);
-        //std::cout << "***********************************" << std::endl;
-        Execute(pInst);
-        if (interactive)
-        {
-            std::cout << "[]: ";
-        }
+        ast_t *pAst = (ast_t *)$1;
+        AstExecute(pAst);
     }
     |CMD_WORD {fsh::PushWord((char *)$1);}
     |CMD_BAR {fsh::PushBar();}
@@ -132,30 +103,41 @@ primary_expression
     | INTEGER               {$$ = $1;}
     | FLOAT                 {$$ = $1;}
     | STRING_LITERAL        {$$ = $1;}
-    | NONE                  {$$ = new none_t(lineno);}
-    | TRUE                  {$$ = new bool_t(lineno, true);}
-    | FALSE                 {$$ = new bool_t(lineno, false);}
-    | SYSTEM                {$$ = $1;}
+    | NONE                  {
+                                fsh::ASTConstant *bc = new fsh::ASTConstant(lineno);
+                                bc->ctype = fsh::ASTConstant::CTYPE_NONE;
+                                $$ = bc;
+                            }
+    | TRUE                  {
+                                fsh::ASTConstant *bc = new fsh::ASTConstant(lineno);
+                                bc->ctype = fsh::ASTConstant::CTYPE_TRUE;
+                                $$ = bc;
+                            }
+    | FALSE                 {
+                                fsh::ASTConstant *bc = new fsh::ASTConstant(lineno);
+                                bc->ctype = fsh::ASTConstant::CTYPE_FALSE;
+                                $$ = bc;
+                            }
+    //| SYSTEM                {$$ = $1;}
     | '(' expression_list ')'    {$$ = $2;}
     | '{' expression_list '}' { 
-        el_t *el = (el_t *)$2;
-        el->isList = true;
+        //el_t *el = (el_t *)$2;
+        //el->isList = true;
         $$ = $2; 
     }
     | '{' '}' { 
-        el_t *el = new el_t(lineno);
-        el->isList = true;
-        $$ = el;
+        //el_t *el = new el_t(lineno);
+        //el->isList = true;
+        //$$ = el;
     }
     ;
 
 assignment_expression
     : IDENTIFIER '=' expression {
-        bop_t *bop = new bop_t(lineno);
-        bop->op = fsh::TOKEN_ASSIGNMENT;
-        bop->lhs = (inst_t *)$1;
-        bop->rhs = (inst_t *)$3;
-        $$ = bop;
+        fsh::ASTAssignment *ass = new fsh::ASTAssignment(lineno);
+        ass->rhs.reset((ast_t *)$3);
+        ass->lhs.reset((ast_t *)$1);
+        $$ = ass;
     }
     ;
 
@@ -177,58 +159,58 @@ expression
 relational_expression
     :expression LT expression {
         bop_t *bop = new bop_t(lineno);
-        bop->op = fsh::TOKEN_LT;
-        bop->lhs = (inst_t *)$1;
-        bop->rhs = (inst_t *)$3;
+        bop->op = fsh::BC_RELATIONAL_LT;
+        bop->lhs.reset((ast_t *)$1);
+        bop->rhs.reset((ast_t *)$3);
         $$ = bop;
     }
     |expression LTE expression {
         bop_t *bop = new bop_t(lineno);
-        bop->op = fsh::TOKEN_LTE;
-        bop->lhs = (inst_t *)$1;
-        bop->rhs = (inst_t *)$3;
+        bop->op = fsh::BC_RELATIONAL_LTE;
+        bop->lhs.reset((ast_t *)$1);
+        bop->rhs.reset((ast_t *)$3);
         $$ = bop;
     }
     |expression GT expression {
         bop_t *bop = new bop_t(lineno);
-        bop->op = fsh::TOKEN_GT;
-        bop->lhs = (inst_t *)$1;
-        bop->rhs = (inst_t *)$3;
+        bop->op = fsh::BC_RELATIONAL_GT;
+        bop->lhs.reset((ast_t *)$1);
+        bop->rhs.reset((ast_t *)$3);
         $$ = bop;
     }
     |expression GTE expression {
         bop_t *bop = new bop_t(lineno);
-        bop->op = fsh::TOKEN_GTE;
-        bop->lhs = (inst_t *)$1;
-        bop->rhs = (inst_t *)$3;
+        bop->op = fsh::BC_RELATIONAL_GTE;
+        bop->lhs.reset((ast_t *)$1);
+        bop->rhs.reset((ast_t *)$3);
         $$ = bop;
     }
     |expression EQ expression {
         bop_t *bop = new bop_t(lineno);
-        bop->op = fsh::TOKEN_EQ;
-        bop->lhs = (inst_t *)$1;
-        bop->rhs = (inst_t *)$3;
+        bop->op = fsh::BC_RELATIONAL_EQ;
+        bop->lhs.reset((ast_t *)$1);
+        bop->rhs.reset((ast_t *)$3);
         $$ = bop;
     }
     |expression NEQ expression {
         bop_t *bop = new bop_t(lineno);
-        bop->op = fsh::TOKEN_NEQ;
-        bop->lhs = (inst_t *)$1;
-        bop->rhs = (inst_t *)$3;
+        bop->op = fsh::BC_RELATIONAL_NEQ;
+        bop->lhs.reset((ast_t *)$1);
+        bop->rhs.reset((ast_t *)$3);
         $$ = bop;
     }
     |expression AND expression {
         bop_t *bop = new bop_t(lineno);
-        bop->op = fsh::TOKEN_AND;
-        bop->lhs = (inst_t *)$1;
-        bop->rhs = (inst_t *)$3;
+        bop->op = fsh::BC_LOGICAL_AND;
+        bop->lhs.reset((ast_t *)$1);
+        bop->rhs.reset((ast_t *)$3);
         $$ = bop;
     }
     |expression OR expression {
         bop_t *bop = new bop_t(lineno);
-        bop->op = fsh::TOKEN_OR;
-        bop->lhs = (inst_t *)$1;
-        bop->rhs = (inst_t *)$3;
+        bop->op = fsh::BC_LOGICAL_OR;
+        bop->lhs.reset((ast_t *)$1);
+        bop->rhs.reset((ast_t *)$3);
         $$ = bop;
     }
     ;
@@ -236,205 +218,192 @@ relational_expression
 math_expression
     :expression '+' expression {
         bop_t *bop = new bop_t(lineno);
-        bop->op = fsh::TOKEN_PLUS;
-        bop->lhs = (inst_t *)$1;
-        bop->rhs = (inst_t *)$3;
+        bop->op = fsh::BC_BINARY_ADD;
+        bop->lhs.reset((ast_t *)$1);
+        bop->rhs.reset((ast_t *)$3);
         $$ = bop;
     }
     | expression '-' expression {
         bop_t *bop = new bop_t(lineno);
-        bop->op = fsh::TOKEN_MINUS;
-        bop->lhs = (inst_t *)$1;
-        bop->rhs = (inst_t *)$3;
+        bop->op = fsh::BC_BINARY_SUBTRACT;
+        bop->lhs.reset((ast_t *)$1);
+        bop->rhs.reset((ast_t *)$3);
         $$ = bop;
     }
     | expression '*' expression {
         bop_t *bop = new bop_t(lineno);
-        bop->op = fsh::TOKEN_MULTIPLY;
-        bop->lhs = (inst_t *)$1;
-        bop->rhs = (inst_t *)$3;
+        bop->op = fsh::BC_BINARY_MULTIPLY;
+        bop->lhs.reset((ast_t *)$1);
+        bop->rhs.reset((ast_t *)$3);
         $$ = bop;
     }
     | expression '/' expression {
         bop_t *bop = new bop_t(lineno);
-        bop->op = fsh::TOKEN_DIVIDE;
-        bop->lhs = (inst_t *)$1;
-        bop->rhs = (inst_t *)$3;
+        bop->op = fsh::BC_BINARY_DIVIDE;
+        bop->lhs.reset((ast_t *)$1);
+        bop->rhs.reset((ast_t *)$3);
         $$ = bop;
     }
     | '-' expression %prec NEG {
-        inst_t *p = (inst_t *)$2;
-        if (p->type() == fsh::instruction::INSTRUCTION_IDENTIFIER)
-        {
-            iden_t *pId = (iden_t *)p;
-            pId->negate = true;
-        }
-        else if (p->type() == fsh::instruction::INSTRUCTION_INTEGER)
-        {
-            int_t *pInt = (int_t *)p;
-            pInt->value = -pInt->value;
-        }
-        else if (p->type() == fsh::instruction::INSTRUCTION_FLOAT)   {
-            float_t *pFloat = (float_t *)p;
-            pFloat->value = -pFloat->value;
-        }
-        $$ = p; 
+        fsh::ASTUnaryOperator *uo= new fsh::ASTUnaryOperator(lineno);
+        uo->op = fsh::BC_UNARY_NEGATE;
+        uo->operand.reset((ast_t *)$2);
+        $$ = uo;
     }
     ;
 
 attribute_expression
     : IDENTIFIER RIGHT_ARROW expression {
-        attr_t *pAttr = new attr_t(lineno);
-        pAttr->name = (inst_t *)$1;
-        pAttr->value = (inst_t *)$3;
-        $$ = pAttr;
+        //attr_t *pAttr = new attr_t(lineno);
+        //pAttr->name = (inst_t *)$1);
+        //pAttr->value = (inst_t *)$3);
+        //$$ = pAttr;
     }
     ;
 
 subscript_expression
     : primary_expression DOUBLE_BRACKET_OPEN  expression ':' expression DOUBLE_BRACKET_CLOSE {
-        call_t *pCall = new call_t(lineno);
-        pCall->call = new iden_t(lineno, "Subscript");
-        el_t *el = new fsh::instruction::ExpressionList(lineno);
-        el->expressions.push_back((inst_t *)$1);
-        el->expressions.push_back((inst_t *)$3);
-        el->expressions.push_back(new str_t(lineno, ":"));
-        el->expressions.push_back((inst_t *)$5);
-        pCall->functionArguments = el;
-        //std::cout << "func call " << id->name << std::endl;
-        $$ = pCall;
+        //call_t *pCall = new call_t(lineno);
+        //pCall->call = new iden_t(lineno, "Subscript");
+        //el_t *el = new fsh::instruction::ExpressionList(lineno);
+        //el->expressions.push_back((inst_t *)$1);
+        //el->expressions.push_back((inst_t *)$3);
+        //el->expressions.push_back(new str_t(lineno, ":"));
+        //el->expressions.push_back((inst_t *)$5);
+        //pCall->functionArguments = el;
+        ////std::cout << "func call " << id->name << std::endl;
+        //$$ = pCall;
     }
     | primary_expression DOUBLE_BRACKET_OPEN  expression ':' DOUBLE_BRACKET_CLOSE {
-        call_t *pCall = new call_t(lineno);
-        pCall->call = new iden_t(lineno, "Subscript");
-        el_t *el = new fsh::instruction::ExpressionList(lineno);
-        el->expressions.push_back((inst_t *)$1);
-        el->expressions.push_back((inst_t *)$3);
-        el->expressions.push_back(new str_t(lineno, ":"));
-        pCall->functionArguments = el;
+        //call_t *pCall = new call_t(lineno);
+        //pCall->call = new iden_t(lineno, "Subscript");
+        //el_t *el = new fsh::instruction::ExpressionList(lineno);
+        //el->expressions.push_back((inst_t *)$1);
+        //el->expressions.push_back((inst_t *)$3);
+        //el->expressions.push_back(new str_t(lineno, ":"));
+        //pCall->functionArguments = el;
         //std::cout << "func call " << id->name << std::endl;
-        $$ = pCall;
+        //$$ = pCall;
     }
     | primary_expression DOUBLE_BRACKET_OPEN  expression DOUBLE_BRACKET_CLOSE {
-        call_t *pCall = new call_t(lineno);
-        pCall->call = new iden_t(lineno, "Subscript");
-        el_t *el = new fsh::instruction::ExpressionList(lineno);
-        el->expressions.push_back((inst_t *)$1);
-        el->expressions.push_back((inst_t *)$3);
-        pCall->functionArguments = el;
-        //std::cout << "func call " << id->name << std::endl;
-        $$ = pCall;
+        //call_t *pCall = new call_t(lineno);
+        //pCall->call = new iden_t(lineno, "Subscript");
+        //el_t *el = new fsh::instruction::ExpressionList(lineno);
+        //el->expressions.push_back((inst_t *)$1);
+        //el->expressions.push_back((inst_t *)$3);
+        //pCall->functionArguments = el;
+        ////std::cout << "func call " << id->name << std::endl;
+        //$$ = pCall;
     }
     | primary_expression DOUBLE_BRACKET_OPEN  ':' expression DOUBLE_BRACKET_CLOSE {
-        call_t *pCall = new call_t(lineno);
-        pCall->call = new iden_t(lineno, "Subscript");
-        el_t *el = new fsh::instruction::ExpressionList(lineno);
-        el->expressions.push_back((inst_t *)$1);
-        el->expressions.push_back(new str_t(lineno, ":"));
-        el->expressions.push_back((inst_t *)$4);
-        pCall->functionArguments = el;
-        //std::cout << "func call " << id->name << std::endl;
-        $$ = pCall;
+        //call_t *pCall = new call_t(lineno);
+        //pCall->call = new iden_t(lineno, "Subscript");
+        //el_t *el = new fsh::instruction::ExpressionList(lineno);
+        //el->expressions.push_back((inst_t *)$1);
+        //el->expressions.push_back(new str_t(lineno, ":"));
+        //el->expressions.push_back((inst_t *)$4);
+        //pCall->functionArguments = el;
+        ////std::cout << "func call " << id->name << std::endl;
+        //$$ = pCall;
     }
     ;
 
 dot_expression
     : IDENTIFIER '.' expression {
-        dot_t *dop = new dot_t(lineno);
-        dop->lhs = (inst_t *)$1;
-        dop->rhs = (inst_t *)$3;
-        $$ = dop;
+        //dot_t *dop = new dot_t(lineno);
+        //dop->lhs = (inst_t *)$1;
+        //dop->rhs = (inst_t *)$3;
+        //$$ = dop;
     }
     ;
 
 exception_expression
     : TRY '[' statement_list  CATCH statement_list  ']'  {
-        trycatch_t *pException = new trycatch_t(lineno);
-        pException->try_ = (inst_t *)$3;
-        pException->catch_ = (inst_t *)$5;
-        $$ = pException;
+        //trycatch_t *pException = new trycatch_t(lineno);
+        //pException->try_ = (inst_t *)$3;
+        //pException->catch_ = (inst_t *)$5;
+        //$$ = pException;
     }
     ;
 
 selection_expression
     : IF '[' expression_list  THEN statement_list  ELSE statement_list  ']'  {
-        wif_t *pWhileIf = new wif_t(lineno);
-        pWhileIf->isWhile = false;
-        pWhileIf->condition = (inst_t *)$3;
-        pWhileIf->if_true = (inst_t *)$5;
-        pWhileIf->if_false = (inst_t *)$7;
-        $$ = pWhileIf;
+        fsh::ASTIfStatement *pIf = new fsh::ASTIfStatement(lineno);
+        pIf->condition.reset((ast_t *)$3);
+        pIf->if_true.reset((ast_t *)$5);
+        pIf->if_false.reset((ast_t *)$7);
+        $$ = pIf;
     }
     ;
 
 for_expression
     : FOR '[' IDENTIFIER IN expression THEN statement_list ']'  {
-        for_t *pFor = new for_t(lineno);
-        pFor->identifier = (inst_t *)$3;
-        pFor->list = (inst_t *)$5;
-        pFor->body = (inst_t *)$7;
-        $$ = pFor;
+        //for_t *pFor = new for_t(lineno);
+        //pFor->identifier = (inst_t *)$3;
+        //pFor->list = (inst_t *)$5;
+        //pFor->body = (inst_t *)$7;
+        //$$ = pFor;
     }
     ;
 
 iteration_expression
-    : WHILE '[' expression_list  THEN statement_list  ELSE statement_list  ']'  {
-        wif_t *pWhileIf = new wif_t(lineno);
-        pWhileIf->isWhile = true;
-        pWhileIf->condition = (inst_t *)$3;
-        pWhileIf->if_true = (inst_t *)$5;
-        pWhileIf->if_false = (inst_t *)$7;
+    : WHILE '[' expression_list  THEN statement_list ']'  {
+        fsh::ASTWhile *pWhileIf = new fsh::ASTWhile(lineno);
+        pWhileIf->condition.reset((ast_t *)$3);
+        pWhileIf->if_true.reset((ast_t *)$5);
         $$ = pWhileIf;
     }
     ;
 
 function_definition
     : '&' '[' identifier_list ':' statement_list ']' {
-        fdef_t *pDef = new fdef_t(lineno);
-        inst_t *arg3 = (inst_t *)$3;
-        assert(arg3->type() == fsh::instruction::INSTRUCTION_IDENTIFIER
-            || arg3->type() == fsh::instruction::INSTRUCTION_IDENTIFIER_LIST);
-        if (arg3->type() == fsh::instruction::INSTRUCTION_IDENTIFIER)
+        fsh::ASTFunctionDef *pDef = new fsh::ASTFunctionDef(lineno);
+        ast_t *arg3 = (ast_t *)$3;
+        assert(arg3->type() == fsh::AST_CONSTANT
+            || arg3->type() == fsh::AST_IDENTIFIER_LIST);
+        if (arg3->type() == fsh::AST_CONSTANT)
         {
-            iden_t * id = (iden_t *)$3;
-            pDef->arg_names.push_back(id->name);
+            fsh::ASTConstant * id = (fsh::ASTConstant *)$3;
+            assert(id->ctype == fsh::ASTConstant::CTYPE_IDENTIFIER);
+            pDef->arg_names.push_back(id->svalue);
             delete id;
         }
         else
         {
-            il_t *il = (il_t *)$3;
+            fsh::ASTIdentifierList *il = (fsh::ASTIdentifierList *)$3;
             for (auto& inst : il->identifiers)
             {
-                if (inst->type() == fsh::instruction::INSTRUCTION_IDENTIFIER)
+                if (inst->type() == fsh::AST_CONSTANT)
                 {
-                    fsh::instruction::IdentifierPtr id = inst.cast<fsh::instruction::Identifier>();
-                    pDef->arg_names.push_back(id->name);
+                    fsh::ASTConstant *id = (fsh::ASTConstant *)inst.get();
+                    assert(id->ctype == fsh::ASTConstant::CTYPE_IDENTIFIER);
+                    pDef->arg_names.push_back(id->svalue);
                 }
             }
             delete il;
         }
-        pDef->functionBody = (fsh::instruction::Instruction *)$5;
+        pDef->functionBody.reset((fsh::Ast *)$5);
         $$ = pDef;
     }
     |'&' '[' statement_list ']' {
-        fsh::instruction::FunctionDef *pDef = new fsh::instruction::FunctionDef(lineno);
-        pDef->functionBody = (fsh::instruction::Instruction *)$3;
+        fsh::ASTFunctionDef *pDef = new fsh::ASTFunctionDef(lineno);
+        pDef->functionBody.reset((fsh::Ast *)$3);
         $$ = pDef;
     }
     ;
 
 function_call
     : primary_expression '[' call_expression_list ']' {
-        call_t *pCall = new call_t(lineno);
-        pCall->call = (inst_t *)$1;
-        pCall->functionArguments = (inst_t *)$3;
-        //std::cout << "func call " << id->name << std::endl;
+        fsh::ASTFunctionCall *pCall = new fsh::ASTFunctionCall(lineno);
+        pCall->call.reset((ast_t *)$1);
+        pCall->arguments.reset((ast_t *)$3);
+        ////std::cout << "func call " << id->name << std::endl;
         $$ = pCall;
     }
     | primary_expression '[' ']' {
-        call_t *pCall = new call_t(lineno);
-        pCall->call = (inst_t *)$1;
-        //std::cout << "func call  " << id->name << std::endl;
+        fsh::ASTFunctionCall *pCall = new fsh::ASTFunctionCall(lineno);
+        pCall->call.reset((ast_t *)$1);
+        ////std::cout << "func call  " << id->name << std::endl;
         $$ = pCall;
     }
     ;
@@ -444,21 +413,21 @@ identifier_list
         $$ = $1;
     }
     |identifier_list ',' IDENTIFIER  {
-        assert(((inst_t *)$3)->type() == fsh::instruction::INSTRUCTION_IDENTIFIER);
-        iden_t *arg3 = (iden_t *)$3;
-        inst_t *ip = (inst_t *)$1;
-        if (ip->type() == fsh::instruction::INSTRUCTION_IDENTIFIER_LIST)
+        assert(((ast_t *)$3)->type() == fsh::AST_CONSTANT);
+        fsh::ASTConstant *arg3 = (fsh::ASTConstant *)$3;
+        ast_t *ast = (ast_t *)$1;
+        if (ast->type() == fsh::AST_IDENTIFIER_LIST)
         {
-            il_t *il = (il_t *)$1;
-            il->identifiers.push_back(arg3);
+            fsh::ASTIdentifierList *il = (fsh::ASTIdentifierList *)$1;
+            il->identifiers.emplace_back(arg3);
             $$ = il;
         }
         else
         {
-            assert(((inst_t *)$1)->type() == fsh::instruction::INSTRUCTION_IDENTIFIER);
-            il_t *il = new il_t(lineno);
-            il->identifiers.push_back((iden_t *)$1);
-            il->identifiers.push_back(arg3);
+            assert(((ast_t *)$1)->type() == fsh::AST_CONSTANT);
+            fsh::ASTIdentifierList *il = new fsh::ASTIdentifierList(lineno);
+            il->identifiers.emplace_back((fsh::ASTConstant *)$1);
+            il->identifiers.emplace_back(arg3);
             $$ = il;
         }
     }
@@ -467,61 +436,61 @@ identifier_list
 expression_list
     :expression {
         el_t *el = new el_t(lineno);
-        el->expressions.push_back((inst_t *)$1);
+        el->expressions.emplace_back((ast_t *)$1);
         $$ = el;
     }
     |expression_list ',' expression  {
-        inst_t *ip = (inst_t *)$1;
-        assert (ip->type() == fsh::instruction::INSTRUCTION_EXPRESSION_LIST);
+        ast_t *ast = (ast_t *)$1;
+        assert (ast->type() == fsh::AST_EXPRESSION_LIST);
         el_t *el = (el_t *)$1;
-        el->expressions.push_back((inst_t *)$3);
+        el->expressions.emplace_back((ast_t *)$3);
         $$ = el;
     }
     ;
 
 attribute_list
     :attribute_expression {
-        el_t *el = new el_t(lineno);
-        el->expressions.push_back((inst_t *)$1);
-        $$ = el;
+        //el_t *el = new el_t(lineno);
+        //el->expressions.push_back((inst_t *)$1);
+        //$$ = el;
     }
     | attribute_list ',' attribute_expression  {
-        inst_t *ip = (inst_t *)$1;
-        assert (ip->type() == fsh::instruction::INSTRUCTION_EXPRESSION_LIST);
-        el_t *el = (el_t *)$1;
-        el->expressions.push_back((inst_t *)$3);
-        $$ = el;
+        //inst_t *ip = (inst_t *)$1;
+        //assert (ip->type() == fsh::instruction::INSTRUCTION_EXPRESSION_LIST);
+        //el_t *el = (el_t *)$1;
+        //el->expressions.push_back((inst_t *)$3);
+        //$$ = el;
     }
     ;
 
 call_expression_list
     :expression {
-        el_t *el = new el_t(lineno);
-        el->expressions.push_back((inst_t *)$1);
+        fsh::ASTExpressionList *el = new fsh::ASTExpressionList(lineno);
+        el->expressions.emplace_back((ast_t *)$1);
         $$ = el;
     }
     | attribute_list {
-        el_t *el = new el_t(lineno);
-        el->expressions.push_back((inst_t *)$1);
-        $$ = el;
+        //el_t *el = new el_t(lineno);
+        //el->expressions.push_back((inst_t *)$1);
+        //$$ = el;
     }
     | expression_list ',' expression  {
-        inst_t *ip = (inst_t *)$1;
-        assert (ip->type() == fsh::instruction::INSTRUCTION_EXPRESSION_LIST);
-        el_t *el = (el_t *)$1;
-        el->expressions.push_back((inst_t *)$3);
+        ast_t *ip = (ast_t *)$1;
+        assert (ip->type() == fsh::AST_EXPRESSION_LIST);
+        fsh::ASTExpressionList *el = (el_t *)$1;
+        el->expressions.emplace_back((ast_t *)$3);
         $$ = el;
     }
     | expression_list ',' attribute_list {
-        inst_t *ip = (inst_t *)$1;
-        assert (ip->type() == fsh::instruction::INSTRUCTION_EXPRESSION_LIST);
-        el_t *el = (el_t *)$1;
-        el_t *el_attr = (el_t *)$3;
-        for (auto e : el_attr->expressions)
-        {
-            el->expressions.push_back((inst_t *)$3);
-        }
-        //delete el_attr;
+        //inst_t *ip = (inst_t *)$1;
+        //assert (ip->type() == fsh::instruction::INSTRUCTION_EXPRESSION_LIST);
+        //el_t *el = (el_t *)$1;
+        //el_t *el_attr = (el_t *)$3;
+        //for (auto e : el_attr->expressions)
+        //{
+            //el->expressions.push_back((inst_t *)$3);
+        //}
+        ////delete el_attr;
     }
     ;
 
@@ -537,18 +506,18 @@ statement
 statement_list
     :statement  {$$ = $1;}
     |statement_list statement   {
-        inst_t *arg1 = (inst_t *)$1;
-        el_t *el = nullptr;
-        if (arg1->type() != fsh::instruction::INSTRUCTION_EXPRESSION_LIST)
+        ast_t *arg1 = (ast_t *)$1;
+        fsh::ASTExpressionList *el = nullptr;
+        if (arg1->type() != fsh::AST_EXPRESSION_LIST)
         {
-            el = new el_t(lineno);
-            el->expressions.push_back(arg1);
+            el = new fsh::ASTExpressionList(lineno);
+            el->expressions.emplace_back(arg1);
         }
         else
         {
-            el = (el_t *)arg1;
+            el = (fsh::ASTExpressionList *)arg1;
         }
-        el->expressions.push_back((inst_t *)$2);
+        el->expressions.emplace_back((ast_t *)$2);
         $$ = el;
     }
     ;
@@ -558,10 +527,10 @@ statement_list
 
 extern fsh::Machine machine;
 
-void Execute(fsh::instruction::Instruction *pInst)
+void AstExecute(fsh::Ast *pAst)
 {
-    fsh::instruction::InstructionPtr inst(pInst);
-    fsh::ElementPtr e = machine.Execute(inst);
+    pAst->GenerateCode(machine, machine.get_byte_code());
+    fsh::ElementPtr e = machine.Execute();
     if(e->type() == fsh::ELEMENT_TYPE_ERROR)
     {
         fsh::ErrorPtr ep = e.cast<fsh::Error>();

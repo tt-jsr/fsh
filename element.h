@@ -10,12 +10,6 @@
 
 namespace fsh
 {
-    namespace instruction
-    {
-        class Instruction;
-        typedef fsh::instrusive_ptr<Instruction> InstructionPtr;
-    }
-
     class Machine;
 
     enum ElementType
@@ -25,14 +19,13 @@ namespace fsh
         ,ELEMENT_TYPE_FLOAT
         ,ELEMENT_TYPE_LIST
         ,ELEMENT_TYPE_MAP
-        ,ELEMENT_TYPE_ERROR
         ,ELEMENT_TYPE_IDENTIFIER
-        ,ELEMENT_TYPE_FUNCTION_DEFINITION
         ,ELEMENT_TYPE_NONE
         ,ELEMENT_TYPE_BOOLEAN
-        ,ELEMENT_TYPE_OBJECT
         ,ELEMENT_TYPE_FILE_HANDLE
+        ,ELEMENT_TYPE_ERROR
         ,ELEMENT_TYPE_ATTRIBUTE
+        ,ELEMENT_TYPE_FUNCTION_DEF
     };
 
     struct Element : public instrusive_base
@@ -43,17 +36,29 @@ namespace fsh
         bool IsString() const {return type() == ELEMENT_TYPE_STRING;}
         bool IsList() const {return type() == ELEMENT_TYPE_LIST;}
         bool IsMap() const {return type() == ELEMENT_TYPE_MAP;}
-        bool IsError() const {return type() == ELEMENT_TYPE_ERROR;}
         bool IsIdentifier() const {return type() == ELEMENT_TYPE_IDENTIFIER;}
-        bool IsFunctionDefinition() const {return type() == ELEMENT_TYPE_FUNCTION_DEFINITION;}
         bool IsNone() const {return type() == ELEMENT_TYPE_NONE;}
         bool IsBoolean() const {return type() == ELEMENT_TYPE_BOOLEAN;}
-        bool IsObject() const {return type() ==ELEMENT_TYPE_OBJECT;}
         bool IsFileHandle() const {return type() == ELEMENT_TYPE_FILE_HANDLE;}
+        bool IsError() const {return type() == ELEMENT_TYPE_ERROR;}
         bool IsAttribute() const {return type() == ELEMENT_TYPE_ATTRIBUTE;}
+        bool IsFunctionDef() const {return type() == ELEMENT_TYPE_FUNCTION_DEF;}
     };
 
     typedef instrusive_ptr<Element> ElementPtr;
+
+    struct Error : public Element
+    {
+        Error()
+        :bOk(false)
+        {}
+
+        virtual ElementType type() const {return ELEMENT_TYPE_ERROR;}
+        std::string msg;
+        bool bOk;
+    };
+
+    typedef instrusive_ptr<Error> ErrorPtr;
 
     struct None : public Element
     {
@@ -78,34 +83,16 @@ namespace fsh
     struct Identifier : public Element
     {
         Identifier()
-        :negate(false)
         {}
 
         Identifier(const std::string& s)
         :value(s)
-        ,negate(false)
         {}
         
         virtual ElementType type() const {return ELEMENT_TYPE_IDENTIFIER;}
         std::string value;
-        bool negate;
     };
     typedef instrusive_ptr<Identifier> IdentifierPtr;
-
-    struct Error : public Element
-    {
-        Error() {}
-        Error(const std::string& s, bool b)
-        :msg(s)
-        ,bOk(b)
-        {}
-
-        virtual ElementType type() const {return ELEMENT_TYPE_ERROR;}
-        std::string msg;
-        bool bOk;
-    };
-
-    typedef instrusive_ptr<Error> ErrorPtr;
 
     struct Integer : public Element
     {
@@ -161,36 +148,13 @@ namespace fsh
 
     typedef instrusive_ptr<List> ListPtr;
 
-    struct ObjectBase
+    struct FunctionDef : public Element
     {
-        virtual ~ObjectBase() {}
+        virtual ElementType type() const {return ELEMENT_TYPE_FUNCTION_DEF;}
+        int64_t funcid;
     };
 
-    struct Object : public Element
-    {
-        Object():pObject(nullptr),magic(0) {}
-        ~Object() {delete pObject;}
-        virtual ElementType type() const {return ELEMENT_TYPE_OBJECT;}
-        ObjectBase *pObject;
-        uint64_t magic;
-    };
-
-    typedef instrusive_ptr<Object> ObjectPtr;
-
-    struct FunctionDefinition : public Element
-    {
-        FunctionDefinition()
-        :isBuiltIn(false)
-        {}
-        virtual ElementType type() const {return ELEMENT_TYPE_FUNCTION_DEFINITION;}
-        std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> builtInBody;
-        instruction::InstructionPtr functionBody;   // Only for shell defined functions
-        std::vector<std::string> arg_names;
-        std::vector<ElementPtr> boundArgs;
-        bool isBuiltIn;
-    };
-
-    typedef instrusive_ptr<FunctionDefinition> FunctionDefinitionPtr;
+    typedef instrusive_ptr<FunctionDef> FunctionDefPtr;
 
     struct FileHandle : public Element
     {
@@ -260,17 +224,15 @@ namespace fsh
     typedef instrusive_ptr<ExecutionContext> ExecutionContextPtr;
 
     StringPtr MakeString(const std::string& s);
-    ErrorPtr MakeError(const std::string& s, bool b);
     IntegerPtr MakeInteger(int64_t);
     FloatPtr MakeFloat(double);
     ListPtr MakeList(const char *);
     MapPtr MakeMap();
     IdentifierPtr MakeIdentifier(const std::string&);
-    FunctionDefinitionPtr MakeFunctionDefinition();
     NonePtr MakeNone();
     BooleanPtr MakeBoolean(bool);
-    ObjectPtr MakeObject(ObjectBase *, uint64_t);
     FileHandlePtr MakeFileHandle();
-    AttributePtr MakeAttribute(IdentifierPtr name, ElementPtr value);
+    ErrorPtr MakeError(const std::string&, bool);
+    FunctionDefPtr MakeFunctionDef(int64_t id);
 }
 

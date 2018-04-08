@@ -4,13 +4,15 @@
 #include <readline/history.h>
 #include "fsh.tab.h"
 #include "common.h"
-#include "instructions.h"
+#include "ast.h"
+#include "machine.h"
 using namespace std;
 #define YY_DECL extern int yylex()
 uint64_t lineno = 1;
 uint64_t column = 0;
 bool commandMode = false;
 bool interactive = false;
+extern fsh::Machine machine;
 
 extern "C" int yywrap() {
     return 1;
@@ -73,7 +75,10 @@ exit            {column += 4;exit(-1);}
 \"              {quotedstring.clear(); BEGIN(str);}
 <str>\"         {
                     BEGIN(INITIAL);
-                    yylval = new fsh::instruction::String(lineno, quotedstring); 
+                    fsh::ASTConstant *bc = new fsh::ASTConstant(lineno);
+                    bc->ctype = fsh::ASTConstant::CTYPE_STRING;
+                    bc->svalue = quotedstring;
+                    yylval = bc;
                     column += 1;
                     return STRING_LITERAL;
                 }
@@ -101,7 +106,7 @@ exit            {column += 4;exit(-1);}
                  return ';';
                 }
 <sys>^[^\<]+$    {column += strlen(yytext);
-                 yylval = new fsh::instruction::System(lineno, yytext); 
+                 //yylval = new fsh::instruction::System(lineno, yytext); 
                  return SYSTEM; 
                 }
 <sys>\n       {
@@ -148,19 +153,29 @@ exit            {column += 4;exit(-1);}
                 }
 {D}+         { 
     column += strlen(yytext);
-    yylval = new fsh::instruction::Integer(lineno, atoi(yytext)); 
+    fsh::ASTConstant *bc = new fsh::ASTConstant(lineno);
+    bc->ctype = fsh::ASTConstant::CTYPE_INTEGER;
+    bc->ivalue = atoi(yytext);
+    yylval = bc;
     return INTEGER; 
 }
 
 {D}+\.{D}+ { 
     column += strlen(yytext);
-    yylval = new fsh::instruction::Float(lineno, strtod(yytext, nullptr)); 
+    fsh::ASTConstant *bc = new fsh::ASTConstant(lineno);
+    bc->ctype = fsh::ASTConstant::CTYPE_FLOAT;
+    bc->dvalue = strtod(yytext, nullptr);
+    yylval = bc;
     return FLOAT; 
 }
 
 [a-zA-Z_][a-zA-Z0-9_]*   { 
     column += strlen(yytext);
-    yylval = new fsh::instruction::Identifier(lineno, yytext); 
+    int64_t id = machine.string_table_add(yytext);
+    fsh::ASTConstant *bc = new fsh::ASTConstant(lineno);
+    bc->ctype = fsh::ASTConstant::CTYPE_IDENTIFIER;
+    bc->svalue = yytext;
+    yylval = bc;
     return IDENTIFIER; 
 }
 #.*$ ;

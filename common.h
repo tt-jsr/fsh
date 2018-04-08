@@ -6,78 +6,63 @@
 #include <stdexcept>
 #include "instrusive_ptr.h"
 #include "element.h"
+#include "bytecode.h"
 
 namespace fsh
 {
-    enum TokenType
+    enum ByteCodeType
     {
-        TOKEN_NONE
-        ,TOKEN_UNKNOWN
-        ,TOKEN_GT
-        ,TOKEN_GTE
-        ,TOKEN_LT
-        ,TOKEN_LTE
-        ,TOKEN_EQ
-        ,TOKEN_NEQ
-        ,TOKEN_NOT
-        // For the OPEN and CLOSE pairs, CLOSE must occur after the OPEN
-        ,TOKEN_PAREN
-        ,TOKEN_BRACKET
-        ,TOKEN_SUBSCRIPT
-        ,TOKEN_BRACE
-        ,TOKEN_DBL_QUOTE
-        ,TOKEN_VERTICLE_BAR
-        ,TOKEN_IDENTIFIER
-        ,TOKEN_INTEGER
-        ,TOKEN_ASSIGNMENT
-        ,TOKEN_COMMA
-        ,TOKEN_COLON
-        ,TOKEN_PLUS
-        ,TOKEN_MINUS
-        ,TOKEN_MULTIPLY
-        ,TOKEN_DIVIDE
-        ,TOKEN_MOD
-        ,TOKEN_DEFINE
-        ,TOKEN_AMP
-        ,TOKEN_AND
-        ,TOKEN_OR
-        ,TOKEN_NL
-        ,TOKEN_SEQUENCE
+        BC_LOAD_INTEGER
+        ,BC_LOAD_NONE
+        ,BC_LOAD_FLOAT
+        ,BC_LOAD_STRING
+        ,BC_LOAD_IDENTIFIER
+        ,BC_LOAD_TRUE
+        ,BC_LOAD_FALSE
+        ,BC_STORE_VAR
+        ,BC_BINARY_ADD
+        ,BC_BINARY_SUBTRACT
+        ,BC_BINARY_MULTIPLY
+        ,BC_BINARY_DIVIDE
+        ,BC_LOGICAL_AND
+        ,BC_LOGICAL_OR
+        ,BC_RELATIONAL_GT
+        ,BC_RELATIONAL_LT
+        ,BC_RELATIONAL_GTE
+        ,BC_RELATIONAL_LTE
+        ,BC_RELATIONAL_EQ
+        ,BC_RELATIONAL_NEQ
+        ,BC_UNARY_NEGATE
+        ,BC_JUMP_IF_FALSE
+        ,BC_JUMP
+        ,BC_CALL
+        ,BC_LOAD_FUNCTION_DEF
     };
 
-    struct Token
+    enum AstType
     {
-        Token()
-        :token(TOKEN_NONE)
+        AST_NONE
+        ,AST_CONSTANT
+        ,AST_ASSIGNMENT
+        ,AST_BINARY_OPERATOR
+        ,AST_UNARY_OPERATOR
+        ,AST_EXPRESSION_LIST
+        ,AST_IDENTIFIER_LIST
+        ,AST_IF
+        ,AST_WHILE
+        ,AST_FUNCTION_CALL
+        ,AST_FUNCTION_DEF
+    };
+
+    struct FunctionDefinition
+    {
+        FunctionDefinition()
+        :isBuiltIn(false)
         {}
-        TokenType token;
-        std::string text;
+        std::vector<std::string> arg_names;
+        ByteCode shellFunction;
+        std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> builtIn;
+        bool isBuiltIn;
     };
-
-    namespace instruction
-    {
-        enum InstructionType
-        {
-            INSTRUCTION_NONE
-            ,INSTRUCTION_IDENTIFIER
-            ,INSTRUCTION_INTEGER
-            ,INSTRUCTION_FLOAT
-            ,INSTRUCTION_BINARY_OPERATOR
-            ,INSTRUCTION_FUNCTION_CALL
-            ,INSTRUCTION_FUNCTION_DEF
-            ,INSTRUCTION_EXPRESSION_LIST
-            ,INSTRUCTION_IDENTIFIER_LIST
-            ,INSTRUCTION_STRING
-            ,INSTRUCTION_BOOL
-            ,INSTRUCTION_WHILE_IF
-            ,INSTRUCTION_ELEMENT_WRAPPER
-            ,INSTRUCTION_TRYCATCH
-            ,INSTRUCTION_DOT_OPERATOR
-            ,INSTRUCTION_FOR
-            ,INSTRUCTION_ATTRIBUTE
-            ,INSTRUCTION_SYSTEM
-        };
-    }
-
 }
-#include "instructions.h"
+#include "ast.h"

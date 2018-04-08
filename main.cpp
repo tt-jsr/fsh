@@ -2,7 +2,7 @@
 #include <signal.h>
 #include "common.h"
 #include "machine.h"
-#include "instructions.h"
+#include "ast.h"
 #include "builtins.h"
 
 using namespace fsh;

@@ -3,7 +3,7 @@
 #include <iostream>
 #include "common.h"
 #include "machine.h"
-#include "instructions.h"
+#include "ast.h"
 
 namespace fsh
 {
@@ -25,11 +25,6 @@ namespace fsh
         return StringPtr(new String(s));
     }
 
-    ErrorPtr MakeError(const std::string& s, bool b)
-    {
-        return ErrorPtr(new Error(s,b));
-    }
-
     IdentifierPtr MakeIdentifier(const std::string& s)
     {
         return IdentifierPtr(new Identifier(s));
@@ -43,11 +38,6 @@ namespace fsh
     FloatPtr MakeFloat(double f)
     {
         return FloatPtr(new Float(f));
-    }
-
-    FunctionDefinitionPtr MakeFunctionDefinition()
-    {
-        return FunctionDefinitionPtr(new FunctionDefinition());
     }
 
     NonePtr MakeNone()
@@ -65,19 +55,18 @@ namespace fsh
         return BooleanPtr(new Boolean(b));
     }
 
-    ObjectPtr MakeObject(ObjectBase *p, uint64_t m)
+    ErrorPtr MakeError(const std::string& m, bool b)
     {
-        ObjectPtr op = ObjectPtr(new Object());
-        op->magic = m;
-        op->pObject = p;
-        return op;
+        ErrorPtr e = new Error();
+        e->msg = m;
+        e->bOk = b;
+        return e;
     }
 
-    AttributePtr MakeAttribute(IdentifierPtr n, ElementPtr v)
+    FunctionDefPtr MakeFunctionDef(int64_t id)
     {
-        AttributePtr ap(new Attribute());
-        ap->name = n;
-        ap->value = v;
-        return ap;
+        FunctionDefPtr p(new FunctionDef());
+        p->funcid = id;
+        return p;
     }
 }

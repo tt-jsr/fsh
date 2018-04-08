@@ -78,6 +78,7 @@ namespace fsh
 
     ElementPtr ReadFile(Machine& machine, std::vector<ElementPtr>& args)
     {
+        /*
         bool stripnl;
         machine.get_variable("__stripnl", stripnl);
 
@@ -139,11 +140,13 @@ namespace fsh
             }
         }
         fclose(fp);
+        */
         return MakeNone();
     }
 
     ElementPtr ReadProcess(Machine& machine, std::vector<ElementPtr>& args)
     {
+        /*
         bool stripnl;
         machine.get_variable("__stripnl", stripnl);
 
@@ -198,12 +201,14 @@ namespace fsh
             }
         }
         pclose(fp);
+        */
         return MakeNone();
     }
 
 
     ElementPtr PipelineHead(Machine& machine, ElementPtr stage, size_t& listIdx)
     {
+        /*
         stage = machine.resolve(stage);
         switch (stage->type())
         {
@@ -274,11 +279,13 @@ namespace fsh
             }
             break;
         }
+        */
         return MakeBoolean(false);
     }
 
     ElementPtr PipelineStage(Machine& machine, ElementPtr stage, ElementPtr data)
     {
+        /*
         stage = machine.resolve(stage);
         switch (stage->type())
         {
@@ -349,6 +356,7 @@ namespace fsh
             }
             break;
         }
+        */
         return MakeBoolean(false);
     }
 

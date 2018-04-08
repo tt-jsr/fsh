@@ -65,7 +65,7 @@ namespace fsh
      *
      * Returns a function
      */
-    FunctionDefinitionPtr Bind(Machine&, std::vector<ElementPtr>&);
+    //FunctionDefinitionPtr Bind(Machine&, std::vector<ElementPtr>&);
 
     /********* List ****************************************/
     /* Returns an item from a list
@@ -150,13 +150,12 @@ namespace fsh
     ElementPtr UnitTest(Machine&, std::vector<ElementPtr>&);
 
     ElementPtr GetElement(Machine& machine, std::vector<ElementPtr>& args, size_t index);
-    ObjectPtr GetObject(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     StringPtr GetString(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     ListPtr GetList(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     MapPtr GetMap(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     IntegerPtr GetInteger(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     IdentifierPtr GetIdentifier(Machine& machine, std::vector<ElementPtr>& args, size_t index);
-    FunctionDefinitionPtr GetFunctionDefinition(Machine& machine, std::vector<ElementPtr>& args, size_t index);
-    ElementPtr CallFunctionImpl(Machine& machine, bool isBind, FunctionDefinitionPtr funcDef, size_t nItemsOnStack);
+    //FunctionDefinitionPtr GetFunctionDefinition(Machine& machine, std::vector<ElementPtr>& args, size_t index);
+    //ElementPtr CallFunctionImpl(Machine& machine, bool isBind, FunctionDefinitionPtr funcDef, size_t nItemsOnStack);
     std::string toString(Machine& machine, ElementPtr e);
 }

@@ -21,19 +21,6 @@ namespace fsh
         return ep;
     }
 
-    ObjectPtr GetObject(Machine& machine, std::vector<ElementPtr>& args, size_t index)
-    {
-        ElementPtr ep = GetElement(machine, args, index);
-        if(ep.get() == nullptr)
-            return ObjectPtr();
-
-        if (ep->type() != ELEMENT_TYPE_OBJECT)
-        {
-            return ObjectPtr();
-        }
-        return ep.cast<Object>();
-    }
-
     StringPtr GetString(Machine& machine, std::vector<ElementPtr>& args, size_t index)
     {
         ElementPtr ep = GetElement(machine, args, index);
@@ -99,6 +86,7 @@ namespace fsh
         return ep.cast<Identifier>();
     }
 
+    /*
     FunctionDefinitionPtr GetFunctionDefinition(Machine& machine, std::vector<ElementPtr>& args, size_t index)
     {
         ElementPtr ep = GetElement(machine, args, index);
@@ -113,7 +101,9 @@ namespace fsh
         }
         return ep.cast<FunctionDefinition>();
     }
+    */
 
+    /*
     void RearraingeArgs(Machine& machine, std::vector<ElementPtr>& boundArgs, std::vector<ElementPtr>& args, std::vector<ElementPtr>& out)
     {
         // Process _n arguments first
@@ -228,7 +218,7 @@ namespace fsh
             return rtn;
         }
     }
-
+*/
     ElementPtr UnitTest(Machine& machine, std::vector<ElementPtr>& args)
     {
         IntegerPtr n = GetInteger(machine, args, 0);
@@ -374,11 +364,13 @@ namespace fsh
                 return rtn;
             }
             break;
+            /*
         case ELEMENT_TYPE_FUNCTION_DEFINITION:
             {
                 return "FunctionDefinition";
             }
             break;
+            */
         default:
             {
                 std::stringstream strm;
@@ -410,17 +402,7 @@ namespace fsh
         return MakeNone();
     }
 
-    ElementPtr Eval(Machine& machine, std::vector<ElementPtr>& args)
-    {
-        StringPtr sp = GetString(machine, args, 0);
-        if (!sp)
-        {
-            throw std::runtime_error("Eval requires a string argument");
-        }
-
-        throw std::runtime_error("Eval is not implemented");
-    }
-
+    /*
     FunctionDefinitionPtr Bind(Machine& machine, std::vector<ElementPtr>& args)
     {
         ElementPtr e = GetElement(machine, args, 0);
@@ -441,54 +423,63 @@ namespace fsh
         }
         return funcDst;
     }
+*/
+    void RegisterBuiltInImpl(Machine& machine, const std::string& name, std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> f)
+    {
+        FunctionDefinition fd;
+        fd.builtIn = f;
+        fd.isBuiltIn = true;
+        int64_t id = machine.registerFunction(fd);
+        ElementPtr e = MakeInteger(id);
+        machine.store_variable(name, e);
+    }
 
     void RegisterBuiltIns(Machine& machine)
     {
         // IO
-        machine.register_builtin("Print", fsh::Print);
-        machine.register_builtin("ReadFile", fsh::ReadFile);
-        machine.register_builtin("OpenFile", fsh::OpenFile);
-        machine.register_builtin("PipeLine", fsh::PipeLine);
-        machine.register_builtin("OpenProcess", fsh::OpenProcess);
-        machine.register_builtin("ReadProcess", fsh::ReadProcess);
+        RegisterBuiltInImpl(machine, "Print", fsh::Print);
+        RegisterBuiltInImpl(machine, "ReadFile", fsh::ReadFile);
+        RegisterBuiltInImpl(machine, "OpenFile", fsh::OpenFile);
+        RegisterBuiltInImpl(machine, "PipeLine", fsh::PipeLine);
+        RegisterBuiltInImpl(machine, "OpenProcess", fsh::OpenProcess);
+        RegisterBuiltInImpl(machine, "ReadProcess", fsh::ReadProcess);
 
         // String
-        machine.register_builtin("Trim", fsh::Trim);
-        machine.register_builtin("TrimLeft", fsh::TrimLeft);
-        machine.register_builtin("TrimRight", fsh::TrimRight);
-        machine.register_builtin("Split", fsh::Split);
-        machine.register_builtin("Strcmp", fsh::Strcmp);
-        machine.register_builtin("RegMatch", fsh::RegMatch);
-        machine.register_builtin("RegSearch", fsh::RegSearch);
-        machine.register_builtin("Find", fsh::Find);
-        machine.register_builtin("Format", fsh::Format);
-        machine.register_builtin("SubString", fsh::SubString);
+        RegisterBuiltInImpl(machine, "Trim", fsh::Trim);
+        RegisterBuiltInImpl(machine, "TrimLeft", fsh::TrimLeft);
+        RegisterBuiltInImpl(machine, "TrimRight", fsh::TrimRight);
+        RegisterBuiltInImpl(machine, "Split", fsh::Split);
+        RegisterBuiltInImpl(machine, "Strcmp", fsh::Strcmp);
+        RegisterBuiltInImpl(machine, "RegMatch", fsh::RegMatch);
+        RegisterBuiltInImpl(machine, "RegSearch", fsh::RegSearch);
+        RegisterBuiltInImpl(machine, "Find", fsh::Find);
+        RegisterBuiltInImpl(machine, "Format", fsh::Format);
+        RegisterBuiltInImpl(machine, "SubString", fsh::SubString);
 
         // List
-        machine.register_builtin("Part", fsh::Part);
-        machine.register_builtin("Subscript", fsh::Subscript);
-        machine.register_builtin("DefineRecord", fsh::DefineRecord);
-        machine.register_builtin("MakeRecord", fsh::MakeRecord);
-        machine.register_builtin("Len", fsh::Len);
-        machine.register_builtin("Append", fsh::Append);
-        machine.register_builtin("SetRecordType", fsh::SetRecordType);
+        RegisterBuiltInImpl(machine, "Part", fsh::Part);
+        RegisterBuiltInImpl(machine, "Subscript", fsh::Subscript);
+        RegisterBuiltInImpl(machine, "DefineRecord", fsh::DefineRecord);
+        RegisterBuiltInImpl(machine, "MakeRecord", fsh::MakeRecord);
+        RegisterBuiltInImpl(machine, "Len", fsh::Len);
+        RegisterBuiltInImpl(machine, "Append", fsh::Append);
+        RegisterBuiltInImpl(machine, "SetRecordType", fsh::SetRecordType);
 
         // Map
-        machine.register_builtin("CreateMap", fsh::CreateMap);
-        machine.register_builtin("Insert", fsh::Insert);
-        machine.register_builtin("Delete", fsh::Delete);
-        machine.register_builtin("Lookup", fsh::Lookup);
+        RegisterBuiltInImpl(machine, "CreateMap", fsh::CreateMap);
+        RegisterBuiltInImpl(machine, "Insert", fsh::Insert);
+        RegisterBuiltInImpl(machine, "Delete", fsh::Delete);
+        RegisterBuiltInImpl(machine, "Lookup", fsh::Lookup);
 
         // Misc
-        machine.register_builtin("IsError", fsh::IsError);
-        machine.register_builtin("ErrorString", fsh::ErrorString);
-        machine.register_builtin("Throw", fsh::Throw);
-        machine.register_builtin("UnitTest", fsh::UnitTest);
-        machine.register_builtin("Int", fsh::ToInt);
-        machine.register_builtin("Float", fsh::ToFloat);
-        machine.register_builtin("ToString", fsh::ToString);
-        machine.register_builtin("Eval", fsh::Eval);
-        machine.register_builtin("Bind", fsh::Bind);
+        RegisterBuiltInImpl(machine, "IsError", fsh::IsError);
+        RegisterBuiltInImpl(machine, "ErrorString", fsh::ErrorString);
+        RegisterBuiltInImpl(machine, "Throw", fsh::Throw);
+        RegisterBuiltInImpl(machine, "UnitTest", fsh::UnitTest);
+        RegisterBuiltInImpl(machine, "Int", fsh::ToInt);
+        RegisterBuiltInImpl(machine, "Float", fsh::ToFloat);
+        RegisterBuiltInImpl(machine, "ToString", fsh::ToString);
+        //machine.register_builtin("Bind", fsh::Bind);
     }
 }
 

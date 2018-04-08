@@ -3,9 +3,9 @@ CDEBUG = -g -O0
 CPPFLAGS = $(CDEBUG) -I.
 LDFLAGS=-g
 LIBS = -lstdc++ -lreadline
-DEPS=common.h element.h execution_context.h machine.h instructions.h builtins.h fsh.y fsh.l shell.h
+DEPS=common.h element.h execution_context.h machine.h builtins.h fsh.y fsh.l shell.h ast.h bytecode.h
 
-SRC	= main.cpp execution_context.cpp element.cpp machine.cpp instructions.cpp fsh.tab.cpp lex.yy.cpp err_cmd.cpp io_cmd.cpp builtins.cpp string_cmd.cpp list_cmd.cpp shell.cpp map_cmd.cpp
+SRC	= main.cpp execution_context.cpp element.cpp machine.cpp ast.cpp fsh.tab.cpp lex.yy.cpp err_cmd.cpp io_cmd.cpp builtins.cpp string_cmd.cpp list_cmd.cpp shell.cpp map_cmd.cpp bytecode.cpp
 
 fsh.tab.o : fsh.y
 	bison -d fsh.y
