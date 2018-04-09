@@ -66,12 +66,12 @@ namespace fsh
         void push_data(ElementPtr);
         void push_context();
         void pop_context();
+    private_impl:
+        ByteCode byte_code;
         std::unordered_map<int64_t, std::string> string_table;
         int64_t next_string_id;
         std::unordered_map<int64_t, FunctionDefinition> functions;
         int64_t next_function_id;
-        ByteCode byte_code;
-        size_t ip;
         std::function<void (int)> unittest_callback;
         std::function<void (const char *)> unittest_exception;
     };

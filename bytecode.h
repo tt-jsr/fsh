@@ -7,6 +7,10 @@ namespace fsh
 
     struct ByteCode
     {
+        ByteCode()
+        :ip(0)
+        {}
+
         size_t size() {return byte_codes.size();}
         void clear() {byte_codes.clear();}
 
@@ -34,7 +38,8 @@ namespace fsh
         }
 
         std::vector<int64_t> byte_codes;
+        size_t ip;
     };
 
-    void Execute(Machine&, ByteCode&, size_t& ip);
+    void Execute(Machine&, ByteCode&);
 }

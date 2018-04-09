@@ -187,57 +187,57 @@ namespace fsh
 #define LOG false && std::cout
 #endif
 
-    void Execute(Machine& machine, ByteCode& bc, size_t& ip)
+    void Execute(Machine& machine, ByteCode& bc)
     {
-        switch(bc[ip])
+        switch(bc[bc.ip])
         {
         case BC_BINARY_ADD:
             LOG << "BINARY_ADD" << std::endl;
-            binary_operator(machine, bc[ip]);
+            binary_operator(machine, bc[bc.ip]);
             break;
         case BC_BINARY_SUBTRACT:
             LOG << "BINARY_SUBTRACT" << std::endl;
-            binary_operator(machine, bc[ip]);
+            binary_operator(machine, bc[bc.ip]);
             break;
         case BC_BINARY_MULTIPLY:
             LOG << "BINARY_MULTIPLY" << std::endl;
-            binary_operator(machine, bc[ip]);
+            binary_operator(machine, bc[bc.ip]);
             break;
         case BC_BINARY_DIVIDE:
             LOG << "BINARY_DIVIDE" << std::endl;
-            binary_operator(machine, bc[ip]);
+            binary_operator(machine, bc[bc.ip]);
             break;
         case BC_RELATIONAL_GT:
             LOG << "BC_RELATIONAL_GT" << std::endl;
-            binary_operator(machine, bc[ip]);
+            binary_operator(machine, bc[bc.ip]);
             break;
         case BC_RELATIONAL_GTE:
             LOG << "BC_RELATIONAL_GTE" << std::endl;
-            binary_operator(machine, bc[ip]);
+            binary_operator(machine, bc[bc.ip]);
             break;
         case BC_RELATIONAL_LT:
             LOG << "BC_RELATIONAL_LT" << std::endl;
-            binary_operator(machine, bc[ip]);
+            binary_operator(machine, bc[bc.ip]);
             break;
         case BC_RELATIONAL_LTE:
             LOG << "BC_RELATIONAL_LTE" << std::endl;
-            binary_operator(machine, bc[ip]);
+            binary_operator(machine, bc[bc.ip]);
             break;
         case BC_RELATIONAL_EQ:
             LOG << "BC_RELATIONAL_EQ" << std::endl;
-            binary_operator(machine, bc[ip]);
+            binary_operator(machine, bc[bc.ip]);
             break;
         case BC_RELATIONAL_NEQ:
             LOG << "BC_RELATIONAL_NEQ" << std::endl;
-            binary_operator(machine, bc[ip]);
+            binary_operator(machine, bc[bc.ip]);
             break;
         case BC_LOGICAL_AND:
             LOG << "BC_LOGICAL_AND" << std::endl;
-            binary_operator(machine, bc[ip]);
+            binary_operator(machine, bc[bc.ip]);
             break;
         case BC_LOGICAL_OR:
             LOG << "BC_LOGICAL_OR" << std::endl;
-            binary_operator(machine, bc[ip]);
+            binary_operator(machine, bc[bc.ip]);
             break;
         case BC_UNARY_NEGATE:
             {
@@ -273,44 +273,44 @@ namespace fsh
             break;
         case BC_LOAD_INTEGER:
             {
-                ++ip;
-                machine.push_data(MakeInteger(bc[ip]));
-                LOG << "BC_LOAD_INTEGER " << bc[ip] << std::endl;
+                ++bc.ip;
+                machine.push_data(MakeInteger(bc[bc.ip]));
+                LOG << "BC_LOAD_INTEGER " << bc[bc.ip] << std::endl;
             }
             break;
         case BC_LOAD_FLOAT:
             {
-                ++ip;
-                double *d = (double *)&bc.byte_codes[ip];
+                ++bc.ip;
+                double *d = (double *)&bc.byte_codes[bc.ip];
                 machine.push_data(MakeFloat(*d));
                 LOG << "BC_LOAD_FLOAT" << *d << std::endl;
             }
             break;
         case BC_LOAD_STRING:
             {
-                ++ip;
-                std::string s = machine.string_table_get(bc[ip]);
+                ++bc.ip;
+                std::string s = machine.string_table_get(bc[bc.ip]);
                 machine.push_data(MakeString(s));
                 LOG << "BC_LOAD_STRING " << s << std::endl;
             }
             break;
         case BC_LOAD_IDENTIFIER:
             {
-                ++ip;
-                std::string s = machine.string_table_get(bc[ip]);
+                ++bc.ip;
+                std::string s = machine.string_table_get(bc[bc.ip]);
                 machine.push_data(MakeIdentifier(s));
                 LOG << "BC_LOAD_IDENTIFIER " << s << std::endl;
             }
             break;
         case BC_STORE_VAR:
             {
-                LOG << "BC_STORE_VAR" << std::endl;
                 ElementPtr id = machine.pop_data();
                 ElementPtr v = machine.pop_data();
                 if (!id->IsIdentifier())
                     throw std::runtime_error("Expected identifier");
                 machine.store_variable(id.cast<Identifier>()->value, v);
                 machine.push_data(v);
+                LOG << "BC_STORE_VAR " << id.cast<Identifier>()->value << std::endl;
             }
             break;
         case BC_JUMP_IF_FALSE:
@@ -318,30 +318,30 @@ namespace fsh
                 LOG << "BC_JUMP_IF_FALSE" << std::endl;
                 ElementPtr e = machine.pop_data();
                 bool b = machine.ConvertToBool(e);
-                ++ip; // pointing to jump location
+                ++bc.ip; // pointing to jump location
                 if (!b)
                 {
-                    ip = bc[ip];
+                    bc.ip = bc[bc.ip];
                 }
             }
             break;
         case BC_JUMP:
             {
                 LOG << "BC_JUMP" << std::endl;
-                ++ip;
-                ip = bc[ip];
+                ++bc.ip;
+                bc.ip = bc[bc.ip];
             }
             break;
         case BC_CALL:
             {
-                LOG << "BC_CALL" << std::endl;
                 ElementPtr callId = machine.pop_data();
                 callId = machine.resolve(callId);
-                if (callId->type() != ELEMENT_TYPE_INTEGER)
+                if (callId->type() != ELEMENT_TYPE_FUNCTION_DEF)
                     throw std::runtime_error("Function call requires name/id");
 
                 // Function id
                 int64_t id = callId.cast<Integer>()->value;
+                LOG << "BC_CALL " << id << std::endl;
 
                 ElementPtr numargs = machine.pop_data();
                 assert (numargs->type() == ELEMENT_TYPE_INTEGER);
@@ -378,15 +378,49 @@ namespace fsh
                 }
                 else
                 {
-
+                    std::vector<ElementPtr> args;
+                    while(num)
+                    {
+                        ElementPtr e = machine.pop_data();
+                        e = machine.resolve(e);
+                        args.push_back(e);
+                        --num;
+                    }
+                    std::reverse(args.begin(), args.end());
+                    machine.push_context();
+                    size_t end = std::min(fd->arg_names.size(), args.size());
+                    size_t idx = 0;
+                    for (idx; idx < end; ++idx)
+                    {
+                        machine.store_variable(fd->arg_names[idx], args[idx]);
+                    }
+                    for (; idx < fd->arg_names.size();++idx)
+                    {
+                        machine.store_variable(fd->arg_names[idx], MakeNone());
+                    }
+                    fd->shellFunction.ip = 0;
+                    try
+                    {
+                        while(fd->shellFunction.ip < fd->shellFunction.size())
+                        {
+                            fsh::Execute(machine, fd->shellFunction);
+                            ++fd->shellFunction.ip;
+                        }
+                    }
+                    catch (std::exception& e)
+                    {
+                        machine.pop_context();
+                        throw;
+                    }
                 }
             }
             break;
         case BC_LOAD_FUNCTION_DEF:
             {
-                ++ip;
-                int64_t id = bc[ip];
+                ++bc.ip;
+                int64_t id = bc[bc.ip];
                 machine.push_data(MakeFunctionDef(id));
+                LOG << "BC_LOAD_FUNCTION_DEF " << id << std::endl;
             }
             break;
         default:

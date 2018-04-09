@@ -13,7 +13,6 @@ namespace fsh
 
         ElementPtr GetVariable(const std::string& s);
         void AddVariable(const std::string& name, ElementPtr value);
-
     };
 
     ExecutionContextPtr MakeExecutionContext();

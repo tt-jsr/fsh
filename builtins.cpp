@@ -430,7 +430,7 @@ namespace fsh
         fd.builtIn = f;
         fd.isBuiltIn = true;
         int64_t id = machine.registerFunction(fd);
-        ElementPtr e = MakeInteger(id);
+        ElementPtr e = MakeFunctionDef(id);
         machine.store_variable(name, e);
     }
 

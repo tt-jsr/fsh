@@ -16,7 +16,6 @@ namespace fsh
     Machine::Machine(void)
     :next_string_id(0)
     ,next_function_id(0)
-    ,ip(0)
     {
         executionContext = MakeExecutionContext();
     }
@@ -31,10 +30,10 @@ namespace fsh
         try
         {
             datastack.clear();
-            while(ip < byte_code.size())
+            while(byte_code.ip < byte_code.size())
             {
-                fsh::Execute(*this, byte_code, ip);
-                ++ip;
+                fsh::Execute(*this, byte_code);
+                ++byte_code.ip;
             }
             assert(datastack.size() > 0);
             if (datastack.size() == 0)
