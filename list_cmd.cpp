@@ -209,6 +209,16 @@ namespace fsh
         return lst;
     }
 
+    ListPtr CreateList(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ListPtr lp = MakeList("__list__");
+        for (ElementPtr& e : args)
+        {
+            lp->items.push_back(e);
+        }
+        return lp;
+    }
+
     IntegerPtr Len(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr sp = GetString(machine, args, 0);

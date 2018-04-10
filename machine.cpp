@@ -25,8 +25,10 @@ namespace fsh
     {
     }
 
-    ElementPtr Machine::Execute()
+    ElementPtr Machine::Execute(Ast *pAst)
     {
+        byte_code.ip = byte_code.size();
+        pAst->GenerateCode(*this, get_byte_code());
         try
         {
             datastack.clear();
@@ -192,15 +194,19 @@ namespace fsh
 
     std::string Machine::string_table_get(int64_t id)
     {
-        auto it = string_table.find(id);
-        if (it == string_table.end())
+        auto it = string_table_by_id.find(id);
+        if (it == string_table_by_id.end())
             throw std::runtime_error("string not found");
         return it->second;
     }
 
     int64_t Machine::string_table_add(const std::string& s)
     {
-        string_table.emplace(++next_string_id, s);
+        auto it = string_table_by_string.find(s);
+        if (it != string_table_by_string.end())
+            return it->second;
+        string_table_by_id.emplace(++next_string_id, s);
+        string_table_by_string.emplace(s, next_string_id);
         return next_string_id;
     }
 

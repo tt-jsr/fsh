@@ -302,6 +302,29 @@ namespace fsh
                 LOG << "BC_LOAD_IDENTIFIER " << s << std::endl;
             }
             break;
+        case BC_RESOLVE:
+            {
+                ElementPtr e = machine.pop_data();
+                e = machine.resolve(e);
+                machine.push_data(e);
+                LOG << "BC_RESOLVE " << std::endl;
+            }
+            break;
+        case BC_INCREMENT_LOCATION:
+            {
+                ++bc.ip;
+                size_t location = bc[bc.ip];
+                ++bc[location];
+            }
+            break;
+        case BC_LOAD_INTEGER_LOCATION:
+            {
+                ++bc.ip;
+                size_t location = bc[bc.ip];
+                machine.push_data(MakeInteger(bc[location]));
+                LOG << "BC_INTEGER_LOCATION " << bc[location] << " from " << location << std::endl;
+            }
+            break;
         case BC_STORE_VAR:
             {
                 ElementPtr id = machine.pop_data();
@@ -311,6 +334,40 @@ namespace fsh
                 machine.store_variable(id.cast<Identifier>()->value, v);
                 machine.push_data(v);
                 LOG << "BC_STORE_VAR " << id.cast<Identifier>()->value << std::endl;
+            }
+            break;
+        case BC_LOAD_LIST_ITEM:
+            {
+                ElementPtr idx = machine.pop_data();
+                ElementPtr lst = machine.pop_data();
+                if (!idx->IsInteger())
+                    throw std::runtime_error("BC_LOAD_LIST_ITEM Expected integer");
+                if (!lst->IsList())
+                    throw std::runtime_error("BC_LOAD_LIST_ITEM Expected list");
+                int n = idx.cast<Integer>()->value;
+                LOG << "BC_LOAD_LIST_ITEM " << n << std::endl;
+                auto& vec = lst.cast<List>()->items;
+                if (n < 0 || n >= vec.size())
+                {
+                    machine.set_gp_register(false);
+                }
+                else
+                {
+                    machine.set_gp_register(true);
+                    machine.push_data(vec[n]);
+                }
+            }
+            break;
+        case BC_JUMP_GP_FALSE:
+            {
+                ++bc.ip; // pointing to jump location
+                if (machine.get_gp_register() == false)
+                {
+                    LOG << "BC_JUMP_GP_FALSE : jump taken" << std::endl;
+                    bc.ip = bc[bc.ip];
+                }
+                else
+                    LOG << "BC_JUMP_GP_FALSE : jump not taken" << std::endl;
             }
             break;
         case BC_JUMP_IF_FALSE:
@@ -332,6 +389,10 @@ namespace fsh
                 bc.ip = bc[bc.ip];
             }
             break;
+        case BC_DATA:
+                LOG << "BC_DATA" << std::endl;
+                ++bc.ip;  // skip data, don't do anything
+                break;
         case BC_CALL:
             {
                 ElementPtr callId = machine.pop_data();
@@ -353,65 +414,48 @@ namespace fsh
                 if (fd == nullptr)
                     throw std::runtime_error("Function not found");
                 
-                if (fd->isBuiltIn)
+                std::vector<ElementPtr> args;
+                while(num)
                 {
-                    std::vector<ElementPtr> args;
-                    while(num)
+                    ElementPtr e = machine.pop_data();
+                    e = machine.resolve(e);
+                    args.push_back(e);
+                    --num;
+                }
+                std::reverse(args.begin(), args.end());
+                try {
+                    if (fd->isBuiltIn)
                     {
-                        ElementPtr e = machine.pop_data();
-                        e = machine.resolve(e);
-                        args.push_back(e);
-                        --num;
-                    }
-                    std::reverse(args.begin(), args.end());
-                    try {
                         machine.push_context();
                         ElementPtr e = fd->builtIn(machine, args);
                         machine.push_data(e);
                         machine.pop_context();
                     }
-                    catch(std::exception& e)
+                    else
                     {
-                        machine.pop_context();
-                        throw;
-                    }
-                }
-                else
-                {
-                    std::vector<ElementPtr> args;
-                    while(num)
-                    {
-                        ElementPtr e = machine.pop_data();
-                        e = machine.resolve(e);
-                        args.push_back(e);
-                        --num;
-                    }
-                    std::reverse(args.begin(), args.end());
-                    machine.push_context();
-                    size_t end = std::min(fd->arg_names.size(), args.size());
-                    size_t idx = 0;
-                    for (idx; idx < end; ++idx)
-                    {
-                        machine.store_variable(fd->arg_names[idx], args[idx]);
-                    }
-                    for (; idx < fd->arg_names.size();++idx)
-                    {
-                        machine.store_variable(fd->arg_names[idx], MakeNone());
-                    }
-                    fd->shellFunction.ip = 0;
-                    try
-                    {
+                        machine.push_context();
+                        size_t end = std::min(fd->arg_names.size(), args.size());
+                        size_t idx = 0;
+                        for (idx; idx < end; ++idx)
+                        {
+                            machine.store_variable(fd->arg_names[idx], args[idx]);
+                        }
+                        for (; idx < fd->arg_names.size();++idx)
+                        {
+                            machine.store_variable(fd->arg_names[idx], MakeNone());
+                        }
+                        fd->shellFunction.ip = 0;
                         while(fd->shellFunction.ip < fd->shellFunction.size())
                         {
                             fsh::Execute(machine, fd->shellFunction);
                             ++fd->shellFunction.ip;
                         }
                     }
-                    catch (std::exception& e)
-                    {
-                        machine.pop_context();
-                        throw;
-                    }
+                }
+                catch (std::exception& e)
+                {
+                    machine.pop_context();
+                    throw;
                 }
             }
             break;
@@ -421,6 +465,15 @@ namespace fsh
                 int64_t id = bc[bc.ip];
                 machine.push_data(MakeFunctionDef(id));
                 LOG << "BC_LOAD_FUNCTION_DEF " << id << std::endl;
+            }
+            break;
+        case BC_SYSTEM:
+            {
+                ++bc.ip;
+                int64_t id = bc[bc.ip];
+                std::string cmd = machine.string_table_get(id);
+                system(cmd.c_str());
+                machine.push_data(MakeNone());
             }
             break;
         default:

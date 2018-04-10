@@ -84,7 +84,12 @@ namespace fsh
     NonePtr DefineRecord(Machine&, std::vector<ElementPtr>&);
 
     /* MakeRecord*/
+    /* Make a record defined with Define record
+     * Example:MakeRecord["fstat", field1, field2, ...];
+     */
     ListPtr MakeRecord(Machine&, std::vector<ElementPtr>&);
+
+    ListPtr CreateList(Machine&, std::vector<ElementPtr>&);
     
     /* Returns number of elements in a String, List or Map */
     IntegerPtr Len(Machine&, std::vector<ElementPtr>&);
@@ -155,7 +160,5 @@ namespace fsh
     MapPtr GetMap(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     IntegerPtr GetInteger(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     IdentifierPtr GetIdentifier(Machine& machine, std::vector<ElementPtr>& args, size_t index);
-    //FunctionDefinitionPtr GetFunctionDefinition(Machine& machine, std::vector<ElementPtr>& args, size_t index);
-    //ElementPtr CallFunctionImpl(Machine& machine, bool isBind, FunctionDefinitionPtr funcDef, size_t nItemsOnStack);
     std::string toString(Machine& machine, ElementPtr e);
 }

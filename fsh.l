@@ -106,7 +106,7 @@ exit            {column += 4;exit(-1);}
                  return ';';
                 }
 <sys>^[^\<]+$    {column += strlen(yytext);
-                 //yylval = new fsh::instruction::System(lineno, yytext); 
+                 yylval = new fsh::ASTSystem(lineno, yytext); 
                  return SYSTEM; 
                 }
 <sys>\n       {

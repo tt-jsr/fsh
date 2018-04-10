@@ -20,11 +20,14 @@ namespace fsh
         Machine(void);
         ~Machine(void);
 
-        ElementPtr Execute();
+        ElementPtr Execute(Ast *);
 
         // Resolve the arg if it is an identifier, will return the 
         // element it points to
         ElementPtr resolve(ElementPtr);
+
+        void set_gp_register(bool b) {gp_register = b;}
+        bool get_gp_register() {return gp_register;}
 
         void register_unittest(std::function<void (int)>&);
         // Register a function.
@@ -67,8 +70,10 @@ namespace fsh
         void push_context();
         void pop_context();
     private_impl:
+        bool gp_register;
         ByteCode byte_code;
-        std::unordered_map<int64_t, std::string> string_table;
+        std::unordered_map<int64_t, std::string> string_table_by_id;
+        std::unordered_map<std::string, int64_t> string_table_by_string;
         int64_t next_string_id;
         std::unordered_map<int64_t, FunctionDefinition> functions;
         int64_t next_function_id;

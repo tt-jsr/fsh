@@ -10,6 +10,7 @@
 
 namespace fsh
 {
+    /*************************************************/
     ASTBinaryOperator::~ASTBinaryOperator()
     {
     }
@@ -18,7 +19,7 @@ namespace fsh
     {
         rhs->GenerateCode(machine, bc);
         lhs->GenerateCode(machine, bc);
-        bc.push_back(op);
+        bc.code(op);
     }
 
     /*****************************************************/
@@ -27,35 +28,31 @@ namespace fsh
         switch(ctype)
         {
         case CTYPE_INTEGER:
-            bc.push_back(BC_LOAD_INTEGER);
-            bc.push_back(ivalue);
+            bc.code(BC_LOAD_INTEGER, ivalue);
             break;
         case CTYPE_FLOAT:
-            bc.push_back(BC_LOAD_FLOAT);
-            bc.push_back(*(int64_t *)&dvalue);
+            bc.code(BC_LOAD_FLOAT, *(int64_t *)&dvalue);
             break;
         case CTYPE_STRING:
             {
                 int64_t id = machine.string_table_add(svalue);
-                bc.push_back(BC_LOAD_STRING);
-                bc.push_back(id);
+                bc.code(BC_LOAD_STRING, id);
             }
             break;
         case CTYPE_IDENTIFIER:
             {
                 int64_t id = machine.string_table_add(svalue);
-                bc.push_back(BC_LOAD_IDENTIFIER);
-                bc.push_back(id);
+                bc.code(BC_LOAD_IDENTIFIER, id);
             }
             break;
         case CTYPE_NONE:
-            bc.push_back(BC_LOAD_NONE);
+            bc.code(BC_LOAD_NONE);
             break;
         case CTYPE_TRUE:
-            bc.push_back(BC_LOAD_TRUE);
+            bc.code(BC_LOAD_TRUE);
             break;
         case CTYPE_FALSE:
-            bc.push_back(BC_LOAD_FALSE);
+            bc.code(BC_LOAD_FALSE);
             break;
         default:
             assert(false);
@@ -67,7 +64,7 @@ namespace fsh
     void ASTUnaryOperator::GenerateCode(Machine& machine, ByteCode& bc)
     {
         operand->GenerateCode(machine, bc);
-        bc.push_back(op);
+        bc.code(op);
     }
 
     /*****************************************************/
@@ -75,7 +72,7 @@ namespace fsh
     {
         rhs->GenerateCode(machine, bc);
         lhs->GenerateCode(machine, bc);
-        bc.push_back(BC_STORE_VAR);
+        bc.code(BC_STORE_VAR);
     }
 
     /*****************************************************/
@@ -100,23 +97,50 @@ namespace fsh
     void ASTIfStatement::GenerateCode(Machine& machine, ByteCode& bc)
     {
         condition->GenerateCode(machine, bc);
-        size_t jump_else = bc.push_jump(BC_JUMP_IF_FALSE);
+        size_t jump_else = bc.jump_forward(BC_JUMP_IF_FALSE);
         if_true->GenerateCode(machine, bc);
-        size_t jump_end = bc.push_jump(BC_JUMP);
-        bc.setToCurrent(jump_else); // Actually point to the byte code before the one we want to execute
+        size_t jump_end = bc.jump_forward(BC_JUMP);
+        bc.set_jump_location(jump_else); // Actually point to the byte code before the one we want to execute
         if_false->GenerateCode(machine, bc);
-        bc.setToCurrent(jump_end);
+        bc.set_jump_location(jump_end);
     }
 
     /*****************************************************/
     void ASTWhile::GenerateCode(Machine& machine, ByteCode& bc)
     {
-        size_t begin = bc.size()-1;
+        size_t begin = bc.current_location();
         condition->GenerateCode(machine, bc);
-        size_t jump_end = bc.push_jump(BC_JUMP_IF_FALSE);
+        size_t jump_end = bc.jump_forward(BC_JUMP_IF_FALSE);
         if_true->GenerateCode(machine, bc);
-        bc.push_jump(BC_JUMP, begin);
-        bc.setToCurrent(jump_end);
+        bc.jump_to(BC_JUMP, begin);
+        bc.set_jump_location(jump_end);
+    }
+
+
+    /*****************************************************/
+    void ASTFor::GenerateCode(Machine& machine, ByteCode& bc)
+    {
+        // Allocate a spot for the  list iterator
+        size_t iterator = bc.code(BC_DATA, 0);
+
+        size_t begin = bc.current_location();
+
+        // The list
+        list->GenerateCode(machine, bc);
+        // Resolve the TOS so the list gets put on the stack
+        bc.code(BC_RESOLVE);
+        bc.code(BC_LOAD_INTEGER_LOCATION, iterator);
+        bc.code(BC_LOAD_LIST_ITEM);
+        size_t jump_end = bc.jump_forward(BC_JUMP_GP_FALSE);
+
+        // The variable name to store the current list item
+        identifier->GenerateCode(machine, bc);
+        bc.code(BC_STORE_VAR);
+
+        body->GenerateCode(machine, bc);
+        bc.code(BC_INCREMENT_LOCATION, iterator);
+        bc.jump_to(BC_JUMP, begin);
+        bc.set_jump_location(jump_end);
     }
 
     /***************************************************/
@@ -126,16 +150,14 @@ namespace fsh
         if (arguments)
         {
             arguments->GenerateCode(machine, bc);
-            bc.push_back(BC_LOAD_INTEGER);
-            bc.push_back(el->expressions.size());
+            bc.code(BC_LOAD_INTEGER, el->expressions.size());
         }
         else
         {
-            bc.push_back(BC_LOAD_INTEGER);
-            bc.push_back(0);
+            bc.code(BC_LOAD_INTEGER, 0);
         }
         call->GenerateCode(machine, bc);
-        bc.push_back(BC_CALL);
+        bc.code(BC_CALL);
     }
 
     /***************************************************/
@@ -147,8 +169,14 @@ namespace fsh
         fd.isBuiltIn = false;
         int64_t id = machine.registerFunction(fd);
 
-        bc.push_back(BC_LOAD_FUNCTION_DEF);
-        bc.push_back(id);
+        bc.code(BC_LOAD_FUNCTION_DEF, id);
+    }
+
+    /***************************************************/
+    void ASTSystem::GenerateCode(Machine& machine, ByteCode& bc)
+    {
+        int64_t id = machine.string_table_add(cmd);
+        bc.code(BC_SYSTEM, id);
     }
  }
 

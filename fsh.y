@@ -24,22 +24,7 @@ extern void yyerror(const char *s);
 
 typedef fsh::Ast ast_t;
 typedef fsh::ASTBinaryOperator bop_t;
-//typedef fsh::FunctionCall call_t;
-//typedef fsh::FunctionDef fdef_t;
-//typedef fsh::WhileIf wif_t;
 typedef fsh::ASTExpressionList el_t;
-//typedef fsh::IdentifierList il_t;
-//typedef fsh::Identifier iden_t;
-//typedef fsh::String str_t;
-//typedef fsh::Boolean bool_t;
-//typedef fsh::Integer int_t;
-//typedef fsh::Float float_t;
-//typedef fsh::None none_t;
-//typedef fsh::TryCatch trycatch_t;
-//typedef fsh::DotOperator dot_t;
-//typedef fsh::For for_t;
-//typedef fsh::Attribute attr_t;
-//typedef fsh::System system_t;
 %}
 
 %define api.value.type {void *} // Actually is Ast
@@ -118,18 +103,8 @@ primary_expression
                                 bc->ctype = fsh::ASTConstant::CTYPE_FALSE;
                                 $$ = bc;
                             }
-    //| SYSTEM                {$$ = $1;}
+    | SYSTEM                {$$ = $1;}
     | '(' expression_list ')'    {$$ = $2;}
-    | '{' expression_list '}' { 
-        //el_t *el = (el_t *)$2;
-        //el->isList = true;
-        $$ = $2; 
-    }
-    | '{' '}' { 
-        //el_t *el = new el_t(lineno);
-        //el->isList = true;
-        //$$ = el;
-    }
     ;
 
 assignment_expression
@@ -338,11 +313,11 @@ selection_expression
 
 for_expression
     : FOR '[' IDENTIFIER IN expression THEN statement_list ']'  {
-        //for_t *pFor = new for_t(lineno);
-        //pFor->identifier = (inst_t *)$3;
-        //pFor->list = (inst_t *)$5;
-        //pFor->body = (inst_t *)$7;
-        //$$ = pFor;
+        fsh::ASTFor *pFor = new fsh::ASTFor(lineno);
+        pFor->identifier.reset((ast_t *)$3);
+        pFor->list.reset((ast_t *)$5);
+        pFor->body.reset((ast_t *)$7);
+        $$ = pFor;
     }
     ;
 
@@ -529,12 +504,12 @@ extern fsh::Machine machine;
 
 void AstExecute(fsh::Ast *pAst)
 {
-    pAst->GenerateCode(machine, machine.get_byte_code());
-    fsh::ElementPtr e = machine.Execute();
+    fsh::ElementPtr e = machine.Execute(pAst);
+    delete pAst;
     if(e->type() == fsh::ELEMENT_TYPE_ERROR)
     {
         fsh::ErrorPtr ep = e.cast<fsh::Error>();
-        if (ep->bOk == false)
+        if (ep->bOk == false && interactive == false)
             std::cout << ep->msg << std::endl;
     }
     if (interactive)

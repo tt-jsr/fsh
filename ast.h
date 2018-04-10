@@ -123,6 +123,20 @@ namespace fsh
         std::unique_ptr<Ast> if_false;
     };
 
+    class ASTFor : public Ast
+    {
+    public:
+        ASTFor(size_t l)
+        :Ast(l)
+        {}
+        ~ASTFor() {}
+        void GenerateCode(Machine&, ByteCode&);
+        AstType type() {return AST_FOR;}
+        std::unique_ptr<Ast> identifier;
+        std::unique_ptr<Ast> list;
+        std::unique_ptr<Ast> body;
+    };
+
     class ASTFunctionCall : public Ast
     {
     public:
@@ -147,6 +161,19 @@ namespace fsh
         AstType type() {return AST_FUNCTION_DEF;}
         std::vector<std::string> arg_names;
         std::unique_ptr<Ast> functionBody;
+    };
+
+    class ASTSystem : public Ast
+    {
+    public:
+        ASTSystem(size_t l, const std::string& s)
+        :Ast(l)
+        , cmd(s)
+        {}
+        ~ASTSystem() {}
+        void GenerateCode(Machine&, ByteCode&);
+        AstType type() {return AST_SYSTEM;}
+        std::string cmd;
     };
 
 }
