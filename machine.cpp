@@ -128,9 +128,8 @@ namespace fsh
             ElementPtr rtn;
             IdentifierPtr id = e.cast<Identifier>();
             if (get_variable(id->value, rtn))
-            {
                 return rtn;
-            }
+            return MakeNone();
         }
         return e;
     }
@@ -212,6 +211,32 @@ namespace fsh
 
     void Machine::store_variable(const std::string& name, ElementPtr d)
     {
+        size_t pos = name.find_first_of('.');
+        if (pos != std::string::npos)
+        {
+            std::string var = name.substr(0, pos);
+            std::string fieldName = name.substr(pos+1);
+            ElementPtr e;
+            if (get_variable(var, e) == false)
+            {
+                std::stringstream strm;
+                strm << "store variable: List variable " << var << " does not exist";
+                throw std::runtime_error(strm.str());
+            }
+            if (e->IsList() == false)
+            {
+                std::stringstream strm;
+                strm << "store variable: List variable " << var << " is not a list";
+                throw std::runtime_error(strm.str());
+            }
+            ListPtr lp = e.cast<List>();
+
+            size_t idx = get_record_field(lp->listtype, fieldName);
+            if (idx >= lp->items.size())
+                throw std::runtime_error("store_variable: List fieldname out of range");
+            lp->items[idx] = d;
+            return;
+        }
         executionContext->AddVariable(name, d);
     }
 
@@ -238,7 +263,8 @@ namespace fsh
 
     bool Machine::get_variable(const std::string& name, ElementPtr& out)
     {
-        std::string varname;
+        if (get_list_field(name, out))
+            return true;
         out = executionContext->GetVariable(name);
         if (out)
             return true;

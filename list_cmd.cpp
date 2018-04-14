@@ -13,33 +13,12 @@ namespace fsh
 {
     ElementPtr Part(int64_t start, int64_t end, const std::string& src)
     {
-        if(start < 0)
-            start = src.size() + start;
-        if (end < 0)
-            end = src.size() + end;
-        if (start < 0 || end < 0)
-            throw std::runtime_error("Invalid part");
-        if (start > end)
-            throw std::runtime_error("Invalid part");
-        if (start > src.size() || end > src.size())
-            throw std::runtime_error("Invalid part");
         std::string s = src.substr(start,end-start);
         return MakeString(s);
     }
 
     ElementPtr Part(int64_t start, int64_t end, const std::vector<ElementPtr>& src)
     {
-        if(start <0)
-            start = src.size() + start;
-        if (end < 0)
-            end = src.size() + end;
-        if (start < 0 || end < 0)
-            throw std::runtime_error("Invalid part");
-        if (start > end)
-            throw std::runtime_error("Invalid part");
-        if (start > src.size() || end > src.size())
-            throw std::runtime_error("Invalid part");
-
         if (end-start== 1)
         {
             return src[start];
@@ -53,21 +32,6 @@ namespace fsh
             }
             return rtn;
         }
-    }
-
-    ElementType GetElementType(size_t idx, std::vector<ElementPtr>& args)
-    {
-        if (idx >= args.size())
-            return ELEMENT_TYPE_NONE;
-        ElementType e = args[idx]->type();
-        if (e == ELEMENT_TYPE_INTEGER)
-            return e;
-        if (e == ELEMENT_TYPE_STRING)
-        { 
-            if (args[idx].cast<String>()->value == ":")
-                return e;
-        }
-        throw std::runtime_error("Part: invalid argument");
     }
 
     size_t GetListSize(ElementPtr e)
@@ -85,52 +49,74 @@ namespace fsh
 
     ElementPtr Subscript(Machine& machine, std::vector<ElementPtr>& args)
     {
-        int64_t start = std::numeric_limits<int64_t>::max();
-        int64_t end = std::numeric_limits<int64_t>::max();
+        const int64_t maxint = std::numeric_limits<int64_t>::max();
+        int64_t start = maxint;
+        int64_t end = maxint;
+        bool hasRange = false;
 
-        ElementPtr e = GetElement(machine, args, 0);
-        if (!e)
+        ElementPtr sequence = GetElement(machine, args, 0);
+        if (!sequence)
             throw std::runtime_error("[[]] requires a sequence");
-        if (GetElementType(1, args) == ELEMENT_TYPE_INTEGER)
+        IntegerPtr eStart = GetInteger(machine, args, 1);
+        BooleanPtr eHasRange = GetBoolean(machine, args, 2);
+        IntegerPtr eEnd = GetInteger(machine, args, 3);
+
+        if (eStart)
+            start = eStart->value;
+        if (eEnd)
+            end = eEnd->value;
+        if (eHasRange)
+            hasRange = eHasRange->value;
+
+        // list[m]
+        if (start != maxint && !hasRange && end == maxint)
         {
-            start = args[1].cast<Integer>()->value;
-            if (GetElementType(2, args) == ELEMENT_TYPE_STRING) // ':'
-            {
-                if (GetElementType(3, args) == ELEMENT_TYPE_INTEGER)
-                    end = args[3].cast<Integer>()->value;
-                else
-                    end = GetListSize(e);
-            }
-            else
-            {
-                end = start+1;
-            }
+            if (start < 0)
+                start = GetListSize(sequence) + start;
+            end = start+1;
         }
-        else
+
+        // list[m : n]
+        if (start != maxint && hasRange && end != maxint)
+        {
+            if (start < 0)
+                start = GetListSize(sequence) + start;
+            if (end < 0)
+                end = GetListSize(sequence) + end;
+        }
+
+        // List[: n]
+        if (start == maxint && hasRange && end != maxint)
         {
             start = 0;
-            if (GetElementType(2, args) == ELEMENT_TYPE_INTEGER)
-                end = args[2].cast<Integer>()->value;
-            else
-                end = GetListSize(e);
+            if (end < 0)
+                end = GetListSize(sequence) + end;
         }
 
-        if (start == std::numeric_limits<int64_t>::max())
+        //List[n : ]
+        if (start != maxint && hasRange && end == maxint)
         {
-            throw std::runtime_error("[[]]: uninitialized start");
+            if (start < 0)
+                start = GetListSize(sequence) + start;
+            end = GetListSize(sequence);
         }
-        if (end == std::numeric_limits<int64_t>::max())
+
+        if (start >= GetListSize(sequence) || start < 0)
         {
-            throw std::runtime_error("[[]]: uninitialized end");
+            throw std::runtime_error("[[]]: start index out of range");
         }
-        if (e->IsString())
+        if (end < 0 || end > GetListSize(sequence))
         {
-            StringPtr p = e.cast<String>();
-            return Part(start,end, p->value);
+            throw std::runtime_error("[[]]: end index out of range");
         }
-        if (e->IsList())
+        if (sequence->IsString())
         {
-            ListPtr p = e.cast<List>();
+            StringPtr p = sequence.cast<String>();
+            return p; 
+        }
+        if (sequence->IsList())
+        {
+            ListPtr p = sequence.cast<List>();
             return Part(start,end, p->items);
         }
         throw std::runtime_error("Trying to [[]] non string or list");
@@ -144,21 +130,23 @@ namespace fsh
         {
             throw std::runtime_error("Part an integer indicies");
         }
+        int64_t idx = n->value;
+        size_t size = GetListSize(e);
+        if (idx < 0)
+            idx = GetListSize(e) + idx;
+        if (idx < 0 || idx >= size)
+            throw std::runtime_error("Index out of range");
         if (e->IsString())
         {
             StringPtr p = e.cast<String>();
-            if (n < 0 || n > p->value.size())
-                throw std::runtime_error("Index out of range");
             std::string s;
-            s.push_back(p->value[n->value]);
+            s.push_back(p->value[idx]);
             return MakeString(s);
         }
         if (e->IsList())
         {
             ListPtr p = e.cast<List>();
-            if (n < 0 || n > p->items.size())
-                throw std::runtime_error("Index out of range");
-            return p->items[n];
+            return p->items[idx];
         }
         throw std::runtime_error("Trying to part non string or list");
     }
@@ -187,7 +175,7 @@ namespace fsh
         return MakeNone();
     }
 
-    ListPtr MakeRecord(Machine& machine, std::vector<ElementPtr>& args)
+    ListPtr CreateRecord(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr sp = GetString(machine, args, 0);
         if (!sp)

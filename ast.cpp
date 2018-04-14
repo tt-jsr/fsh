@@ -60,6 +60,39 @@ namespace fsh
         }
     }
 
+    ASTConstant *ASTMakeIntegerConstant(size_t lineno, int64_t n)
+    {
+        ASTConstant *p = new ASTConstant(lineno);
+        p->ctype = ASTConstant::CTYPE_INTEGER;
+        p->ivalue = n;
+        return p;
+    }
+
+    ASTConstant *ASTMakeBooleanConstant(size_t lineno, bool b)
+    {
+        ASTConstant *p = new ASTConstant(lineno);
+        if (b)
+            p->ctype = ASTConstant::CTYPE_TRUE;
+        else
+            p->ctype = ASTConstant::CTYPE_FALSE;
+        return p;
+    }
+
+    ASTConstant *ASTMakeNoneConstant(size_t lineno)
+    {
+        ASTConstant *p = new ASTConstant(lineno);
+        p->ctype = ASTConstant::CTYPE_NONE;
+        return p;
+    }
+
+    ASTConstant *ASTMakeIdentifierConstant(size_t lineno, const std::string& s)
+    {
+        ASTConstant *p = new ASTConstant(lineno);
+        p->ctype = ASTConstant::CTYPE_IDENTIFIER;
+        p->svalue = s;
+        return p;
+    }
+
     /*****************************************************/
     void ASTUnaryOperator::GenerateCode(Machine& machine, ByteCode& bc)
     {
@@ -71,6 +104,7 @@ namespace fsh
     void ASTAssignment::GenerateCode(Machine& machine, ByteCode& bc)
     {
         rhs->GenerateCode(machine, bc);
+        bc.code(BC_RESOLVE);
         lhs->GenerateCode(machine, bc);
         bc.code(BC_STORE_VAR);
     }
@@ -149,7 +183,11 @@ namespace fsh
         ASTExpressionList *el = (ASTExpressionList *)arguments.get();
         if (arguments)
         {
-            arguments->GenerateCode(machine, bc);
+            for (auto& a : arguments->expressions)
+            {
+                a->GenerateCode(machine, bc);
+                bc.code(BC_RESOLVE);
+            }
             bc.code(BC_LOAD_INTEGER, el->expressions.size());
         }
         else
@@ -157,6 +195,13 @@ namespace fsh
             bc.code(BC_LOAD_INTEGER, 0);
         }
         call->GenerateCode(machine, bc);
+        bc.code(BC_RESOLVE);
+        bc.code(BC_PUSH_CONTEXT);
+        if (attributes)
+        {
+            attributes->GenerateCode(machine, bc);
+            bc.code(BC_POP);
+        }
         bc.code(BC_CALL);
     }
 

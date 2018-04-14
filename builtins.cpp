@@ -86,6 +86,20 @@ namespace fsh
         return ep.cast<Identifier>();
     }
 
+    BooleanPtr GetBoolean(Machine& machine, std::vector<ElementPtr>& args, size_t index)
+    {
+        ElementPtr ep = GetElement(machine, args, index);
+        if(ep.get() == nullptr)
+            return BooleanPtr();
+
+        if (ep->type() != ELEMENT_TYPE_BOOLEAN)
+        {
+            return BooleanPtr();
+        }
+        return ep.cast<Boolean>();
+    }
+
+    /*******************************************************************/
     ElementPtr UnitTest(Machine& machine, std::vector<ElementPtr>& args)
     {
         IntegerPtr n = GetInteger(machine, args, 0);
@@ -264,6 +278,7 @@ namespace fsh
     {
         bool addnl(true);
         machine.get_variable("__addnl", addnl);
+        std::cout << "addnl: " << addnl << std::endl;
         for (auto& e : args)
         {
             std::cout << toString(machine, e);
@@ -331,7 +346,7 @@ namespace fsh
         RegisterBuiltInImpl(machine, "Part", fsh::Part);
         RegisterBuiltInImpl(machine, "Subscript", fsh::Subscript);
         RegisterBuiltInImpl(machine, "DefineRecord", fsh::DefineRecord);
-        RegisterBuiltInImpl(machine, "MakeRecord", fsh::MakeRecord);
+        RegisterBuiltInImpl(machine, "CreateRecord", fsh::CreateRecord);
         RegisterBuiltInImpl(machine, "CreateList", fsh::CreateList);
         RegisterBuiltInImpl(machine, "Len", fsh::Len);
         RegisterBuiltInImpl(machine, "Append", fsh::Append);

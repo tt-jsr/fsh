@@ -102,6 +102,76 @@ namespace fsh
         }
     }
 
+    bool ExecuteEQ(Machine& machine, ElementPtr lhs, ElementPtr rhs)
+    {
+        if(lhs->IsNone() && rhs->IsNone())
+        {
+            machine.push_data(MakeBoolean(true));
+            return true;
+        }
+        if(!lhs->IsNone() && rhs->IsNone())
+        {
+            machine.push_data(MakeBoolean(false));
+            return true;
+        }
+        if(lhs->IsNone() && !rhs->IsNone())
+        {
+            machine.push_data(MakeBoolean(false));
+            return true;
+        }
+        if(lhs->IsBoolean() && rhs->IsBoolean())
+        {
+            machine.push_data(MakeBoolean(lhs.cast<Boolean>()->value == rhs.cast<Boolean>()->value));
+            return true;
+        }
+        if(lhs->IsBoolean() && !rhs->IsBoolean())
+        {
+            machine.push_data(MakeBoolean(false));
+            return true;
+        }
+        if(!lhs->IsBoolean() && rhs->IsBoolean())
+        {
+            machine.push_data(MakeBoolean(false));
+            return true;
+        }
+        return false;
+    }
+
+    bool ExecuteNEQ(Machine& machine, ElementPtr lhs, ElementPtr rhs)
+    {
+        if(lhs->IsNone() && rhs->IsNone())
+        {
+            machine.push_data(MakeBoolean(false));
+            return true;
+        }
+        if(!lhs->IsNone() && rhs->IsNone())
+        {
+            machine.push_data(MakeBoolean(true));
+            return true;
+        }
+        if(lhs->IsNone() && !rhs->IsNone())
+        {
+            machine.push_data(MakeBoolean(true));
+            return true;
+        }
+        if(lhs->IsBoolean() && rhs->IsBoolean())
+        {
+            machine.push_data(MakeBoolean(lhs.cast<Boolean>()->value != rhs.cast<Boolean>()->value));
+            return true;
+        }
+        if(lhs->IsBoolean() && !rhs->IsBoolean())
+        {
+            machine.push_data(MakeBoolean(true));
+            return true;
+        }
+        if(!lhs->IsBoolean() && rhs->IsBoolean())
+        {
+            machine.push_data(MakeBoolean(true));
+            return true;
+        }
+        return false;
+    }
+
     void binary_operator(Machine& machine, int op)
     {
         ElementPtr lhs = machine.pop_data();
@@ -147,6 +217,16 @@ namespace fsh
             ElementPtr e = MakeBoolean(true);
             machine.push_data(e);
             return;
+        }
+        if (op == BC_RELATIONAL_EQ)
+        {
+            if (ExecuteEQ(machine, ldata, rdata))
+                return;
+        }
+        if (op == BC_RELATIONAL_NEQ)
+        {
+            if (ExecuteNEQ(machine, ldata, rdata))
+                return;
         }
         
         if (rdata->IsString() && ldata->IsString())
@@ -396,7 +476,6 @@ namespace fsh
         case BC_CALL:
             {
                 ElementPtr callId = machine.pop_data();
-                callId = machine.resolve(callId);
                 if (callId->type() != ELEMENT_TYPE_FUNCTION_DEF)
                     throw std::runtime_error("Function call requires name/id");
 
@@ -418,7 +497,6 @@ namespace fsh
                 while(num)
                 {
                     ElementPtr e = machine.pop_data();
-                    e = machine.resolve(e);
                     args.push_back(e);
                     --num;
                 }
@@ -426,14 +504,11 @@ namespace fsh
                 try {
                     if (fd->isBuiltIn)
                     {
-                        machine.push_context();
-                        ElementPtr e = fd->builtIn(machine, args);
-                        machine.push_data(e);
-                        machine.pop_context();
+                        ElementPtr rtn = fd->builtIn(machine, args);
+                        machine.push_data(rtn);
                     }
                     else
                     {
-                        machine.push_context();
                         size_t end = std::min(fd->arg_names.size(), args.size());
                         size_t idx = 0;
                         for (idx; idx < end; ++idx)
@@ -451,6 +526,7 @@ namespace fsh
                             ++fd->shellFunction.ip;
                         }
                     }
+                    machine.pop_context();
                 }
                 catch (std::exception& e)
                 {
@@ -475,6 +551,12 @@ namespace fsh
                 system(cmd.c_str());
                 machine.push_data(MakeNone());
             }
+            break;
+        case BC_PUSH_CONTEXT:
+            machine.push_context();
+            break;
+        case BC_POP:
+            machine.pop_data();
             break;
         default:
             assert(false);

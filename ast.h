@@ -57,6 +57,10 @@ namespace fsh
         int64_t ivalue;
         std::string svalue;
     };
+    ASTConstant *ASTMakeIntegerConstant(size_t lineno, int64_t);
+    ASTConstant *ASTMakeBooleanConstant(size_t lineno, bool);
+    ASTConstant *ASTMakeIdentifierConstant(size_t lineno, const std::string&);
+    ASTConstant *ASTMakeNoneConstant(size_t lineno);
 
     class ASTAssignment : public Ast
     {
@@ -147,7 +151,8 @@ namespace fsh
         void GenerateCode(Machine&, ByteCode&);
         AstType type() {return AST_FUNCTION_CALL;}
         std::unique_ptr<Ast> call;
-        std::unique_ptr<Ast> arguments;
+        std::unique_ptr<ASTExpressionList> arguments;
+        std::unique_ptr<ASTExpressionList> attributes;
     };
 
     class ASTFunctionDef : public Ast
@@ -175,6 +180,5 @@ namespace fsh
         AstType type() {return AST_SYSTEM;}
         std::string cmd;
     };
-
 }
 

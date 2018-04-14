@@ -87,7 +87,7 @@ namespace fsh
     /* Make a record defined with Define record
      * Example:MakeRecord["fstat", field1, field2, ...];
      */
-    ListPtr MakeRecord(Machine&, std::vector<ElementPtr>&);
+    ListPtr CreateRecord(Machine&, std::vector<ElementPtr>&);
 
     ListPtr CreateList(Machine&, std::vector<ElementPtr>&);
     
@@ -160,5 +160,6 @@ namespace fsh
     MapPtr GetMap(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     IntegerPtr GetInteger(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     IdentifierPtr GetIdentifier(Machine& machine, std::vector<ElementPtr>& args, size_t index);
+    BooleanPtr GetBoolean(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     std::string toString(Machine& machine, ElementPtr e);
 }

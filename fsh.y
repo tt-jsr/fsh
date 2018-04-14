@@ -37,7 +37,6 @@ typedef fsh::ASTExpressionList el_t;
 %token FOR IN
 %token DOUBLE_BRACKET_OPEN
 %token DOUBLE_BRACKET_CLOSE
-%token RIGHT_ARROW
 %token SYSTEM
 %token CMD_WORD
 %token CMD_BAR
@@ -55,6 +54,7 @@ typedef fsh::ASTExpressionList el_t;
 %left EQ NEQ
 %left '+' '-'
 %left '*' '/'
+%left RIGHT_ARROW
 %left '.'
 %precedence NEG
 
@@ -126,7 +126,6 @@ expression
     | selection_expression      {$$ = $1;}
     | iteration_expression      {$$ = $1;}
     | exception_expression      {$$ = $1;}
-    | dot_expression            {$$ = $1;}
     | for_expression            {$$ = $1;}
     | subscript_expression      {$$ = $1;}
     ;
@@ -227,68 +226,71 @@ math_expression
     }
     ;
 
-attribute_expression
-    : IDENTIFIER RIGHT_ARROW expression {
-        //attr_t *pAttr = new attr_t(lineno);
-        //pAttr->name = (inst_t *)$1);
-        //pAttr->value = (inst_t *)$3);
-        //$$ = pAttr;
-    }
-    ;
-
 subscript_expression
     : primary_expression DOUBLE_BRACKET_OPEN  expression ':' expression DOUBLE_BRACKET_CLOSE {
-        //call_t *pCall = new call_t(lineno);
-        //pCall->call = new iden_t(lineno, "Subscript");
-        //el_t *el = new fsh::instruction::ExpressionList(lineno);
-        //el->expressions.push_back((inst_t *)$1);
-        //el->expressions.push_back((inst_t *)$3);
-        //el->expressions.push_back(new str_t(lineno, ":"));
-        //el->expressions.push_back((inst_t *)$5);
-        //pCall->functionArguments = el;
-        ////std::cout << "func call " << id->name << std::endl;
-        //$$ = pCall;
+        // Set function name
+        fsh::ASTFunctionCall *pCall = new fsh::ASTFunctionCall(lineno);
+        pCall->call.reset(fsh::ASTMakeIdentifierConstant(lineno, "Subscript"));
+
+        fsh::ASTExpressionList *pList = new fsh::ASTExpressionList(lineno);
+        pList->expressions.emplace_back((ast_t *)$1);
+        pList->expressions.emplace_back((ast_t *)$3);
+
+        pList->expressions.emplace_back(fsh::ASTMakeBooleanConstant(lineno, true));
+
+        pList->expressions.emplace_back((ast_t *)$5);
+
+        pCall->arguments.reset(pList);
+
+        $$ = pCall;
     }
     | primary_expression DOUBLE_BRACKET_OPEN  expression ':' DOUBLE_BRACKET_CLOSE {
-        //call_t *pCall = new call_t(lineno);
-        //pCall->call = new iden_t(lineno, "Subscript");
-        //el_t *el = new fsh::instruction::ExpressionList(lineno);
-        //el->expressions.push_back((inst_t *)$1);
-        //el->expressions.push_back((inst_t *)$3);
-        //el->expressions.push_back(new str_t(lineno, ":"));
-        //pCall->functionArguments = el;
-        //std::cout << "func call " << id->name << std::endl;
-        //$$ = pCall;
+        fsh::ASTFunctionCall *pCall = new fsh::ASTFunctionCall(lineno);
+        pCall->call.reset(fsh::ASTMakeIdentifierConstant(lineno, "Subscript"));
+
+        fsh::ASTExpressionList *pList = new fsh::ASTExpressionList(lineno);
+        pList->expressions.emplace_back((ast_t *)$1);
+        pList->expressions.emplace_back((ast_t *)$3);
+
+        pList->expressions.emplace_back(fsh::ASTMakeBooleanConstant(lineno, true));
+
+        pList->expressions.emplace_back(fsh::ASTMakeNoneConstant(lineno));
+
+        pCall->arguments.reset(pList);
+
+        $$ = pCall;
     }
     | primary_expression DOUBLE_BRACKET_OPEN  expression DOUBLE_BRACKET_CLOSE {
-        //call_t *pCall = new call_t(lineno);
-        //pCall->call = new iden_t(lineno, "Subscript");
-        //el_t *el = new fsh::instruction::ExpressionList(lineno);
-        //el->expressions.push_back((inst_t *)$1);
-        //el->expressions.push_back((inst_t *)$3);
-        //pCall->functionArguments = el;
-        ////std::cout << "func call " << id->name << std::endl;
-        //$$ = pCall;
+        fsh::ASTFunctionCall *pCall = new fsh::ASTFunctionCall(lineno);
+        pCall->call.reset(fsh::ASTMakeIdentifierConstant(lineno, "Subscript"));
+
+        fsh::ASTExpressionList *pList = new fsh::ASTExpressionList(lineno);
+        pList->expressions.emplace_back((ast_t *)$1);
+        pList->expressions.emplace_back((ast_t *)$3);
+
+        pList->expressions.emplace_back(fsh::ASTMakeBooleanConstant(lineno, false));
+
+        pList->expressions.emplace_back(fsh::ASTMakeNoneConstant(lineno));
+
+        pCall->arguments.reset(pList);
+
+        $$ = pCall;
     }
     | primary_expression DOUBLE_BRACKET_OPEN  ':' expression DOUBLE_BRACKET_CLOSE {
-        //call_t *pCall = new call_t(lineno);
-        //pCall->call = new iden_t(lineno, "Subscript");
-        //el_t *el = new fsh::instruction::ExpressionList(lineno);
-        //el->expressions.push_back((inst_t *)$1);
-        //el->expressions.push_back(new str_t(lineno, ":"));
-        //el->expressions.push_back((inst_t *)$4);
-        //pCall->functionArguments = el;
-        ////std::cout << "func call " << id->name << std::endl;
-        //$$ = pCall;
-    }
-    ;
+        fsh::ASTFunctionCall *pCall = new fsh::ASTFunctionCall(lineno);
+        pCall->call.reset(fsh::ASTMakeIdentifierConstant(lineno, "Subscript"));
 
-dot_expression
-    : IDENTIFIER '.' expression {
-        //dot_t *dop = new dot_t(lineno);
-        //dop->lhs = (inst_t *)$1;
-        //dop->rhs = (inst_t *)$3;
-        //$$ = dop;
+        fsh::ASTExpressionList *pList = new fsh::ASTExpressionList(lineno);
+        pList->expressions.emplace_back((ast_t *)$1);
+        pList->expressions.emplace_back(fsh::ASTMakeNoneConstant(lineno));
+
+        pList->expressions.emplace_back(fsh::ASTMakeBooleanConstant(lineno, true));
+
+        pList->expressions.emplace_back((ast_t *)$4);
+
+        pCall->arguments.reset(pList);
+
+        $$ = pCall;
     }
     ;
 
@@ -371,8 +373,22 @@ function_call
     : primary_expression '[' call_expression_list ']' {
         fsh::ASTFunctionCall *pCall = new fsh::ASTFunctionCall(lineno);
         pCall->call.reset((ast_t *)$1);
-        pCall->arguments.reset((ast_t *)$3);
-        ////std::cout << "func call " << id->name << std::endl;
+        pCall->arguments.reset((fsh::ASTExpressionList *)$3);
+        //std::cout << "func call " << id->name << std::endl;
+        $$ = pCall;
+    }
+    | primary_expression '[' call_expression_list ':' attribute_list ']' {
+        fsh::ASTFunctionCall *pCall = new fsh::ASTFunctionCall(lineno);
+        pCall->call.reset((ast_t *)$1);
+        pCall->arguments.reset((fsh::ASTExpressionList *)$3);
+        pCall->attributes.reset((fsh::ASTExpressionList *)$5);
+        //std::cout << "func call " << id->name << std::endl;
+        $$ = pCall;
+    }
+    | primary_expression '[' attribute_list ']' {
+        fsh::ASTFunctionCall *pCall = new fsh::ASTFunctionCall(lineno);
+        pCall->call.reset((ast_t *)$1);
+        pCall->attributes.reset((fsh::ASTExpressionList *)$3);
         $$ = pCall;
     }
     | primary_expression '[' ']' {
@@ -423,18 +439,27 @@ expression_list
     }
     ;
 
+attribute_expression
+    : IDENTIFIER RIGHT_ARROW expression {
+        fsh::ASTAssignment *pAttr = new fsh::ASTAssignment(lineno);
+        pAttr->lhs.reset((ast_t *)$1);
+        pAttr->rhs.reset((ast_t *)$3);
+        $$ = pAttr;
+    }
+    ;
+
 attribute_list
     :attribute_expression {
-        //el_t *el = new el_t(lineno);
-        //el->expressions.push_back((inst_t *)$1);
-        //$$ = el;
+        el_t *el = new el_t(lineno);
+        el->expressions.emplace_back((ast_t *)$1);
+        $$ = el;
     }
     | attribute_list ',' attribute_expression  {
-        //inst_t *ip = (inst_t *)$1;
-        //assert (ip->type() == fsh::instruction::INSTRUCTION_EXPRESSION_LIST);
-        //el_t *el = (el_t *)$1;
-        //el->expressions.push_back((inst_t *)$3);
-        //$$ = el;
+        ast_t *ip = (ast_t *)$1;
+        assert (ip->type() == fsh::AST_EXPRESSION_LIST);
+        el_t *el = (el_t *)$1;
+        el->expressions.emplace_back((ast_t *)$3);
+        $$ = el;
     }
     ;
 
@@ -444,28 +469,12 @@ call_expression_list
         el->expressions.emplace_back((ast_t *)$1);
         $$ = el;
     }
-    | attribute_list {
-        //el_t *el = new el_t(lineno);
-        //el->expressions.push_back((inst_t *)$1);
-        //$$ = el;
-    }
     | expression_list ',' expression  {
         ast_t *ip = (ast_t *)$1;
         assert (ip->type() == fsh::AST_EXPRESSION_LIST);
         fsh::ASTExpressionList *el = (el_t *)$1;
         el->expressions.emplace_back((ast_t *)$3);
         $$ = el;
-    }
-    | expression_list ',' attribute_list {
-        //inst_t *ip = (inst_t *)$1;
-        //assert (ip->type() == fsh::instruction::INSTRUCTION_EXPRESSION_LIST);
-        //el_t *el = (el_t *)$1;
-        //el_t *el_attr = (el_t *)$3;
-        //for (auto e : el_attr->expressions)
-        //{
-            //el->expressions.push_back((inst_t *)$3);
-        //}
-        ////delete el_attr;
     }
     ;
 

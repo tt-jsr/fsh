@@ -47,8 +47,15 @@ namespace fsh
         ,BC_RELATIONAL_EQ
         ,BC_RELATIONAL_NEQ
         ,BC_UNARY_NEGATE
+        // Pops TOS. If the value is false (as defined by Machine::ConvertToBool())
+        // jump to the location specified by the next location
         ,BC_JUMP_IF_FALSE
+
+        // Checks Machine.get_gp_register(), and if false, jumps to the location 
+        // specified in the next location
         ,BC_JUMP_GP_FALSE
+
+        // Jump to the location specified in the next location
         ,BC_JUMP
         ,BC_CALL
         ,BC_LOAD_FUNCTION_DEF
@@ -59,12 +66,14 @@ namespace fsh
         // The index is used to get an item from the
         // list, witch is pushed onto the stack
         // If index is out of bounds, the machine register
-        // r_bool is set to false
+        // gp_register is set to false, and nothing is pushed
         ,BC_LOAD_LIST_ITEM
 
+        // pops the TOS, performs any variable lookup, and pushes the result
         ,BC_RESOLVE
+
         // Increment an integer
-        // The next location contains the  location
+        // The next location contains the location
         // of the integer to be incremented.
         // No value is pushed onto the stack
         ,BC_INCREMENT_LOCATION
@@ -74,7 +83,13 @@ namespace fsh
         // of the integer to be pushed onto the stack
         ,BC_LOAD_INTEGER_LOCATION
 
+        // Does not contain any code. The next location is reserved
+        // to store a value for use by the bytecode
         ,BC_DATA
+
+        ,BC_PUSH_CONTEXT
+
+        ,BC_POP
     };
 
     enum AstType
@@ -92,6 +107,7 @@ namespace fsh
         ,AST_FUNCTION_CALL
         ,AST_FUNCTION_DEF
         ,AST_SYSTEM
+        ,AST_SUBSCRIPT
     };
 
     struct FunctionDefinition

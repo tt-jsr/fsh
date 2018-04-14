@@ -169,7 +169,7 @@ exit            {column += 4;exit(-1);}
     return FLOAT; 
 }
 
-[a-zA-Z_][a-zA-Z0-9_]*   { 
+[a-zA-Z_][a-zA-Z0-9_\.]*   { 
     column += strlen(yytext);
     int64_t id = machine.string_table_add(yytext);
     fsh::ASTConstant *bc = new fsh::ASTConstant(lineno);
