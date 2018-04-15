@@ -48,7 +48,7 @@ cmdFunc = &[line:
 ];
 
 userInput = &[
-    ReadFile[cmdFunc, "stdin", __stripnl=True];
+    ReadFile[cmdFunc, "stdin": stripnl=True];
 ];
 
 userInput[];

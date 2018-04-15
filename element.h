@@ -25,7 +25,7 @@ namespace fsh
         ,ELEMENT_TYPE_FILE_HANDLE
         ,ELEMENT_TYPE_ERROR
         ,ELEMENT_TYPE_ATTRIBUTE
-        ,ELEMENT_TYPE_FUNCTION_DEF
+        ,ELEMENT_TYPE_FUNCTION_DEF_ID
     };
 
     struct Element : public instrusive_base
@@ -42,7 +42,7 @@ namespace fsh
         bool IsFileHandle() const {return type() == ELEMENT_TYPE_FILE_HANDLE;}
         bool IsError() const {return type() == ELEMENT_TYPE_ERROR;}
         bool IsAttribute() const {return type() == ELEMENT_TYPE_ATTRIBUTE;}
-        bool IsFunctionDef() const {return type() == ELEMENT_TYPE_FUNCTION_DEF;}
+        bool IsFunctionDefId() const {return type() == ELEMENT_TYPE_FUNCTION_DEF_ID;}
     };
 
     typedef instrusive_ptr<Element> ElementPtr;
@@ -148,13 +148,13 @@ namespace fsh
 
     typedef instrusive_ptr<List> ListPtr;
 
-    struct FunctionDef : public Element
+    struct FunctionDefId : public Element
     {
-        virtual ElementType type() const {return ELEMENT_TYPE_FUNCTION_DEF;}
+        virtual ElementType type() const {return ELEMENT_TYPE_FUNCTION_DEF_ID;}
         int64_t funcid;
     };
 
-    typedef instrusive_ptr<FunctionDef> FunctionDefPtr;
+    typedef instrusive_ptr<FunctionDefId> FunctionDefIdPtr;
 
     struct FileHandle : public Element
     {
@@ -233,6 +233,6 @@ namespace fsh
     BooleanPtr MakeBoolean(bool);
     FileHandlePtr MakeFileHandle();
     ErrorPtr MakeError(const std::string&, bool);
-    FunctionDefPtr MakeFunctionDef(int64_t id);
+    FunctionDefIdPtr MakeFunctionDefId(int64_t id);
 }
 

@@ -476,11 +476,11 @@ namespace fsh
         case BC_CALL:
             {
                 ElementPtr callId = machine.pop_data();
-                if (callId->type() != ELEMENT_TYPE_FUNCTION_DEF)
+                if (callId->type() != ELEMENT_TYPE_FUNCTION_DEF_ID)
                     throw std::runtime_error("Function call requires name/id");
 
                 // Function id
-                int64_t id = callId.cast<Integer>()->value;
+                int64_t id = callId.cast<FunctionDefId>()->funcid;
                 LOG << "BC_CALL " << id << std::endl;
 
                 ElementPtr numargs = machine.pop_data();
@@ -493,56 +493,15 @@ namespace fsh
                 if (fd == nullptr)
                     throw std::runtime_error("Function not found");
                 
-                std::vector<ElementPtr> args;
-                while(num)
-                {
-                    ElementPtr e = machine.pop_data();
-                    args.push_back(e);
-                    --num;
-                }
-                std::reverse(args.begin(), args.end());
-                try {
-                    if (fd->isBuiltIn)
-                    {
-                        ElementPtr rtn = fd->builtIn(machine, args);
-                        machine.push_data(machine.resolve(rtn));
-                    }
-                    else
-                    {
-                        size_t end = std::min(fd->arg_names.size(), args.size());
-                        size_t idx = 0;
-                        for (idx; idx < end; ++idx)
-                        {
-                            machine.store_variable(fd->arg_names[idx], args[idx]);
-                        }
-                        for (; idx < fd->arg_names.size();++idx)
-                        {
-                            machine.store_variable(fd->arg_names[idx], MakeNone());
-                        }
-                        fd->shellFunction.ip = 0;
-                        while(fd->shellFunction.ip < fd->shellFunction.size())
-                        {
-                            fsh::Execute(machine, fd->shellFunction);
-                            ++fd->shellFunction.ip;
-                        }
-                        ElementPtr rtn = machine.pop_data();
-                        rtn = machine.resolve(rtn);
-                        machine.push_data(rtn);
-                    }
-                    machine.pop_context();
-                }
-                catch (std::exception& e)
-                {
-                    machine.pop_context();
-                    throw;
-                }
+                ElementPtr rtn = FunctionCallHelper(machine, fd, num);
+                machine.push_data(rtn);
             }
             break;
         case BC_LOAD_FUNCTION_DEF:
             {
                 ++bc.ip;
                 int64_t id = bc[bc.ip];
-                machine.push_data(MakeFunctionDef(id));
+                machine.push_data(MakeFunctionDefId(id));
                 LOG << "BC_LOAD_FUNCTION_DEF " << id << std::endl;
             }
             break;

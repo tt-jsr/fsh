@@ -99,6 +99,19 @@ namespace fsh
         return ep.cast<Boolean>();
     }
 
+    FunctionDefIdPtr GetFunctionDefId(Machine& machine, std::vector<ElementPtr>& args, size_t index)
+    {
+        ElementPtr ep = GetElement(machine, args, index);
+        if(ep.get() == nullptr)
+            return FunctionDefIdPtr();
+
+        if (ep->type() != ELEMENT_TYPE_FUNCTION_DEF_ID)
+        {
+            return FunctionDefIdPtr();
+        }
+        return ep.cast<FunctionDefId>();
+    }
+
     /*******************************************************************/
     ElementPtr UnitTest(Machine& machine, std::vector<ElementPtr>& args)
     {
@@ -287,6 +300,53 @@ namespace fsh
         return MakeNone();
     }
 
+    ElementPtr FunctionCallHelper(Machine& machine, FunctionDefinition *fd, int64_t nArgsOnStack)
+    {
+        std::vector<ElementPtr> args;
+        while(nArgsOnStack)
+        {
+            ElementPtr e = machine.pop_data();
+            args.push_back(e);
+            --nArgsOnStack;
+        }
+        std::reverse(args.begin(), args.end());
+        ElementPtr rtn;
+        try {
+            if (fd->isBuiltIn)
+            {
+                rtn = fd->builtIn(machine, args);
+                rtn = machine.resolve(rtn);
+            }
+            else
+            {
+                size_t end = std::min(fd->arg_names.size(), args.size());
+                size_t idx = 0;
+                for (idx; idx < end; ++idx)
+                {
+                    machine.store_variable(fd->arg_names[idx], args[idx]);
+                }
+                for (; idx < fd->arg_names.size();++idx)
+                {
+                    machine.store_variable(fd->arg_names[idx], MakeNone());
+                }
+                fd->shellFunction.ip = 0;
+                while(fd->shellFunction.ip < fd->shellFunction.size())
+                {
+                    fsh::Execute(machine, fd->shellFunction);
+                    ++fd->shellFunction.ip;
+                }
+                rtn = machine.pop_data();
+                rtn = machine.resolve(rtn);
+            }
+            machine.pop_context();
+            return rtn;
+        }
+        catch (std::exception& e)
+        {
+            machine.pop_context();
+            throw;
+        }
+    }
     /*
     FunctionDefinitionPtr Bind(Machine& machine, std::vector<ElementPtr>& args)
     {
@@ -315,7 +375,7 @@ namespace fsh
         fd.builtIn = f;
         fd.isBuiltIn = true;
         int64_t id = machine.registerFunction(fd);
-        ElementPtr e = MakeFunctionDef(id);
+        ElementPtr e = MakeFunctionDefId(id);
         machine.store_variable(name, e);
     }
 

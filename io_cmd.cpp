@@ -78,15 +78,18 @@ namespace fsh
 
     ElementPtr ReadFile(Machine& machine, std::vector<ElementPtr>& args)
     {
-        /*
         bool stripnl;
-        machine.get_variable("__stripnl", stripnl);
+        machine.get_variable("stripnl", stripnl);
 
-        FunctionDefinitionPtr fd = GetFunctionDefinition(machine, args, 0);
-        if (fd.get() == nullptr)
+        FunctionDefIdPtr fdid = GetFunctionDefId(machine, args, 0);
+        if (fdid.get() == nullptr)
         {
             throw std::runtime_error("ReadFile: Expected function for arg 0");
         }
+
+        FunctionDefinition *fd = machine.getFunction(fdid->funcid);
+        if (fd == nullptr)
+            throw std::runtime_error("Function not found");
 
         StringPtr sp = GetString(machine, args, 1);
         if (sp.get() == nullptr)
@@ -124,8 +127,7 @@ namespace fsh
             try
             {
                 machine.push_context();
-                ElementPtr r = CallFunctionImpl(machine, false, fd, 1);
-                machine.pop_context();
+                ElementPtr r = FunctionCallHelper(machine, fd, 1);
                 if (r->IsBoolean() && r.cast<Boolean>()->value == false)
                 {
                     fclose(fp);
@@ -134,13 +136,11 @@ namespace fsh
             }
             catch (std::exception)
             {
-                machine.pop_context();
                 fclose(fp);
                 throw;
             }
         }
         fclose(fp);
-        */
         return MakeNone();
     }
 

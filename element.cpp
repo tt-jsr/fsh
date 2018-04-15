@@ -63,9 +63,9 @@ namespace fsh
         return e;
     }
 
-    FunctionDefPtr MakeFunctionDef(int64_t id)
+    FunctionDefIdPtr MakeFunctionDefId(int64_t id)
     {
-        FunctionDefPtr p(new FunctionDef());
+        FunctionDefIdPtr p(new FunctionDefId());
         p->funcid = id;
         return p;
     }
