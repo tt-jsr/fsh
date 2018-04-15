@@ -33,7 +33,7 @@ example2= &[
         Print[lst];
         lst;
     ];
-    ls = OpenProcess["ls -l", "r"];
+    ls = OpenProcess["ls -l", "r":stripnl->True];
     PipeLine[ls, parse, print];
 ];
 
@@ -48,8 +48,13 @@ cmdFunc = &[line:
 ];
 
 userInput = &[
-    ReadFile[cmdFunc, "stdin": stripnl=True];
+    ReadFile[cmdFunc, "stdin": stripnl->True];
 ];
 
-userInput[];
+example3= &[
+    ls = OpenProcess["ls -l", "r" : stripnl->True];
+    PipeLine[ls, Print];
+];
+example3[];
+#userInput[];
 

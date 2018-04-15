@@ -45,8 +45,8 @@ namespace fsh
     {
         bool stripnl(false);
         bool addnl(false);
-        machine.get_variable("__stripnl", stripnl);
-        machine.get_variable("__addnl", addnl);
+        machine.get_variable("stripnl", stripnl);
+        machine.get_variable("addnl", addnl);
 
         StringPtr processName = GetString(machine, args, 0);
         if (processName.get() == nullptr)
@@ -146,19 +146,23 @@ namespace fsh
 
     ElementPtr ReadProcess(Machine& machine, std::vector<ElementPtr>& args)
     {
-        /*
         bool stripnl;
-        machine.get_variable("__stripnl", stripnl);
+        machine.get_variable("stripnl", stripnl);
 
-        FunctionDefinitionPtr fd = GetFunctionDefinition(machine, args, 0);
-        if (fd.get() == nullptr)
+        FunctionDefIdPtr fdid = GetFunctionDefId(machine, args, 0);
+        if (fdid.get() == nullptr)
         {
             throw std::runtime_error("ReadProcess: Expected function for arg 0");
         }
 
+        FunctionDefinition *fd = machine.getFunction(fdid->funcid);
+        if (fd == nullptr)
+            throw std::runtime_error("Function not found");
+
         StringPtr sp = GetString(machine, args, 1);
         if (sp.get() == nullptr)
-            throw std::runtime_error("ReadProcess: Expected process for arg 2");
+            throw std::runtime_error("ReadProcess: Expected process name for arg 2");
+
         FILE *fp = popen(sp->value.c_str(), "r");
         if (fp == nullptr)
         {
@@ -185,8 +189,7 @@ namespace fsh
             try
             {
                 machine.push_context();
-                ElementPtr r = CallFunctionImpl(machine, false, fd, 1);
-                machine.pop_context();
+                ElementPtr r = FunctionCallHelper(machine, fd, 1);
                 if (r->IsBoolean() && r.cast<Boolean>()->value == false)
                 {
                     pclose(fp);
@@ -195,20 +198,17 @@ namespace fsh
             }
             catch (std::exception)
             {
-                machine.pop_context();
                 pclose(fp);
                 throw;
             }
         }
         pclose(fp);
-        */
         return MakeNone();
     }
 
 
     ElementPtr PipelineHead(Machine& machine, ElementPtr stage, size_t& listIdx)
     {
-        /*
         stage = machine.resolve(stage);
         switch (stage->type())
         {
@@ -220,23 +220,15 @@ namespace fsh
                 return lp->items[listIdx++];
             }
             break;
-        case ELEMENT_TYPE_FUNCTION_DEFINITION:
+        case ELEMENT_TYPE_FUNCTION_DEF_ID:
             {
                     //std::cout << "stage function" << std::endl;
-                FunctionDefinitionPtr func = stage.cast<FunctionDefinition>();
-
+                FunctionDefIdPtr fdid = stage.cast<FunctionDefId>();
+                int64_t funcid = fdid->funcid;
+                FunctionDefinition *fd = machine.getFunction(fdid->funcid);
+                assert(fd);
                 machine.push_context();
-                try
-                {
-                    ElementPtr rtn =  CallFunctionImpl(machine, false, func, 0);
-                    machine.pop_context();
-                    return rtn;
-                }
-                catch (std::exception e)
-                {
-                    machine.pop_context();
-                    throw;
-                }
+                return FunctionCallHelper(machine, fd, 0);
             }
             break;
         case ELEMENT_TYPE_FILE_HANDLE:
@@ -279,34 +271,23 @@ namespace fsh
             }
             break;
         }
-        */
         return MakeBoolean(false);
     }
 
     ElementPtr PipelineStage(Machine& machine, ElementPtr stage, ElementPtr data)
     {
-        /*
         stage = machine.resolve(stage);
         switch (stage->type())
         {
-        case ELEMENT_TYPE_FUNCTION_DEFINITION:
+        case ELEMENT_TYPE_FUNCTION_DEF_ID:
             {
-                    //std::cout << "stage function" << std::endl;
-                FunctionDefinitionPtr func = stage.cast<FunctionDefinition>();
-
-                machine.push_data(data);
+                FunctionDefIdPtr fdid = stage.cast<FunctionDefId>();
+                int64_t funcid = fdid->funcid;
+                FunctionDefinition *fd = machine.getFunction(fdid->funcid);
+                assert(fd);
                 machine.push_context();
-                try
-                {
-                    ElementPtr rtn =  CallFunctionImpl(machine, false, func, 1);
-                    machine.pop_context();
-                    return rtn;
-                }
-                catch (std::exception e)
-                {
-                    machine.pop_context();
-                    throw;
-                }
+                machine.push_data(data);
+                return FunctionCallHelper(machine, fd, 1);
             }
             break;
         case ELEMENT_TYPE_FILE_HANDLE:
@@ -356,7 +337,6 @@ namespace fsh
             }
             break;
         }
-        */
         return MakeBoolean(false);
     }
 

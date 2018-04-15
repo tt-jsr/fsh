@@ -161,6 +161,8 @@ namespace fsh
 
     std::string toString(Machine& machine, ElementPtr e)
     {
+        if (e.get() == nullptr)
+            return "null";
         switch(e->type())
         {
         case ELEMENT_TYPE_INTEGER:
