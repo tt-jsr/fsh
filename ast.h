@@ -155,6 +155,18 @@ namespace fsh
         std::unique_ptr<ASTExpressionList> attributes;
     };
 
+    class ASTTryCatch : public Ast
+    {
+    public:
+        ASTTryCatch(size_t l)
+        :Ast(l)
+        {}
+        ~ASTTryCatch() {}
+        void GenerateCode(Machine&, ByteCode&);
+        AstType type() {return AST_TRY_CATCH;}
+        std::unique_ptr<Ast> try_block;
+        std::unique_ptr<Ast> catch_block;
+    };
     class ASTFunctionDef : public Ast
     {
     public:

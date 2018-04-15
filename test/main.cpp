@@ -1,8 +1,8 @@
 #include <cppunit/TextTestRunner.h>
 #include <cppunit/TestResult.h>
 #include <iostream>
-#include "test1.h"
 #include "../common.h"
+#include "test1.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION(Test1);
 

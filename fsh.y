@@ -296,10 +296,10 @@ subscript_expression
 
 exception_expression
     : TRY '[' statement_list  CATCH statement_list  ']'  {
-        //trycatch_t *pException = new trycatch_t(lineno);
-        //pException->try_ = (inst_t *)$3;
-        //pException->catch_ = (inst_t *)$5;
-        //$$ = pException;
+        fsh::ASTTryCatch *pException = new fsh::ASTTryCatch(lineno);
+        pException->try_block.reset((ast_t *)$3);
+        pException->catch_block.reset((ast_t *)$5);
+        $$ = pException;
     }
     ;
 

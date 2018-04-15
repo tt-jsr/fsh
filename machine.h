@@ -11,6 +11,7 @@
 
 namespace fsh
 {
+    class Ast;
     typedef std::map<std::string, size_t> FieldMap_t;
     typedef std::map<std::string, FieldMap_t> RecordMap_t;
 
@@ -33,6 +34,9 @@ namespace fsh
         // Register a function.
         int64_t registerFunction(FunctionDefinition&);
         FunctionDefinition *getFunction(int64_t id);
+
+        int64_t storeBlock(ByteCode&);
+        ByteCode *getBlock(int64_t id);
 
         ByteCode& get_byte_code();
         // Store constant string in the string table
@@ -77,6 +81,8 @@ namespace fsh
         int64_t next_string_id;
         std::unordered_map<int64_t, FunctionDefinition> functions;
         int64_t next_function_id;
+        std::unordered_map<int64_t, ByteCode> blocks;
+        int64_t next_block_id;
         std::function<void (int)> unittest_callback;
         std::function<void (const char *)> unittest_exception;
     };

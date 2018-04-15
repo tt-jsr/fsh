@@ -112,7 +112,7 @@ namespace fsh
         if (sequence->IsString())
         {
             StringPtr p = sequence.cast<String>();
-            return p; 
+            return Part(start,end, p->value);
         }
         if (sequence->IsList())
         {
@@ -156,7 +156,7 @@ namespace fsh
     {
         StringPtr sp = GetString(machine, args, 0);
         if (!sp)
-            throw std::runtime_error("MakeRecord: First argument must be the name of the list");
+            throw std::runtime_error("DefineRecord: First argument must be the name of the list");
 
         if (machine.get_field_map(sp->value) != nullptr)
         {
@@ -169,7 +169,7 @@ namespace fsh
         {
             IdentifierPtr id = GetIdentifier(machine, args, idx);
             if (!id)
-                throw std::runtime_error("MakeRecord: Argument must be an identifier");
+                throw std::runtime_error("DefineRecord: Argument must be an identifier");
             machine.add_record_field(sp->value, id->value, idx-1);
         }
         return MakeNone();

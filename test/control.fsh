@@ -22,7 +22,6 @@ result = If [val < 10
 ];
 
 UnitTest[2];
-
 #########################################
 # Test While
 
@@ -30,8 +29,6 @@ count = 25;
 result = While [val > 5 and count > 0
     then
         count = count - 1;
-    else
-        False;
 ];
 
 UnitTest[3];
@@ -40,7 +37,7 @@ UnitTest[3];
 # Test For
 
 DefineRecord["fruit", apple, banana, kiwi, orange];
-lst = MakeRecord["fruit"];
+lst = CreateRecord["fruit"];
 
 count = 0;
 rtn = For[item in lst

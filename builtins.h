@@ -10,7 +10,7 @@ namespace fsh
     /* Print[arg1, srg2, ...];
      * Print accepts a variable number of arguments
      * Returns None
-     * Attributes: __addnl->Boolean
+     * Attributes: addnl->Boolean
      */
     ElementPtr Print(Machine&, std::vector<ElementPtr>&);
 

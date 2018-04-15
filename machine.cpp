@@ -16,6 +16,7 @@ namespace fsh
     Machine::Machine(void)
     :next_string_id(0)
     ,next_function_id(0)
+    ,next_block_id(0)
     {
         executionContext = MakeExecutionContext();
     }
@@ -46,7 +47,7 @@ namespace fsh
         }
         catch (std::exception& ex)
         {
-            if (unittest_exception)
+            if (unittest_exception != nullptr)
             {
                 unittest_exception(ex.what());
             }
@@ -129,7 +130,6 @@ namespace fsh
             IdentifierPtr id = e.cast<Identifier>();
             if (get_variable(id->value, rtn))
                 return rtn;
-            return MakeNone();
         }
         return e;
     }
@@ -337,6 +337,20 @@ namespace fsh
     {
         auto it = functions.find(id);
         if (it == functions.end())
+            return nullptr;
+        return &it->second;
+    }
+
+    int64_t Machine::storeBlock(ByteCode& bc)
+    {
+        blocks[++next_block_id] = bc;
+        return next_block_id;
+    }
+
+    ByteCode *Machine::getBlock(int64_t id)
+    {
+        auto it = blocks.find(id);
+        if (it == blocks.end())
             return nullptr;
         return &it->second;
     }

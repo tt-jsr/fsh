@@ -178,6 +178,20 @@ namespace fsh
     }
 
     /***************************************************/
+    void ASTTryCatch::GenerateCode(Machine& machine, ByteCode& bc)
+    {
+        ByteCode bctry;
+        ByteCode bccatch;
+        try_block->GenerateCode(machine, bctry);
+        int64_t try_id = machine.storeBlock(bctry);
+        catch_block->GenerateCode(machine, bccatch);
+        int64_t catch_id = machine.storeBlock(bccatch);
+        bc.code(BC_TRY);
+        bc.code(try_id);
+        bc.code(catch_id);
+    }
+
+    /***************************************************/
     void ASTFunctionCall::GenerateCode(Machine& machine, ByteCode& bc)
     {
         ASTExpressionList *el = (ASTExpressionList *)arguments.get();
@@ -199,8 +213,11 @@ namespace fsh
         bc.code(BC_PUSH_CONTEXT);
         if (attributes)
         {
-            attributes->GenerateCode(machine, bc);
-            bc.code(BC_POP);
+            for (auto& a : attributes->expressions)
+            {
+                a->GenerateCode(machine, bc);
+                bc.code(BC_POP);
+            }
         }
         bc.code(BC_CALL);
     }

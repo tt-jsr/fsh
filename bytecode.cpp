@@ -505,7 +505,7 @@ namespace fsh
                     if (fd->isBuiltIn)
                     {
                         ElementPtr rtn = fd->builtIn(machine, args);
-                        machine.push_data(rtn);
+                        machine.push_data(machine.resolve(rtn));
                     }
                     else
                     {
@@ -525,6 +525,9 @@ namespace fsh
                             fsh::Execute(machine, fd->shellFunction);
                             ++fd->shellFunction.ip;
                         }
+                        ElementPtr rtn = machine.pop_data();
+                        rtn = machine.resolve(rtn);
+                        machine.push_data(rtn);
                     }
                     machine.pop_context();
                 }
@@ -557,6 +560,36 @@ namespace fsh
             break;
         case BC_POP:
             machine.pop_data();
+            break;
+        case BC_TRY:
+            {
+                size_t try_id = bc[++bc.ip];
+                size_t catch_id = bc[++bc.ip];
+                ByteCode *bctry = machine.getBlock(try_id);
+                ByteCode *bccatch = machine.getBlock(catch_id);
+                assert(bctry);
+                assert(bccatch);
+                try
+                {
+                    bctry->ip = 0;
+                    while(bctry->ip < bctry->size())
+                    {
+                        fsh::Execute(machine, *bctry);
+                        ++bctry->ip;
+                    }
+                }
+                catch (std::exception& e)
+                {
+                    ElementPtr ex = MakeString(e.what());
+                    machine.store_variable("_exception", ex);
+                    bccatch->ip = 0;
+                    while(bccatch->ip < bccatch->size())
+                    {
+                        fsh::Execute(machine, *bccatch);
+                        ++bccatch->ip;
+                    }
+                }
+            }
             break;
         default:
             assert(false);

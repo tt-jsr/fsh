@@ -3,9 +3,9 @@ CDEBUG = -g -O0
 CPPFLAGS = $(CDEBUG) -I. -I.. 
 LDFLAGS=-g
 LIBS = -lstdc++ -lcppunit -lreadline
-DEPS=../common.h ../element.h ../execution_context.h ../machine.h ../instructions.h ../builtins.h ../fsh.y ../fsh.l
+DEPS=../common.h ../element.h ../execution_context.h ../machine.h ../ast.h ../builtins.h ../fsh.y ../fsh.l ../bytecode.h
 
-SRC	= test1.cpp main.cpp ../execution_context.cpp ../element.cpp ../machine.cpp ../instructions.cpp ../fsh.tab.cpp ../lex.yy.cpp ../err_cmd.cpp ../io_cmd.cpp ../builtins.cpp ../string_cmd.cpp ../list_cmd.cpp ../map_cmd.cpp ../shell.cpp
+SRC	= test1.cpp main.cpp ../execution_context.cpp ../element.cpp ../machine.cpp ../ast.cpp ../fsh.tab.cpp ../lex.yy.cpp ../err_cmd.cpp ../io_cmd.cpp ../builtins.cpp ../string_cmd.cpp ../list_cmd.cpp ../map_cmd.cpp ../shell.cpp ../bytecode.cpp
 
 OBJS	= $(SRC:.cpp=.o)
 
