@@ -493,7 +493,7 @@ namespace fsh
                 if (fd == nullptr)
                     throw std::runtime_error("Function not found");
                 
-                ElementPtr rtn = FunctionCallHelper(machine, fd, num);
+                ElementPtr rtn = fd->Call(machine, num);
                 machine.push_data(rtn);
             }
             break;

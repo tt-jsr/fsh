@@ -302,53 +302,6 @@ namespace fsh
         return MakeNone();
     }
 
-    ElementPtr FunctionCallHelper(Machine& machine, FunctionDefinition *fd, int64_t nArgsOnStack)
-    {
-        std::vector<ElementPtr> args;
-        while(nArgsOnStack)
-        {
-            ElementPtr e = machine.pop_data();
-            args.push_back(e);
-            --nArgsOnStack;
-        }
-        std::reverse(args.begin(), args.end());
-        ElementPtr rtn;
-        try {
-            if (fd->isBuiltIn)
-            {
-                rtn = fd->builtIn(machine, args);
-                rtn = machine.resolve(rtn);
-            }
-            else
-            {
-                size_t end = std::min(fd->arg_names.size(), args.size());
-                size_t idx = 0;
-                for (idx; idx < end; ++idx)
-                {
-                    machine.store_variable(fd->arg_names[idx], args[idx]);
-                }
-                for (; idx < fd->arg_names.size();++idx)
-                {
-                    machine.store_variable(fd->arg_names[idx], MakeNone());
-                }
-                fd->shellFunction.ip = 0;
-                while(fd->shellFunction.ip < fd->shellFunction.size())
-                {
-                    fsh::Execute(machine, fd->shellFunction);
-                    ++fd->shellFunction.ip;
-                }
-                rtn = machine.pop_data();
-                rtn = machine.resolve(rtn);
-            }
-            machine.pop_context();
-            return rtn;
-        }
-        catch (std::exception& e)
-        {
-            machine.pop_context();
-            throw;
-        }
-    }
     /*
     FunctionDefinitionPtr Bind(Machine& machine, std::vector<ElementPtr>& args)
     {
@@ -373,9 +326,8 @@ namespace fsh
 */
     void RegisterBuiltInImpl(Machine& machine, const std::string& name, std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> f)
     {
-        FunctionDefinition fd;
-        fd.builtIn = f;
-        fd.isBuiltIn = true;
+        BuiltInFunction *fd = new BuiltInFunction();
+        fd->builtIn = f;
         int64_t id = machine.registerFunction(fd);
         ElementPtr e = MakeFunctionDefId(id);
         machine.store_variable(name, e);
@@ -428,6 +380,68 @@ namespace fsh
         RegisterBuiltInImpl(machine, "Float", fsh::ToFloat);
         RegisterBuiltInImpl(machine, "ToString", fsh::ToString);
         //machine.register_builtin("Bind", fsh::Bind);
+    }
+
+    /*****************************************************************/
+
+    ElementPtr FunctionDefinition::Call(Machine& machine, int64_t nArgsOnStack)
+    {
+        std::vector<ElementPtr> args;
+        while(nArgsOnStack)
+        {
+            ElementPtr e = machine.pop_data();
+            args.push_back(e);
+            --nArgsOnStack;
+        }
+        std::reverse(args.begin(), args.end());
+        try {
+            ElementPtr rtn = CallImpl(machine, args);
+            rtn = machine.resolve(rtn);
+            machine.pop_context();
+            return rtn;
+        }
+        catch (std::exception& e)
+        {
+            machine.pop_context();
+            throw;
+        }
+    }
+
+    /*****************************************************************/
+
+    
+    ElementPtr BuiltInFunction::CallImpl(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        return builtIn(machine, args);
+    }
+
+    /*****************************************************************/
+
+    ElementPtr ShellFunction::CallImpl(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        size_t end = std::min(arg_names.size(), args.size());
+        size_t idx = 0;
+        for (idx; idx < end; ++idx)
+        {
+            machine.store_variable(arg_names[idx], args[idx]);
+        }
+        for (; idx < arg_names.size(); ++idx)
+        {
+            machine.store_variable(arg_names[idx], MakeNone());
+        }
+        shellFunction.ip = 0;
+        while(shellFunction.ip < shellFunction.size())
+        {
+            fsh::Execute(machine, shellFunction);
+            ++shellFunction.ip;
+        }
+        return machine.pop_data();
+    }
+
+    /*****************************************************************/
+
+    ElementPtr BoundFunction::CallImpl(Machine& machine, std::vector<ElementPtr>& args)
+    {
     }
 }
 

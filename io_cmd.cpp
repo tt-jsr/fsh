@@ -127,7 +127,7 @@ namespace fsh
             try
             {
                 machine.push_context();
-                ElementPtr r = FunctionCallHelper(machine, fd, 1);
+                ElementPtr r = fd->Call(machine, 1);
                 if (r->IsBoolean() && r.cast<Boolean>()->value == false)
                 {
                     fclose(fp);
@@ -189,7 +189,7 @@ namespace fsh
             try
             {
                 machine.push_context();
-                ElementPtr r = FunctionCallHelper(machine, fd, 1);
+                ElementPtr r = fd->Call(machine, 1);
                 if (r->IsBoolean() && r.cast<Boolean>()->value == false)
                 {
                     pclose(fp);
@@ -228,7 +228,7 @@ namespace fsh
                 FunctionDefinition *fd = machine.getFunction(fdid->funcid);
                 assert(fd);
                 machine.push_context();
-                return FunctionCallHelper(machine, fd, 0);
+                return fd->Call(machine, 0);
             }
             break;
         case ELEMENT_TYPE_FILE_HANDLE:
@@ -287,7 +287,7 @@ namespace fsh
                 assert(fd);
                 machine.push_context();
                 machine.push_data(data);
-                return FunctionCallHelper(machine, fd, 1);
+                return fd->Call(machine, 1);
             }
             break;
         case ELEMENT_TYPE_FILE_HANDLE:

@@ -327,7 +327,7 @@ namespace fsh
         return false;
     }
 
-    int64_t Machine::registerFunction(FunctionDefinition& fd)
+    int64_t Machine::registerFunction(FunctionDefinition * fd)
     {
         functions[++next_function_id] = fd;
         return next_function_id;
@@ -338,7 +338,7 @@ namespace fsh
         auto it = functions.find(id);
         if (it == functions.end())
             return nullptr;
-        return &it->second;
+        return it->second;
     }
 
     int64_t Machine::storeBlock(ByteCode& bc)

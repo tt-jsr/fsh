@@ -32,7 +32,7 @@ namespace fsh
 
         void register_unittest(std::function<void (int)>&);
         // Register a function.
-        int64_t registerFunction(FunctionDefinition&);
+        int64_t registerFunction(FunctionDefinition *);
         FunctionDefinition *getFunction(int64_t id);
 
         int64_t storeBlock(ByteCode&);
@@ -79,7 +79,7 @@ namespace fsh
         std::unordered_map<int64_t, std::string> string_table_by_id;
         std::unordered_map<std::string, int64_t> string_table_by_string;
         int64_t next_string_id;
-        std::unordered_map<int64_t, FunctionDefinition> functions;
+        std::unordered_map<int64_t, FunctionDefinition *> functions;
         int64_t next_function_id;
         std::unordered_map<int64_t, ByteCode> blocks;
         int64_t next_block_id;

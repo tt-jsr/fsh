@@ -163,8 +163,4 @@ namespace fsh
     BooleanPtr GetBoolean(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     FunctionDefIdPtr GetFunctionDefId(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     std::string toString(Machine& machine, ElementPtr e);
-
-    // When calling you must call machine::push_context() before calling. Do not call
-    // machine::pop_context when it returns
-    ElementPtr FunctionCallHelper(Machine&, FunctionDefinition *, int64_t numArgs);
 }

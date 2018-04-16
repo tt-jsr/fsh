@@ -4,6 +4,7 @@
 #include <cstring>
 #include <string>
 #include <stdexcept>
+#include <functional>
 #include "instrusive_ptr.h"
 #include "element.h"
 #include "bytecode.h"
@@ -157,13 +158,32 @@ namespace fsh
 
     struct FunctionDefinition
     {
-        FunctionDefinition()
-        :isBuiltIn(false)
-        {}
+        ElementPtr Call(Machine& machine, int64_t nArgsOnStack);
+        virtual ElementPtr CallImpl(Machine&, std::vector<ElementPtr>& args) = 0;
+    };
+    
+    struct BuiltInFunction : public FunctionDefinition
+    {
+        ElementPtr CallImpl(Machine&, std::vector<ElementPtr>& args);
+
+        std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> builtIn;
+    };
+
+    struct ShellFunction : public FunctionDefinition
+    {
+        ElementPtr CallImpl(Machine&, std::vector<ElementPtr>& args);
+
         std::vector<std::string> arg_names;
         ByteCode shellFunction;
-        std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> builtIn;
-        bool isBuiltIn;
+    };
+
+    struct BoundFunction : public FunctionDefinition
+    {
+        ElementPtr CallImpl(Machine&, std::vector<ElementPtr>& args);
+
+        FunctionDefinition *target;
+        std::vector<ElementPtr> args;
     };
 }
+
 #include "ast.h"

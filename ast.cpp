@@ -225,10 +225,9 @@ namespace fsh
     /***************************************************/
     void ASTFunctionDef::GenerateCode(Machine& machine, ByteCode& bc)
     {
-        FunctionDefinition fd;
-        functionBody->GenerateCode(machine, fd.shellFunction);
-        fd.arg_names = arg_names;
-        fd.isBuiltIn = false;
+        ShellFunction *fd = new ShellFunction();
+        functionBody->GenerateCode(machine, fd->shellFunction);
+        fd->arg_names = arg_names;
         int64_t id = machine.registerFunction(fd);
 
         bc.code(BC_LOAD_FUNCTION_DEF, id);
