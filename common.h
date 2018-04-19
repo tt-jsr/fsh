@@ -135,6 +135,8 @@ namespace fsh
         ,BC_POP
 
         ,BC_TRY
+
+        ,BC_BIND
     };
 
     enum AstType
@@ -154,6 +156,7 @@ namespace fsh
         ,AST_SYSTEM
         ,AST_SUBSCRIPT
         ,AST_TRY_CATCH
+        ,AST_BIND
     };
 
     struct FunctionDefinition
@@ -182,7 +185,8 @@ namespace fsh
         ElementPtr CallImpl(Machine&, std::vector<ElementPtr>& args);
 
         FunctionDefinition *target;
-        std::vector<ElementPtr> args;
+        std::vector<ElementPtr> bound_args;
+        ByteCode attributes;
     };
 }
 

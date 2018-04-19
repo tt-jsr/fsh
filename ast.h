@@ -167,6 +167,7 @@ namespace fsh
         std::unique_ptr<Ast> try_block;
         std::unique_ptr<Ast> catch_block;
     };
+
     class ASTFunctionDef : public Ast
     {
     public:
@@ -178,6 +179,20 @@ namespace fsh
         AstType type() {return AST_FUNCTION_DEF;}
         std::vector<std::string> arg_names;
         std::unique_ptr<Ast> functionBody;
+    };
+
+    class ASTBind : public Ast
+    {
+    public:
+        ASTBind(size_t l)
+        :Ast(l)
+        {}
+        ~ASTBind() {}
+        void GenerateCode(Machine&, ByteCode&);
+        AstType type() {return AST_BIND;}
+        std::unique_ptr<Ast> function;
+        std::unique_ptr<ASTExpressionList> arguments;
+        std::unique_ptr<ASTExpressionList> attributes;
     };
 
     class ASTSystem : public Ast

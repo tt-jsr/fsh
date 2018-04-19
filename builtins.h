@@ -65,7 +65,7 @@ namespace fsh
      *
      * Returns a function
      */
-    //FunctionDefinitionPtr Bind(Machine&, std::vector<ElementPtr>&);
+//    FunctionDefIdPtr Bind(Machine&, std::vector<ElementPtr>&);
 
     /********* List ****************************************/
     /* Returns an item from a list

@@ -72,19 +72,19 @@ foo["hello" : attr1->"cruel", attr2->"world"];
 
 ############################
 #test bind
-#foo = &[testno, arg1, arg2, arg3:
-    #UnitTest[testno];
-#];
-#
-#f2 = Bind[foo, _1, _2, _3, "world"];
-#f2[8, "hello", "cruel"];
-#
-#f2 = Bind[foo, 9, _2, _1, "world"];
-#f2["hello", "cruel"];
+foo = &[testno, arg1, arg2, arg3:
+    UnitTest[testno];
+];
+
+f2 = [_1, _2, _3, "world"]->foo;
+f2[8, "hello", "cruel"];
+
+f2 = [9, _2, _1, "world"] -> foo;
+f2["hello", "cruel"];
 #
 ####################################
 ## Test bind with an attribute
-#f2 = Bind[foo, 10, _2, _1, "world" : attr->"value"];
-#f2["hello", "cruel"];
+f2 = [ 10, _2, _1, "world" : attr->"value"] -> foo;
+f2["hello", "cruel"];
 
 

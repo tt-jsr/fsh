@@ -302,86 +302,6 @@ namespace fsh
         return MakeNone();
     }
 
-    /*
-    FunctionDefinitionPtr Bind(Machine& machine, std::vector<ElementPtr>& args)
-    {
-        ElementPtr e = GetElement(machine, args, 0);
-        if (!e->IsFunctionDefinition())
-            throw std::runtime_error("Bind requires function");
-
-        FunctionDefinitionPtr funcSrc = e.cast<FunctionDefinition>();
-        if (funcSrc->boundArgs.size())
-            throw std::runtime_error("Bind: Cannot bind to a bound function");
-        FunctionDefinitionPtr funcDst = MakeFunctionDefinition();
-        funcDst->builtInBody = funcSrc->builtInBody;
-        funcDst->functionBody = funcSrc->functionBody;
-        funcDst->isBuiltIn= funcSrc->isBuiltIn;
-        funcDst->arg_names = funcSrc->arg_names;
-        for (size_t idx = 1; idx < args.size(); ++idx)
-        {
-            funcDst->boundArgs.push_back(args[idx]);
-        }
-        return funcDst;
-    }
-*/
-    void RegisterBuiltInImpl(Machine& machine, const std::string& name, std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> f)
-    {
-        BuiltInFunction *fd = new BuiltInFunction();
-        fd->builtIn = f;
-        int64_t id = machine.registerFunction(fd);
-        ElementPtr e = MakeFunctionDefId(id);
-        machine.store_variable(name, e);
-    }
-
-    void RegisterBuiltIns(Machine& machine)
-    {
-        // IO
-        RegisterBuiltInImpl(machine, "Print", fsh::Print);
-        RegisterBuiltInImpl(machine, "ReadFile", fsh::ReadFile);
-        RegisterBuiltInImpl(machine, "OpenFile", fsh::OpenFile);
-        RegisterBuiltInImpl(machine, "PipeLine", fsh::PipeLine);
-        RegisterBuiltInImpl(machine, "OpenProcess", fsh::OpenProcess);
-        RegisterBuiltInImpl(machine, "ReadProcess", fsh::ReadProcess);
-
-        // String
-        RegisterBuiltInImpl(machine, "Trim", fsh::Trim);
-        RegisterBuiltInImpl(machine, "TrimLeft", fsh::TrimLeft);
-        RegisterBuiltInImpl(machine, "TrimRight", fsh::TrimRight);
-        RegisterBuiltInImpl(machine, "Split", fsh::Split);
-        RegisterBuiltInImpl(machine, "Strcmp", fsh::Strcmp);
-        RegisterBuiltInImpl(machine, "RegMatch", fsh::RegMatch);
-        RegisterBuiltInImpl(machine, "RegSearch", fsh::RegSearch);
-        RegisterBuiltInImpl(machine, "Find", fsh::Find);
-        RegisterBuiltInImpl(machine, "Format", fsh::Format);
-        RegisterBuiltInImpl(machine, "SubString", fsh::SubString);
-
-        // List
-        RegisterBuiltInImpl(machine, "Part", fsh::Part);
-        RegisterBuiltInImpl(machine, "Subscript", fsh::Subscript);
-        RegisterBuiltInImpl(machine, "DefineRecord", fsh::DefineRecord);
-        RegisterBuiltInImpl(machine, "CreateRecord", fsh::CreateRecord);
-        RegisterBuiltInImpl(machine, "CreateList", fsh::CreateList);
-        RegisterBuiltInImpl(machine, "Len", fsh::Len);
-        RegisterBuiltInImpl(machine, "Append", fsh::Append);
-        RegisterBuiltInImpl(machine, "SetRecordType", fsh::SetRecordType);
-
-        // Map
-        RegisterBuiltInImpl(machine, "CreateMap", fsh::CreateMap);
-        RegisterBuiltInImpl(machine, "Insert", fsh::Insert);
-        RegisterBuiltInImpl(machine, "Delete", fsh::Delete);
-        RegisterBuiltInImpl(machine, "Lookup", fsh::Lookup);
-
-        // Misc
-        RegisterBuiltInImpl(machine, "IsError", fsh::IsError);
-        RegisterBuiltInImpl(machine, "ErrorString", fsh::ErrorString);
-        RegisterBuiltInImpl(machine, "Throw", fsh::Throw);
-        RegisterBuiltInImpl(machine, "UnitTest", fsh::UnitTest);
-        RegisterBuiltInImpl(machine, "Int", fsh::ToInt);
-        RegisterBuiltInImpl(machine, "Float", fsh::ToFloat);
-        RegisterBuiltInImpl(machine, "ToString", fsh::ToString);
-        //machine.register_builtin("Bind", fsh::Bind);
-    }
-
     /*****************************************************************/
 
     ElementPtr FunctionDefinition::Call(Machine& machine, int64_t nArgsOnStack)
@@ -442,6 +362,91 @@ namespace fsh
 
     ElementPtr BoundFunction::CallImpl(Machine& machine, std::vector<ElementPtr>& args)
     {
+        std::vector<ElementPtr> target_args;
+        std::reverse(bound_args.begin(), bound_args.end());
+        for (ElementPtr& ba : bound_args)
+        {
+            if (ba->IsIdentifier())
+            {
+                IdentifierPtr id = ba.cast<Identifier>();
+                if (id->value[0] == '_')
+                {
+                    size_t dst = strtol(&id->value[1], nullptr, 10);
+                    if (dst-1 >= args.size())
+                        throw std::runtime_error("Bind: Invalie position arguments");
+                    target_args.push_back(args[dst-1]);
+                }
+                else
+                {
+                    throw std::runtime_error("Bind: invalid position argument");
+                }
+            }
+            else
+            {
+                target_args.push_back(ba);
+            }
+        }
+        
+        return target->CallImpl(machine, target_args);
     }
+
+    void RegisterBuiltInImpl(Machine& machine, const std::string& name, std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> f)
+    {
+        BuiltInFunction *fd = new BuiltInFunction();
+        fd->builtIn = f;
+        int64_t id = machine.registerFunction(fd);
+        ElementPtr e = MakeFunctionDefId(id);
+        machine.store_variable(name, e);
+    }
+
+    void RegisterBuiltIns(Machine& machine)
+    {
+        // IO
+        RegisterBuiltInImpl(machine, "Print", fsh::Print);
+        RegisterBuiltInImpl(machine, "ReadFile", fsh::ReadFile);
+        RegisterBuiltInImpl(machine, "OpenFile", fsh::OpenFile);
+        RegisterBuiltInImpl(machine, "PipeLine", fsh::PipeLine);
+        RegisterBuiltInImpl(machine, "OpenProcess", fsh::OpenProcess);
+        RegisterBuiltInImpl(machine, "ReadProcess", fsh::ReadProcess);
+
+        // String
+        RegisterBuiltInImpl(machine, "Trim", fsh::Trim);
+        RegisterBuiltInImpl(machine, "TrimLeft", fsh::TrimLeft);
+        RegisterBuiltInImpl(machine, "TrimRight", fsh::TrimRight);
+        RegisterBuiltInImpl(machine, "Split", fsh::Split);
+        RegisterBuiltInImpl(machine, "Strcmp", fsh::Strcmp);
+        RegisterBuiltInImpl(machine, "RegMatch", fsh::RegMatch);
+        RegisterBuiltInImpl(machine, "RegSearch", fsh::RegSearch);
+        RegisterBuiltInImpl(machine, "Find", fsh::Find);
+        RegisterBuiltInImpl(machine, "Format", fsh::Format);
+        RegisterBuiltInImpl(machine, "SubString", fsh::SubString);
+
+        // List
+        RegisterBuiltInImpl(machine, "Part", fsh::Part);
+        RegisterBuiltInImpl(machine, "Subscript", fsh::Subscript);
+        RegisterBuiltInImpl(machine, "DefineRecord", fsh::DefineRecord);
+        RegisterBuiltInImpl(machine, "CreateRecord", fsh::CreateRecord);
+        RegisterBuiltInImpl(machine, "CreateList", fsh::CreateList);
+        RegisterBuiltInImpl(machine, "Len", fsh::Len);
+        RegisterBuiltInImpl(machine, "Append", fsh::Append);
+        RegisterBuiltInImpl(machine, "SetRecordType", fsh::SetRecordType);
+
+        // Map
+        RegisterBuiltInImpl(machine, "CreateMap", fsh::CreateMap);
+        RegisterBuiltInImpl(machine, "Insert", fsh::Insert);
+        RegisterBuiltInImpl(machine, "Delete", fsh::Delete);
+        RegisterBuiltInImpl(machine, "Lookup", fsh::Lookup);
+
+        // Misc
+        RegisterBuiltInImpl(machine, "IsError", fsh::IsError);
+        RegisterBuiltInImpl(machine, "ErrorString", fsh::ErrorString);
+        RegisterBuiltInImpl(machine, "Throw", fsh::Throw);
+        RegisterBuiltInImpl(machine, "UnitTest", fsh::UnitTest);
+        RegisterBuiltInImpl(machine, "Int", fsh::ToInt);
+        RegisterBuiltInImpl(machine, "Float", fsh::ToFloat);
+        RegisterBuiltInImpl(machine, "ToString", fsh::ToString);
+        //machine.register_builtin("Bind", fsh::Bind);
+    }
+
 }
 

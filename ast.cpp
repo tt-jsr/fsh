@@ -35,14 +35,16 @@ namespace fsh
             break;
         case CTYPE_STRING:
             {
-                int64_t id = machine.string_table_add(svalue);
-                bc.code(BC_LOAD_STRING, id);
+                std::string *ps = new std::string();
+                *ps = svalue;
+                bc.code(BC_LOAD_STRING, (int64_t)ps);
             }
             break;
         case CTYPE_IDENTIFIER:
             {
-                int64_t id = machine.string_table_add(svalue);
-                bc.code(BC_LOAD_IDENTIFIER, id);
+                std::string *ps = new std::string();
+                *ps = svalue;
+                bc.code(BC_LOAD_IDENTIFIER, (int64_t)ps);
             }
             break;
         case CTYPE_NONE:
@@ -222,6 +224,39 @@ namespace fsh
         bc.code(BC_CALL);
     }
 
+    /***************************************************/
+    void ASTBind::GenerateCode(Machine& machine, ByteCode& bc)
+    {
+        ASTExpressionList *el = (ASTExpressionList *)arguments.get();
+        if (arguments)
+        {
+            for (auto& a : arguments->expressions)
+            {
+                a->GenerateCode(machine, bc);
+                bc.code(BC_RESOLVE);
+            }
+            bc.code(BC_LOAD_INTEGER, el->expressions.size());
+        }
+        else
+        {
+            bc.code(BC_LOAD_INTEGER, 0);
+        }
+        function->GenerateCode(machine, bc);
+        bc.code(BC_RESOLVE);
+        bc.code(BC_PUSH_CONTEXT);
+        ByteCode *pAttr = nullptr;
+        if (attributes)
+        {
+            pAttr = new ByteCode();
+            for (auto& a : attributes->expressions)
+            {
+                a->GenerateCode(machine, *pAttr);
+                pAttr->code(BC_POP);
+            }
+        }
+        bc.code(BC_BIND);
+        bc.code((int64_t)pAttr);
+    }
     /***************************************************/
     void ASTFunctionDef::GenerateCode(Machine& machine, ByteCode& bc)
     {

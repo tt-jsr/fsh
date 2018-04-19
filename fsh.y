@@ -122,6 +122,7 @@ expression
     | math_expression           {$$ = $1;}
     | relational_expression     {$$ = $1;}
     | function_call             {$$ = $1;}
+    | bind_call                 {$$ = $1;}
     | function_definition       {$$ = $1;}
     | selection_expression      {$$ = $1;}
     | iteration_expression      {$$ = $1;}
@@ -366,6 +367,28 @@ function_definition
         fsh::ASTFunctionDef *pDef = new fsh::ASTFunctionDef(lineno);
         pDef->functionBody.reset((fsh::Ast *)$3);
         $$ = pDef;
+    }
+    ;
+
+bind_call
+    : '[' call_expression_list ']' RIGHT_ARROW primary_expression {
+        fsh::ASTBind *pBind = new fsh::ASTBind(lineno);
+        pBind->arguments.reset((fsh::ASTExpressionList *)$2);
+        pBind->function.reset((ast_t *)$5);
+        $$ = pBind;
+    }
+    | '[' call_expression_list ':' attribute_list ']' RIGHT_ARROW  primary_expression{
+        fsh::ASTBind *pBind = new fsh::ASTBind(lineno);
+        pBind->arguments.reset((fsh::ASTExpressionList *)$2);
+        pBind->attributes.reset((fsh::ASTExpressionList *)$4);
+        pBind->function.reset((ast_t *)$7);
+        $$ = pBind;
+    }
+    | '[' attribute_list ']' RIGHT_ARROW primary_expression{
+        fsh::ASTBind *pBind = new fsh::ASTBind(lineno);
+        pBind->attributes.reset((fsh::ASTExpressionList *)$2);
+        pBind->function.reset((ast_t *)$5);
+        $$ = pBind;
     }
     ;
 

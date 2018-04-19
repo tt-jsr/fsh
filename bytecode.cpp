@@ -369,17 +369,17 @@ namespace fsh
         case BC_LOAD_STRING:
             {
                 ++bc.ip;
-                std::string s = machine.string_table_get(bc[bc.ip]);
-                machine.push_data(MakeString(s));
-                LOG << "BC_LOAD_STRING " << s << std::endl;
+                std::string *ps = (std::string *)bc[bc.ip];
+                machine.push_data(MakeString(*ps));
+                LOG << "BC_LOAD_STRING " << *ps << std::endl;
             }
             break;
         case BC_LOAD_IDENTIFIER:
             {
                 ++bc.ip;
-                std::string s = machine.string_table_get(bc[bc.ip]);
-                machine.push_data(MakeIdentifier(s));
-                LOG << "BC_LOAD_IDENTIFIER " << s << std::endl;
+                std::string *ps = (std::string *)bc[bc.ip];
+                machine.push_data(MakeIdentifier(*ps));
+                LOG << "BC_LOAD_IDENTIFIER " << *ps << std::endl;
             }
             break;
         case BC_RESOLVE:
@@ -495,6 +495,42 @@ namespace fsh
                 
                 ElementPtr rtn = fd->Call(machine, num);
                 machine.push_data(rtn);
+            }
+            break;
+        case BC_BIND:
+            {
+                ElementPtr callId = machine.pop_data();
+                if (callId->type() != ELEMENT_TYPE_FUNCTION_DEF_ID)
+                    throw std::runtime_error("Function call requires name/id");
+
+                // Target function id
+                int64_t id = callId.cast<FunctionDefId>()->funcid;
+                LOG << "BC_BIND " << id << std::endl;
+
+                ElementPtr numargs = machine.pop_data();
+                assert (numargs->type() == ELEMENT_TYPE_INTEGER);
+
+                // Number of args that was pushed
+                int64_t num = numargs.cast<Integer>()->value;
+
+                FunctionDefinition *fd = machine.getFunction(id);
+                if (fd == nullptr)
+                    throw std::runtime_error("Function not found");
+
+                BoundFunction *pbf = new BoundFunction();
+                while (num)
+                {
+                    ElementPtr e = machine.pop_data();
+                    pbf->bound_args.push_back(e);
+                    --num;
+                }
+
+                pbf->target = fd;
+                ++bc.ip;
+                if (bc[bc.ip])
+                    pbf->attributes = *(ByteCode *)bc[bc.ip];
+                id = machine.registerFunction(pbf);
+                machine.push_data(MakeFunctionDefId(id));
             }
             break;
         case BC_LOAD_FUNCTION_DEF:
