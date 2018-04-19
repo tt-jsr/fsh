@@ -104,20 +104,47 @@ namespace fsh
         throw std::runtime_error("Insert: ust be a string, list or map");
     }
 
-    ElementPtr Delete(Machine& machine, std::vector<ElementPtr>& args)
+    ElementPtr MapDelete(Machine& machine, std::vector<ElementPtr>& args)
     {
         MapPtr mp = GetMap(machine, args, 0);
         if (!mp)
         {
-            throw std::runtime_error("Delete: required map as first arg");
+            throw std::runtime_error("MapDelete: required map as first arg");
         }
         ElementPtr key = GetElement(machine, args, 1);
         if (!key)
-            throw std::runtime_error("Error Delete[map, key]");
+            throw std::runtime_error("MapDelete[map, key]");
 
         mp->map.erase(key);
         return MakeNone();
     }
 
+    ListPtr ListDelete(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ListPtr lst = GetList(machine, args, 0);
+        if (!lst)
+            throw std::runtime_error("Delete: required list as first arg");
+        IntegerPtr ip  = GetInteger(machine, args, 1);
+        if (!ip)
+            throw std::runtime_error("ListDelete requires integer position");
+
+        if (ip->value >= lst->items.size())
+            throw std::runtime_error("ListDelete: index out of bounds");
+        auto it = lst->items.begin() + ip->value;
+        lst->items.erase(it);
+        return lst;
+    }
+
+    ElementPtr Delete(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr e = GetElement(machine, args, 0);
+        if (!e)
+            throw std::runtime_error("Delete: map or list must be specified");
+        if(e->IsMap())
+            return MapDelete(machine, args);
+        if(e->IsList())
+            return ListDelete(machine, args);
+        throw std::runtime_error("Delete invalid type for delete");
+    }
 }
 

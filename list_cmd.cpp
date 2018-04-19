@@ -244,7 +244,7 @@ namespace fsh
     }
 
 
-    LstPtr Set(Machine& machine, std::vector<ElementPtr>& args)
+    ListPtr Set(Machine& machine, std::vector<ElementPtr>& args)
     {
         ListPtr lst = GetList(machine, args, 0);
         if (!lst)

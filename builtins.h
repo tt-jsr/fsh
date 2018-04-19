@@ -35,37 +35,41 @@ namespace fsh
     StringPtr ToString(Machine&, std::vector<ElementPtr>&);
 
     /*
-     * Bind[f, arg1, arg2, ...];
+     * Bind arguments
+     * [arg1, arg2, ...] -> f
      * Binds arguments to the function f. Returns a new function.
      * The arguments to bind define the arguments to the target function, (the function
      * being bound to). Position arguments _1, _2, ... define which arguments will be 
      * taken from the caller
      * Examples:
-     *     foo = Bind[f, "hello", _1, _2];
+     *     f = &[arg1, arg2, arg3:
+     *          Print[arg1, arg2, arg3];
+     *     ];
+     *
+     *     foo = ["hello", _1, _2] -> f;
      *     foo Is a function that takes two arguments represented by_1, _2.
      *     f will be called as f["hello", _1, _2];
      *
-     *     foo = Bind[f, _2, _1];
+     *     foo = [_2, _1]->f;
      *     foo Is a function that takes two arguments represented by_1, _2.
      *     f will be called as f[_2, __1];
      *     Notice the arguments have been swapped.
      *
-     *     foo = Bind[f, "hello", "world"];
+     *     foo = ["hello", "world"] -> f;
      *     foo Is a function that takes no arguments.
      *     f will be called as f["hello", "world"];
      *
-     *     foo = Bind[f, "hello", _1, "world"];
+     *     foo = ["hello", _1, "world"] -> f;
      *     foo Is a function that takes one argument.
      *     f will be called as f["hello", _1, "world"];
      *
      *   You can also bind a function attribute
-     *     foo = Bind[f, _1, _2, _3, attr->value];
+     *     foo = [_1, _2, _3, attr->value] -> f;
      *     foo Is a function that takes three arguments.
      *     f will be called as f[_1, _2, _3, attr->value];
      *
      * Returns a function
      */
-//    FunctionDefIdPtr Bind(Machine&, std::vector<ElementPtr>&);
 
     ElementPtr Copy(Machine&, std::vector<ElementPtr>&);
 
@@ -96,17 +100,29 @@ namespace fsh
     /* Returns number of elements in a String, List or Map */
     IntegerPtr Len(Machine&, std::vector<ElementPtr>&);
 
-    // Append an item to a list. Returns the index of the new item
+    // Append an item to a list or string. Returns the index of the new item
     IntegerPtr Append(Machine&, std::vector<ElementPtr>&);
 
     // Set an item
     // Set[list, index, item];
+    // // Modifies and returns the existing list
     ListPtr Set(Machine&, std::vector<ElementPtr>&);
     ListPtr SetRecordType(Machine&, std::vector<ElementPtr>&);
 
     /******** Map  *********************************/
     MapPtr CreateMap(Machine&, std::vector<ElementPtr>&);
+
+    // Lookup[map, key];
     ElementPtr Lookup(Machine&, std::vector<ElementPtr>&);
+
+    // Insert an item into a map, list, or string
+    // Modifies and returns the existing map, list, or string.
+    // map:
+    //      Insert[map, key, value];
+    // list:
+    //      Insert[list, position, value1, value2...];
+    // string:
+    //      Insert[string, position, string];
     ElementPtr Insert(Machine&, std::vector<ElementPtr>&);
     ElementPtr Delete(Machine&, std::vector<ElementPtr>&);
 
@@ -123,16 +139,16 @@ namespace fsh
     FileHandlePtr OpenFile(Machine&, std::vector<ElementPtr>&);
 
     // OpenProcess["filename", "r"];
-    // Attributes: __stripnl->Boolean
+    // Attributes: stripnl->Boolean
     //                When reading, strring the newline
-    //             __addnl->Boolean
+    //             addnl->Boolean
     //                When writing, add a newline
     FileHandlePtr OpenProcess(Machine&, std::vector<ElementPtr>&);
     ElementPtr PipeLine(Machine&, std::vector<ElementPtr>&);
 
     // ReadFile[func, "filename"];
     //      func is defined as &[line : body...];
-    //      __stripnl=True to strip the ending newline
+    //      stripnl->True to strip the ending newline
     ElementPtr ReadFile(Machine&, std::vector<ElementPtr>&);
 
     //ReadProcess[func, "processname", "r" or "w"];
