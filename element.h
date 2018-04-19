@@ -226,7 +226,7 @@ namespace fsh
     StringPtr MakeString(const std::string& s);
     IntegerPtr MakeInteger(int64_t);
     FloatPtr MakeFloat(double);
-    ListPtr MakeList(const char *);
+    ListPtr MakeList(const char *t = "_list_");
     MapPtr MakeMap();
     IdentifierPtr MakeIdentifier(const std::string&);
     NonePtr MakeNone();

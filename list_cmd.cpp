@@ -243,6 +243,25 @@ namespace fsh
         return MakeInteger(lst->items.size()-1);
     }
 
+
+    LstPtr Set(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ListPtr lst = GetList(machine, args, 0);
+        if (!lst)
+            throw std::runtime_error("Set: argument must be a list");
+
+        IntegerPtr ip = GetInteger(machine, args, 1);
+        if (!ip)
+            throw std::runtime_error("Set: argument 2 must be an integer");
+
+        auto itSrc = args.cbegin() + 2;
+        auto itDst = lst->items.begin() + ip->value;
+
+        lst->items.insert(itDst, args[2]);
+
+        return lst;
+    }
+
     ListPtr SetRecordType(Machine& machine, std::vector<ElementPtr>& args)
     {
         ListPtr lp = GetList(machine, args, 0);

@@ -390,6 +390,34 @@ namespace fsh
         return target->CallImpl(machine, target_args);
     }
 
+    ElementPtr Copy(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr e = GetElement(machine, args, 0);
+        if (!e)
+            throw std::runtime_error("Copy requires argument");
+        if (e->IsMap())
+        {
+            MapPtr src = e.cast<Map>();
+            MapPtr m = MakeMap();
+            m->map = src->map;
+            return m;
+        }
+        if (e->IsList())
+        {
+            ListPtr src = e.cast<List>();
+            ListPtr rtn = MakeList();
+            rtn->items = src->items;
+            return rtn;
+        }
+        if (e->IsString())
+        {
+            StringPtr src = e.cast<String>();
+            StringPtr rtn = MakeString(src->value);
+            return rtn;
+        }
+        return e;
+    }
+
     void RegisterBuiltInImpl(Machine& machine, const std::string& name, std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> f)
     {
         BuiltInFunction *fd = new BuiltInFunction();
@@ -429,6 +457,7 @@ namespace fsh
         RegisterBuiltInImpl(machine, "CreateList", fsh::CreateList);
         RegisterBuiltInImpl(machine, "Len", fsh::Len);
         RegisterBuiltInImpl(machine, "Append", fsh::Append);
+        RegisterBuiltInImpl(machine, "Set", fsh::Set);
         RegisterBuiltInImpl(machine, "SetRecordType", fsh::SetRecordType);
 
         // Map
@@ -445,7 +474,7 @@ namespace fsh
         RegisterBuiltInImpl(machine, "Int", fsh::ToInt);
         RegisterBuiltInImpl(machine, "Float", fsh::ToFloat);
         RegisterBuiltInImpl(machine, "ToString", fsh::ToString);
-        //machine.register_builtin("Bind", fsh::Bind);
+        RegisterBuiltInImpl(machine, "Copy", fsh::Copy);
     }
 
 }

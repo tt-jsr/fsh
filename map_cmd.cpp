@@ -33,22 +33,75 @@ namespace fsh
         return it->second;
     }
 
-    ElementPtr Insert(Machine& machine, std::vector<ElementPtr>& args)
+    ElementPtr MapInsert(Machine& machine, std::vector<ElementPtr>& args)
     {
         MapPtr mp = GetMap(machine, args, 0);
         if (!mp)
         {
-            throw std::runtime_error("Insert: required map as first arg");
+            throw std::runtime_error("MapInsert: required map as first arg");
         }
         ElementPtr key = GetElement(machine, args, 1);
         if (!key)
-            throw std::runtime_error("Error Insert[map, key, value]");
+            throw std::runtime_error("Error MapInsert[map, key, value]");
 
         ElementPtr value = GetElement(machine, args, 2);
         if (!value)
-            throw std::runtime_error("Error Insert[map, key, value]");
+            throw std::runtime_error("Error MapInsert[map, key, value]");
         mp->map[key] = value;
-        return MakeNone();
+        return mp;
+    }
+
+    ElementPtr ListInsert(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ListPtr lst = GetList(machine, args, 0);
+        if (!lst)
+            throw std::runtime_error("ListInsert: argument must be a list");
+
+        IntegerPtr ip = GetInteger(machine, args, 1);
+        if (!ip)
+            throw std::runtime_error("ListInsert: argument 2 must be an integer");
+        if (ip->value >= lst->items.size())
+            throw std::runtime_error("ListInsert: position out of bounds");
+
+        auto itSrc = args.begin() + 2;
+        auto itDst = lst->items.begin() + ip->value;
+
+        lst->items.insert(itDst, itSrc, args.end());
+
+        return lst;
+    }
+
+    ElementPtr StringInsert(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        StringPtr lst = GetString(machine, args, 0);
+        if (!lst)
+            throw std::runtime_error("StringInsert: argument must be a string");
+
+        IntegerPtr ip = GetInteger(machine, args, 1);
+        if (!ip)
+            throw std::runtime_error("StringInsert: argument 2 must be an integer");
+        if (ip->value >= lst->value.size())
+            throw std::runtime_error("StringInsert: position out of bounds");
+
+        StringPtr s = GetString(machine, args, 2);
+        if (!s)
+            throw std::runtime_error("StringInsert: argument 3 must be a string");
+
+        lst->value.insert(ip->value, s->value);
+
+        return lst;
+    }
+
+    ElementPtr Insert(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr e = GetElement(machine, args, 0);
+        if (e->IsMap())
+            return MapInsert(machine, args);
+        if (e->IsList())
+            return ListInsert(machine, args);
+        if (e->IsString())
+            return StringInsert(machine, args);
+        throw std::runtime_error("Insert: ust be a string, list or map");
     }
 
     ElementPtr Delete(Machine& machine, std::vector<ElementPtr>& args)

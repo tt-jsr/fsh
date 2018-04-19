@@ -67,6 +67,8 @@ namespace fsh
      */
 //    FunctionDefIdPtr Bind(Machine&, std::vector<ElementPtr>&);
 
+    ElementPtr Copy(Machine&, std::vector<ElementPtr>&);
+
     /********* List ****************************************/
     /* Returns an item from a list
      * Throws exception 
@@ -94,7 +96,12 @@ namespace fsh
     /* Returns number of elements in a String, List or Map */
     IntegerPtr Len(Machine&, std::vector<ElementPtr>&);
 
+    // Append an item to a list. Returns the index of the new item
     IntegerPtr Append(Machine&, std::vector<ElementPtr>&);
+
+    // Set an item
+    // Set[list, index, item];
+    ListPtr Set(Machine&, std::vector<ElementPtr>&);
     ListPtr SetRecordType(Machine&, std::vector<ElementPtr>&);
 
     /******** Map  *********************************/
