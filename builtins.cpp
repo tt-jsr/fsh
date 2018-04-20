@@ -458,6 +458,8 @@ namespace fsh
         RegisterBuiltInImpl(machine, "Len", fsh::Len);
         RegisterBuiltInImpl(machine, "Append", fsh::Append);
         RegisterBuiltInImpl(machine, "Set", fsh::Set);
+        RegisterBuiltInImpl(machine, "Push", fsh::Push);
+        RegisterBuiltInImpl(machine, "Pop", fsh::Pop);
         RegisterBuiltInImpl(machine, "SetRecordType", fsh::SetRecordType);
 
         // Map

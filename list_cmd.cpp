@@ -244,6 +244,36 @@ namespace fsh
     }
 
 
+    ListPtr Push(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ListPtr lst = GetList(machine, args, 0);
+        if (!lst)
+            throw std::runtime_error("Push: argument must be a list");
+
+        ElementPtr e = GetElement(machine, args, 1);
+        if (!e)
+            throw std::runtime_error("Push: Requires something to push");
+
+        lst->items.push_back(e);
+
+        return lst;
+    }
+
+    ElementPtr Pop(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ListPtr lst = GetList(machine, args, 0);
+        if (!lst)
+            throw std::runtime_error("Pop: argument must be a list");
+
+        if (lst->items.size() == 0)
+            throw std::runtime_error("Pop: empty list");
+
+        ElementPtr e = lst->items.back();
+        lst->items.pop_back();
+
+        return e;
+    }
+
     ListPtr Set(Machine& machine, std::vector<ElementPtr>& args)
     {
         ListPtr lst = GetList(machine, args, 0);

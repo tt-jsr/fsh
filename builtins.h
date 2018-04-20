@@ -107,6 +107,8 @@ namespace fsh
     // Set[list, index, item];
     // // Modifies and returns the existing list
     ListPtr Set(Machine&, std::vector<ElementPtr>&);
+    ListPtr Push(Machine&, std::vector<ElementPtr>&);
+    ElementPtr Pop(Machine&, std::vector<ElementPtr>&);
     ListPtr SetRecordType(Machine&, std::vector<ElementPtr>&);
 
     /******** Map  *********************************/
