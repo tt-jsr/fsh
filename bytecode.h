@@ -14,7 +14,7 @@ namespace fsh
         size_t size() {return byte_codes.size();}
         void clear() {byte_codes.clear();}
 
-        int64_t& operator[](size_t idx)
+        uintptr_t& operator[](size_t idx)
         {
             return byte_codes[idx];
         }
@@ -24,27 +24,27 @@ namespace fsh
             return size()-1;
         }
 
-        size_t jump_forward(int64_t op)
+        size_t jump_forward(uintptr_t op)
         {
             byte_codes.push_back(op);
             byte_codes.push_back(0);
             return byte_codes.size() - 1;
         }
 
-        size_t jump_to(int64_t op, int64_t loc)
+        size_t jump_to(uintptr_t op, uintptr_t loc)
         {
             byte_codes.push_back(op);
             byte_codes.push_back(loc);
             return byte_codes.size() - 1;
         }
 
-        size_t code(int64_t n)
+        size_t code(uintptr_t n)
         {
             byte_codes.push_back(n);
             return byte_codes.size() - 1;
         }
 
-        size_t code(int64_t n, int64_t n2)
+        size_t code(uintptr_t n, uintptr_t n2)
         {
             byte_codes.push_back(n);
             byte_codes.push_back(n2);
@@ -56,7 +56,7 @@ namespace fsh
             byte_codes[idx] = byte_codes.size()-1;
         }
 
-        std::vector<int64_t> byte_codes;
+        std::vector<uintptr_t> byte_codes;
         size_t ip;
     };
 

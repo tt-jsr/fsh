@@ -31,20 +31,20 @@ namespace fsh
             bc.code(BC_LOAD_INTEGER, ivalue);
             break;
         case CTYPE_FLOAT:
-            bc.code(BC_LOAD_FLOAT, *(int64_t *)&dvalue);
+            bc.code(BC_LOAD_FLOAT, *(uintptr_t *)&dvalue);
             break;
         case CTYPE_STRING:
             {
                 std::string *ps = new std::string();
                 *ps = svalue;
-                bc.code(BC_LOAD_STRING, (int64_t)ps);
+                bc.code(BC_LOAD_STRING, (uintptr_t)ps);
             }
             break;
         case CTYPE_IDENTIFIER:
             {
                 std::string *ps = new std::string();
                 *ps = svalue;
-                bc.code(BC_LOAD_IDENTIFIER, (int64_t)ps);
+                bc.code(BC_LOAD_IDENTIFIER, (uintptr_t)ps);
             }
             break;
         case CTYPE_NONE:
@@ -62,7 +62,7 @@ namespace fsh
         }
     }
 
-    ASTConstant *ASTMakeIntegerConstant(size_t lineno, int64_t n)
+    ASTConstant *ASTMakeIntegerConstant(size_t lineno, uintptr_t n)
     {
         ASTConstant *p = new ASTConstant(lineno);
         p->ctype = ASTConstant::CTYPE_INTEGER;
@@ -152,29 +152,28 @@ namespace fsh
         bc.set_jump_location(jump_end);
     }
 
-
     /*****************************************************/
     void ASTFor::GenerateCode(Machine& machine, ByteCode& bc)
     {
-        // Allocate a spot for the  list iterator
+        // Allocate a spot for the iterator key
         size_t iterator = bc.code(BC_DATA, 0);
 
         size_t begin = bc.current_location();
 
-        // The list
+        // The container
         list->GenerateCode(machine, bc);
+
         // Resolve the TOS so the list gets put on the stack
         bc.code(BC_RESOLVE);
-        bc.code(BC_LOAD_INTEGER_LOCATION, iterator);
-        bc.code(BC_LOAD_LIST_ITEM);
+        bc.code(BC_INCREMENT_ITERATOR, iterator);
+        bc.code(BC_LOAD_CONTAINER_ITEM);
         size_t jump_end = bc.jump_forward(BC_JUMP_GP_FALSE);
 
-        // The variable name to store the current list item
+        // The variable name to store the current container item
         identifier->GenerateCode(machine, bc);
         bc.code(BC_STORE_VAR);
 
         body->GenerateCode(machine, bc);
-        bc.code(BC_INCREMENT_LOCATION, iterator);
         bc.jump_to(BC_JUMP, begin);
         bc.set_jump_location(jump_end);
     }
@@ -185,9 +184,9 @@ namespace fsh
         ByteCode bctry;
         ByteCode bccatch;
         try_block->GenerateCode(machine, bctry);
-        int64_t try_id = machine.storeBlock(bctry);
+        uintptr_t try_id = machine.storeBlock(bctry);
         catch_block->GenerateCode(machine, bccatch);
-        int64_t catch_id = machine.storeBlock(bccatch);
+        uintptr_t catch_id = machine.storeBlock(bccatch);
         bc.code(BC_TRY);
         bc.code(try_id);
         bc.code(catch_id);
@@ -255,7 +254,7 @@ namespace fsh
             }
         }
         bc.code(BC_BIND);
-        bc.code((int64_t)pAttr);
+        bc.code((uintptr_t)pAttr);
     }
     /***************************************************/
     void ASTFunctionDef::GenerateCode(Machine& machine, ByteCode& bc)
@@ -263,7 +262,7 @@ namespace fsh
         ShellFunction *fd = new ShellFunction();
         functionBody->GenerateCode(machine, fd->shellFunction);
         fd->arg_names = arg_names;
-        int64_t id = machine.registerFunction(fd);
+        uintptr_t id = machine.registerFunction(fd);
 
         bc.code(BC_LOAD_FUNCTION_DEF, id);
     }
@@ -271,7 +270,7 @@ namespace fsh
     /***************************************************/
     void ASTSystem::GenerateCode(Machine& machine, ByteCode& bc)
     {
-        int64_t id = machine.string_table_add(cmd);
+        uintptr_t id = machine.string_table_add(cmd);
         bc.code(BC_SYSTEM, id);
     }
  }

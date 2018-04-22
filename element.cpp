@@ -55,6 +55,14 @@ namespace fsh
         return BooleanPtr(new Boolean(b));
     }
 
+    PairPtr MakePair(ElementPtr f, ElementPtr s)
+    {
+        PairPtr pr(new Pair());
+        pr->first = f;
+        pr->second = s;
+        return pr;
+    }
+
     ErrorPtr MakeError(const std::string& m, bool b)
     {
         ErrorPtr e = new Error();

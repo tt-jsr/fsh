@@ -26,6 +26,7 @@ namespace fsh
         ,ELEMENT_TYPE_ERROR
         ,ELEMENT_TYPE_ATTRIBUTE
         ,ELEMENT_TYPE_FUNCTION_DEF_ID
+        ,ELEMENT_TYPE_PAIR
     };
 
     struct Element : public instrusive_base
@@ -43,6 +44,7 @@ namespace fsh
         bool IsError() const {return type() == ELEMENT_TYPE_ERROR;}
         bool IsAttribute() const {return type() == ELEMENT_TYPE_ATTRIBUTE;}
         bool IsFunctionDefId() const {return type() == ELEMENT_TYPE_FUNCTION_DEF_ID;}
+        bool IsPair() const {return type() == ELEMENT_TYPE_PAIR;}
     };
 
     typedef instrusive_ptr<Element> ElementPtr;
@@ -220,6 +222,15 @@ namespace fsh
 
     typedef instrusive_ptr<Map> MapPtr;
 
+    struct Pair : public Element
+    {
+        virtual ElementType type() const {return ELEMENT_TYPE_PAIR;}
+        ElementPtr first;
+        ElementPtr second;
+    };
+
+    typedef instrusive_ptr<Pair> PairPtr;
+
     struct ExecutionContext;
     typedef instrusive_ptr<ExecutionContext> ExecutionContextPtr;
 
@@ -234,5 +245,6 @@ namespace fsh
     FileHandlePtr MakeFileHandle();
     ErrorPtr MakeError(const std::string&, bool);
     FunctionDefIdPtr MakeFunctionDefId(int64_t id);
+    PairPtr MakePair(ElementPtr f, ElementPtr s);
 }
 

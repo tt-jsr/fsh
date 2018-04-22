@@ -83,6 +83,8 @@ namespace fsh
         int64_t next_function_id;
         std::unordered_map<int64_t, ByteCode> blocks;
         int64_t next_block_id;
+        std::unordered_map<int64_t, ElementPtr> elements;
+        int64_t next_element_id;
         std::function<void (int)> unittest_callback;
         std::function<void (const char *)> unittest_exception;
     };

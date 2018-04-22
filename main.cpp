@@ -51,6 +51,7 @@ int main(int argc, char *argv[])
         std::cout << "usage: fsh script" << std::endl;
         return 1;
     }
+
 	// open a file handle to a particular file:
 	FILE *myfile = fopen(argv[1], "r");
 	// make sure it's valid:

@@ -405,6 +405,66 @@ namespace fsh
                 LOG << "BC_INTEGER_LOCATION " << bc[location] << " from " << location << std::endl;
             }
             break;
+        case BC_INCREMENT_ITERATOR:
+            {
+                ++bc.ip;
+                size_t iteratorIP = bc[bc.ip];
+                int64_t id = bc[iteratorIP];
+                ElementPtr cont = machine.pop_data();
+                if (cont->IsList())
+                {
+                    Integer *raw = (Integer *)bc[iteratorIP];
+                    if (raw == nullptr)
+                    {
+                        raw = new Integer(0);
+                        raw->inc_ref();
+                        bc[iteratorIP] = (uintptr_t)raw;
+                    }
+                    else
+                    {
+                        assert(raw->IsInteger());
+                        ++raw->value;
+                    }
+                    machine.push_data(cont);
+                    IntegerPtr ip(raw);
+                    machine.push_data(ip);
+                }
+                if (cont->IsMap())
+                {
+                    ElementPtr key;
+                    MapPtr m = cont.cast<Map>();
+                    if (bc[iteratorIP] == 0)
+                    {
+                        auto it = m->map.begin();
+                        if (it != m->map.end())
+                        {
+                            key = it->first;
+                            bc[iteratorIP] = (uintptr_t)key.get();
+                        }
+                    }
+                    else
+                    {
+                        key = (Element *)bc[iteratorIP];
+                        auto it = m->map.find(key);
+                        if (it != m->map.end())
+                        {
+                            ++it;
+                        }
+                        if (it != m->map.end())
+                        {
+                            key = it->first;
+                            bc[iteratorIP] = (uintptr_t)key.get();
+                        }
+                        else
+                        {
+                            key = MakeString("EnDoFmApItErAtOr");
+                        }
+                    }
+                    machine.push_data(m);
+                    machine.push_data(key);
+                }
+            }
+            break;
         case BC_STORE_VAR:
             {
                 ElementPtr id = machine.pop_data();
@@ -416,25 +476,41 @@ namespace fsh
                 LOG << "BC_STORE_VAR " << id.cast<Identifier>()->value << std::endl;
             }
             break;
-        case BC_LOAD_LIST_ITEM:
+        case BC_LOAD_CONTAINER_ITEM:
             {
-                ElementPtr idx = machine.pop_data();
-                ElementPtr lst = machine.pop_data();
-                if (!idx->IsInteger())
-                    throw std::runtime_error("BC_LOAD_LIST_ITEM Expected integer");
-                if (!lst->IsList())
-                    throw std::runtime_error("BC_LOAD_LIST_ITEM Expected list");
-                int n = idx.cast<Integer>()->value;
-                LOG << "BC_LOAD_LIST_ITEM " << n << std::endl;
-                auto& vec = lst.cast<List>()->items;
-                if (n < 0 || n >= vec.size())
+                ElementPtr key = machine.pop_data();
+                ElementPtr C = machine.pop_data();
+                LOG << "BC_LOAD_CONTAINER_ITEM " << toString(machine, key) << std::endl;
+                if (C->IsList())
                 {
-                    machine.set_gp_register(false);
+                    if (!key->IsInteger())
+                        throw std::runtime_error("BC_LOAD_CONTAINER_ITEM Expected integer");
+                    int n = key.cast<Integer>()->value;
+                    auto& vec = C.cast<List>()->items;
+                    if (n < 0 || n >= vec.size())
+                    {
+                        machine.set_gp_register(false);
+                    }
+                    else
+                    {
+                        machine.set_gp_register(true);
+                        machine.push_data(vec[n]);
+                    }
                 }
-                else
+                if (C->IsMap())
                 {
-                    machine.set_gp_register(true);
-                    machine.push_data(vec[n]);
+                    MapPtr m = C.cast<Map>();
+                    auto it = m->map.find(key);
+                    if (it == m->map.end())
+                    {
+                        machine.set_gp_register(false);
+                    }
+                    else
+                    {
+                        machine.set_gp_register(true);
+                        ElementPtr pr = MakePair(it->first, it->second);
+                        machine.push_data(pr);
+                    }
                 }
             }
             break;
@@ -480,14 +556,14 @@ namespace fsh
                     throw std::runtime_error("Function call requires name/id");
 
                 // Function id
-                int64_t id = callId.cast<FunctionDefId>()->funcid;
+                uintptr_t id = callId.cast<FunctionDefId>()->funcid;
                 LOG << "BC_CALL " << id << std::endl;
 
                 ElementPtr numargs = machine.pop_data();
                 assert (numargs->type() == ELEMENT_TYPE_INTEGER);
 
                 // Number of args that was pushed
-                int64_t num = numargs.cast<Integer>()->value;
+                uintptr_t num = numargs.cast<Integer>()->value;
 
                 FunctionDefinition *fd = machine.getFunction(id);
                 if (fd == nullptr)
@@ -504,14 +580,14 @@ namespace fsh
                     throw std::runtime_error("Function call requires name/id");
 
                 // Target function id
-                int64_t id = callId.cast<FunctionDefId>()->funcid;
+                uintptr_t id = callId.cast<FunctionDefId>()->funcid;
                 LOG << "BC_BIND " << id << std::endl;
 
                 ElementPtr numargs = machine.pop_data();
                 assert (numargs->type() == ELEMENT_TYPE_INTEGER);
 
                 // Number of args that was pushed
-                int64_t num = numargs.cast<Integer>()->value;
+                uintptr_t num = numargs.cast<Integer>()->value;
 
                 FunctionDefinition *fd = machine.getFunction(id);
                 if (fd == nullptr)
@@ -536,7 +612,7 @@ namespace fsh
         case BC_LOAD_FUNCTION_DEF:
             {
                 ++bc.ip;
-                int64_t id = bc[bc.ip];
+                uintptr_t id = bc[bc.ip];
                 machine.push_data(MakeFunctionDefId(id));
                 LOG << "BC_LOAD_FUNCTION_DEF " << id << std::endl;
             }
@@ -544,7 +620,7 @@ namespace fsh
         case BC_SYSTEM:
             {
                 ++bc.ip;
-                int64_t id = bc[bc.ip];
+                uintptr_t id = bc[bc.ip];
                 std::string cmd = machine.string_table_get(id);
                 system(cmd.c_str());
                 machine.push_data(MakeNone());

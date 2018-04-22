@@ -108,7 +108,7 @@ namespace fsh
         // list, which is pushed onto the stack
         // If index is out of bounds, the machine register
         // gp_register is set to false, and nothing is pushed
-        ,BC_LOAD_LIST_ITEM
+        ,BC_LOAD_CONTAINER_ITEM
 
         // pops the TOS, performs any variable lookup, and pushes the result
         ,BC_RESOLVE
@@ -137,6 +137,8 @@ namespace fsh
         ,BC_TRY
 
         ,BC_BIND
+
+        ,BC_INCREMENT_ITERATOR
     };
 
     enum AstType

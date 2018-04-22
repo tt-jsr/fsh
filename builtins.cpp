@@ -99,6 +99,19 @@ namespace fsh
         return ep.cast<Boolean>();
     }
 
+    PairPtr GetPair(Machine& machine, std::vector<ElementPtr>& args, size_t index)
+    {
+        ElementPtr ep = GetElement(machine, args, index);
+        if(ep.get() == nullptr)
+            return PairPtr();
+
+        if (ep->type() != ELEMENT_TYPE_PAIR)
+        {
+            return PairPtr();
+        }
+        return ep.cast<Pair>();
+    }
+
     FunctionDefIdPtr GetFunctionDefId(Machine& machine, std::vector<ElementPtr>& args, size_t index)
     {
         ElementPtr ep = GetElement(machine, args, index);
@@ -264,6 +277,18 @@ namespace fsh
                 return rtn;
             }
             break;
+        case ELEMENT_TYPE_PAIR:
+            {
+                std::string rtn;
+                rtn.push_back('(');
+                PairPtr pr = e.cast<Pair>();
+                rtn += toString(machine, pr->first);
+                rtn += ", ";
+                rtn += toString(machine, pr->second);
+                rtn.push_back(')');
+                return rtn;
+            }
+            break;
             /*
         case ELEMENT_TYPE_FUNCTION_DEFINITION:
             {
@@ -418,6 +443,22 @@ namespace fsh
         return e;
     }
 
+    ElementPtr First(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        PairPtr pr = GetPair(machine, args, 0);
+        if (!pr)
+            throw std::runtime_error("First expects a pair");
+        return pr->first;
+    }
+
+    ElementPtr Second(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        PairPtr pr = GetPair(machine, args, 0);
+        if (!pr)
+            throw std::runtime_error("Second expects a pair");
+        return pr->second;
+    }
+
     void RegisterBuiltInImpl(Machine& machine, const std::string& name, std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> f)
     {
         BuiltInFunction *fd = new BuiltInFunction();
@@ -477,6 +518,8 @@ namespace fsh
         RegisterBuiltInImpl(machine, "Float", fsh::ToFloat);
         RegisterBuiltInImpl(machine, "ToString", fsh::ToString);
         RegisterBuiltInImpl(machine, "Copy", fsh::Copy);
+        RegisterBuiltInImpl(machine, "First", fsh::First);
+        RegisterBuiltInImpl(machine, "Second", fsh::Second);
     }
 
 }

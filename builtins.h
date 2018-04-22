@@ -72,6 +72,8 @@ namespace fsh
      */
 
     ElementPtr Copy(Machine&, std::vector<ElementPtr>&);
+    ElementPtr First(Machine&, std::vector<ElementPtr>&);
+    ElementPtr Second(Machine&, std::vector<ElementPtr>&);
 
     /********* List ****************************************/
     /* Returns an item from a list
@@ -187,5 +189,6 @@ namespace fsh
     IdentifierPtr GetIdentifier(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     BooleanPtr GetBoolean(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     FunctionDefIdPtr GetFunctionDefId(Machine& machine, std::vector<ElementPtr>& args, size_t index);
+    PairPtr GetPair(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     std::string toString(Machine& machine, ElementPtr e);
 }

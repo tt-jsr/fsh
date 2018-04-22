@@ -17,6 +17,7 @@ namespace fsh
     :next_string_id(0)
     ,next_function_id(0)
     ,next_block_id(0)
+    ,next_element_id(0)
     {
         executionContext = MakeExecutionContext();
     }
