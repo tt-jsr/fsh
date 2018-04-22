@@ -472,6 +472,7 @@ namespace fsh
     {
         // IO
         RegisterBuiltInImpl(machine, "Print", fsh::Print);
+        RegisterBuiltInImpl(machine, "Input", fsh::Input);
         RegisterBuiltInImpl(machine, "ReadFile", fsh::ReadFile);
         RegisterBuiltInImpl(machine, "OpenFile", fsh::OpenFile);
         RegisterBuiltInImpl(machine, "PipeLine", fsh::PipeLine);

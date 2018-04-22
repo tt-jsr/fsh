@@ -103,12 +103,16 @@ namespace fsh
     IntegerPtr Len(Machine&, std::vector<ElementPtr>&);
 
     // Append an item to a list or string. Returns the index of the new item
+    // Append[list, items,...]
+    // Append[string, string]
     IntegerPtr Append(Machine&, std::vector<ElementPtr>&);
 
     // Set an item
-    // Set[list, index, item];
+    // ListPtr Set[list, index, item];
     // // Modifies and returns the existing list
     ListPtr Set(Machine&, std::vector<ElementPtr>&);
+
+    // Push[list, item];
     ListPtr Push(Machine&, std::vector<ElementPtr>&);
     ElementPtr Pop(Machine&, std::vector<ElementPtr>&);
     ListPtr SetRecordType(Machine&, std::vector<ElementPtr>&);
@@ -128,6 +132,10 @@ namespace fsh
     // string:
     //      Insert[string, position, string];
     ElementPtr Insert(Machine&, std::vector<ElementPtr>&);
+
+    // Delete item
+    // MapPtr Delete[map, key];
+    // ListPtr Delete[list, index];
     ElementPtr Delete(Machine&, std::vector<ElementPtr>&);
 
     /******** Error *********/
@@ -138,6 +146,11 @@ namespace fsh
 
 
     /********** IO ********/
+
+    // Read a line from stdin. 
+    // Input[];
+    // Input[prompt];
+    StringPtr Input(Machine&, std::vector<ElementPtr>&);
 
     // OpenFile["filename", "r"];
     FileHandlePtr OpenFile(Machine&, std::vector<ElementPtr>&);

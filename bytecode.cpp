@@ -104,6 +104,11 @@ namespace fsh
 
     bool ExecuteEQ(Machine& machine, ElementPtr lhs, ElementPtr rhs)
     {
+        if (lhs->type() != rhs->type())
+        {
+            machine.push_data(MakeBoolean(false));
+            return true;
+        }
         if(lhs->IsNone() && rhs->IsNone())
         {
             machine.push_data(MakeBoolean(true));
@@ -139,6 +144,11 @@ namespace fsh
 
     bool ExecuteNEQ(Machine& machine, ElementPtr lhs, ElementPtr rhs)
     {
+        if (lhs->type() != rhs->type())
+        {
+            machine.push_data(MakeBoolean(true));
+            return true;
+        }
         if(lhs->IsNone() && rhs->IsNone())
         {
             machine.push_data(MakeBoolean(false));

@@ -10,6 +10,18 @@
 
 namespace fsh
 {
+    StringPtr Input(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        StringPtr s = GetString(machine, args, 0);
+        if (s)
+        {
+            std::cout << s->value << std::flush;
+        }
+        std::string line;
+        std::getline(std::cin, line);
+        return MakeString(line);
+    }
+
     FileHandlePtr OpenFile(Machine& machine, std::vector<ElementPtr>& args)
     {
         bool stripnl;
