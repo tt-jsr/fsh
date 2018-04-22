@@ -284,10 +284,13 @@ namespace fsh
         if (!ip)
             throw std::runtime_error("Set: argument 2 must be an integer");
 
-        auto itSrc = args.cbegin() + 2;
-        auto itDst = lst->items.begin() + ip->value;
+        if (args.size() < 3)
+            throw std::runtime_error("Set: requires argument 3 for the value to set");
 
-        lst->items.insert(itDst, args[2]);
+        if (ip->value >= args.size())
+            throw std::runtime_error("Set: index out of bounds");
+
+        lst->items[ip->value] = args[2];
 
         return lst;
     }
