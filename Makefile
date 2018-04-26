@@ -7,6 +7,9 @@ DEPS=common.h element.h execution_context.h machine.h builtins.h fsh.y fsh.l she
 
 SRC	= main.cpp execution_context.cpp element.cpp machine.cpp ast.cpp fsh.tab.cpp lex.yy.cpp err_cmd.cpp io_cmd.cpp builtins.cpp string_cmd.cpp list_cmd.cpp shell.cpp map_cmd.cpp bytecode.cpp
 
+SRC += oclog_cmd.cpp
+DEPS += oclog_cmd.h
+
 fsh.tab.o : fsh.y
 	bison -d fsh.y
 	mv fsh.tab.c fsh.tab.cpp

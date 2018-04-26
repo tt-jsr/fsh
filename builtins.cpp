@@ -478,6 +478,8 @@ namespace fsh
         RegisterBuiltInImpl(machine, "PipeLine", fsh::PipeLine);
         RegisterBuiltInImpl(machine, "OpenProcess", fsh::OpenProcess);
         RegisterBuiltInImpl(machine, "ReadProcess", fsh::ReadProcess);
+        RegisterBuiltInImpl(machine, "WriteFile", fsh::WriteFile);
+        RegisterBuiltInImpl(machine, "CloseFile", fsh::CloseFile);
 
         // String
         RegisterBuiltInImpl(machine, "Trim", fsh::Trim);
@@ -521,6 +523,9 @@ namespace fsh
         RegisterBuiltInImpl(machine, "Copy", fsh::Copy);
         RegisterBuiltInImpl(machine, "First", fsh::First);
         RegisterBuiltInImpl(machine, "Second", fsh::Second);
+
+        // Ers
+        RegisterBuiltInImpl(machine, "ParseExecutionReport", fsh::ParseExecutionReport);
     }
 
 }

@@ -451,6 +451,10 @@ namespace fsh
                             key = it->first;
                             bc[iteratorIP] = (uintptr_t)key.get();
                         }
+                        else
+                        {
+                            key = MakeString("EnDoFmApItErAtOr");
+                        }
                     }
                     else
                     {

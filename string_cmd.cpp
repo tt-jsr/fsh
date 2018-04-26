@@ -175,7 +175,7 @@ namespace fsh
         if (!s2)
             throw std::runtime_error("Strcmp: invalid argument");
         bool nocase(false);
-        machine.get_variable("__nocase", nocase);
+        machine.get_variable("nocase", nocase);
         int n;
         if(nocase)
             n = strcasecmp(s1->value.c_str(), s2->value.c_str());

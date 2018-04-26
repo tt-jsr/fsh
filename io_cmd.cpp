@@ -25,7 +25,7 @@ namespace fsh
     FileHandlePtr OpenFile(Machine& machine, std::vector<ElementPtr>& args)
     {
         bool stripnl;
-        machine.get_variable("__stripnl", stripnl);
+        machine.get_variable("stripnl", stripnl);
 
         StringPtr filename = GetString(machine, args, 0);
         if (filename.get() == nullptr)
@@ -88,6 +88,47 @@ namespace fsh
         return fh;
     }
 
+    ElementPtr WriteFile(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr e = GetElement(machine, args, 0);
+        if (!e)
+            throw std::runtime_error("WriteFile: requires file handle");
+        if (e->IsFileHandle() == false)
+            throw std::runtime_error("WriteFile: requires file handle");
+        FileHandlePtr fh = e.cast<FileHandle>();
+        if (fh->bRead)
+            throw std::runtime_error("WriteFile: file handle is opened for reading");
+        ElementPtr data = GetElement(machine, args, 1);
+        if (!data)
+            throw std::runtime_error("WriteFile: Requires data to be written");
+        std::string s = toString(machine, data);
+
+        fputs(s.c_str(), fh->fp);
+        int64_t rtn = s.size();
+        if (fh->addnl)
+        {
+            fputs("\n", fh->fp);
+            rtn += 1;
+        }
+        return MakeInteger(rtn);
+    }
+
+    ElementPtr CloseFile(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr e = GetElement(machine, args, 0);
+        if (!e)
+            throw std::runtime_error("WriteFile: requires file handle");
+        if (e->IsFileHandle() == false)
+            throw std::runtime_error("WriteFile: requires file handle");
+        FileHandlePtr fh = e.cast<FileHandle>();
+        if (fh->isPipe)
+            pclose(fh->fp);
+        else
+            fclose(fh->fp);
+        fh->fp = nullptr;
+        return MakeNone();
+    }
+
     ElementPtr ReadFile(Machine& machine, std::vector<ElementPtr>& args)
     {
         bool stripnl;
@@ -120,7 +161,7 @@ namespace fsh
                 throw std::runtime_error(strm.str());
             }
         }
-        char buffer[1024];
+        char buffer[10240];
         while (true)
         {
             if (nullptr == fgets(buffer, sizeof(buffer), fp))
@@ -182,7 +223,7 @@ namespace fsh
             strm << "ReadProcess: Unable to open " << sp->value;
             throw std::runtime_error(strm.str());
         }
-        char buffer[1024];
+        char buffer[10240];
         while (true)
         {
             if (nullptr == fgets(buffer, sizeof(buffer), fp))
@@ -219,7 +260,19 @@ namespace fsh
     }
 
 
-    ElementPtr PipelineHead(Machine& machine, ElementPtr stage, size_t& listIdx)
+    struct LoopContext
+    {
+        LoopContext()
+        :listIndex(0)
+        ,loopCount(0)
+        {}
+
+        size_t listIndex;
+        ElementPtr mapKey;
+        size_t loopCount;
+    };
+
+    ElementPtr PipelineHead(Machine& machine, ElementPtr stage, LoopContext& ctx)
     {
         stage = machine.resolve(stage);
         switch (stage->type())
@@ -227,9 +280,28 @@ namespace fsh
         case ELEMENT_TYPE_LIST:
             {
                 ListPtr lp = stage.cast<List>();
-                if (listIdx == lp->items.size())
+                if (ctx.listIndex == lp->items.size())
                     return MakeBoolean(false);
-                return lp->items[listIdx++];
+                return lp->items[ctx.listIndex++];
+            }
+            break;
+        case ELEMENT_TYPE_MAP:
+            {
+                MapPtr m = stage.cast<Map>();
+                if (!ctx.mapKey)
+                {
+                    auto it = m->map.begin();
+                    if (it == m->map.end())
+                        return MakeBoolean(false);
+                    ctx.mapKey = it->first;
+                    return it->second;
+                }
+                auto it = m->map.find(ctx.mapKey);
+                ++it;
+                if (it == m->map.end())
+                    return MakeBoolean(false);
+                ctx.mapKey = it->first;
+                return it->second;
             }
             break;
         case ELEMENT_TYPE_FUNCTION_DEF_ID:
@@ -250,7 +322,7 @@ namespace fsh
                 
                 if (file->bRead)
                 {
-                    char buffer[1024];
+                    char buffer[10240];
                     if (nullptr == fgets(buffer, sizeof(buffer), file->fp))
                     {
                         if (file->isPipe)
@@ -277,9 +349,10 @@ namespace fsh
             break;
         default:
             {
-                std::stringstream strm;
-                strm << "Pipeline: unsupported element: " << stage->type();
-                throw std::runtime_error(strm.str());
+                if (ctx.loopCount > 0)
+                    return MakeBoolean(false);
+                std::string s = toString(machine, stage);
+                return MakeString(s);
             }
             break;
         }
@@ -302,6 +375,13 @@ namespace fsh
                 return fd->Call(machine, 1);
             }
             break;
+        case ELEMENT_TYPE_LIST:
+            {
+                ListPtr lst = stage.cast<List>();
+                lst->items.push_back(data);
+                return data;
+            }
+            break;
         case ELEMENT_TYPE_FILE_HANDLE:
             {
                     //std::cout << "stage file" << std::endl;
@@ -309,7 +389,7 @@ namespace fsh
                 
                 if (file->bRead)
                 {
-                    char buffer[1024];
+                    char buffer[10240];
                     if (nullptr == fgets(buffer, sizeof(buffer), file->fp))
                     {
                         if (file->isPipe)
@@ -330,13 +410,10 @@ namespace fsh
                 }
                 else
                 {
-                    if (data->IsString())
-                    {
-                        StringPtr sp = data.cast<String>();
-                        fputs(sp->value.c_str(), file->fp);
-                        if (file->addnl)
-                            fputs("\n", file->fp);
-                    }
+                    std::string s = toString(machine, data);
+                    fputs(s.c_str(), file->fp);
+                    if (file->addnl)
+                        fputs("\n", file->fp);
                     return data;
                 }
             }
@@ -370,13 +447,14 @@ namespace fsh
 
     ElementPtr PipeLineImpl(Machine& machine, std::vector<ElementPtr>& args)
     {
+        LoopContext ctx;
         size_t idx = 0;
         ElementPtr data;
-        size_t listIdx = 0;
+
         while (true)
         {
             if (idx == 0)
-                data = PipelineHead(machine, args[idx], listIdx);
+                data = PipelineHead(machine, args[idx], ctx);
             else
                 data = PipelineStage(machine, args[idx], data);
             if (data->IsBoolean())
@@ -388,7 +466,10 @@ namespace fsh
             }
             ++idx;
             if (idx >= args.size())
+            {
                 idx = 0;
+                ++ctx.loopCount;
+            }
         }
         return MakeNone();
     }

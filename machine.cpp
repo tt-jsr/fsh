@@ -130,7 +130,10 @@ namespace fsh
             ElementPtr rtn;
             IdentifierPtr id = e.cast<Identifier>();
             if (get_variable(id->value, rtn))
+            {
+                assert(rtn);
                 return rtn;
+            }
         }
         return e;
     }
@@ -212,6 +215,7 @@ namespace fsh
 
     void Machine::store_variable(const std::string& name, ElementPtr d)
     {
+        assert(d);
         size_t pos = name.find_first_of('.');
         if (pos != std::string::npos)
         {

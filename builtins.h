@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "oclog_cmd.h"
 
 namespace fsh
 {
@@ -93,7 +94,7 @@ namespace fsh
 
     /* MakeRecord*/
     /* Make a record defined with Define record
-     * Example:MakeRecord["fstat", field1, field2, ...];
+     * Example:CreateRecord["fstat", field1, field2, ...];
      */
     ListPtr CreateRecord(Machine&, std::vector<ElementPtr>&);
 
@@ -171,6 +172,9 @@ namespace fsh
     //ReadProcess[func, "processname", "r" or "w"];
     ElementPtr ReadProcess(Machine&, std::vector<ElementPtr>&);
     ElementPtr WriteProcess(Machine&, std::vector<ElementPtr>&);
+
+    ElementPtr WriteFile(Machine&, std::vector<ElementPtr>&);
+    ElementPtr CloseFile(Machine&, std::vector<ElementPtr>&);
 
     /*********** String ************/
     StringPtr Trim(Machine&, std::vector<ElementPtr>&);
