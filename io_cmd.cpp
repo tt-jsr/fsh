@@ -364,6 +364,13 @@ namespace fsh
         stage = machine.resolve(stage);
         switch (stage->type())
         {
+        case ELEMENT_TYPE_STRING:
+            {
+                StringPtr sp = stage.cast<String>();
+                sp->value += toString(machine, data);
+                return data;
+            }
+            break;
         case ELEMENT_TYPE_FUNCTION_DEF_ID:
             {
                 FunctionDefIdPtr fdid = stage.cast<FunctionDefId>();
@@ -389,24 +396,7 @@ namespace fsh
                 
                 if (file->bRead)
                 {
-                    char buffer[10240];
-                    if (nullptr == fgets(buffer, sizeof(buffer), file->fp))
-                    {
-                        if (file->isPipe)
-                            pclose(file->fp);
-                        else
-                            fclose(file->fp);
-                        file->fp = nullptr;
-                        return MakeBoolean(false);
-                    }
-                    //std::cout << buffer << std::endl;
-                    if (file->stripnl)
-                    {
-                        int len = strlen(buffer);
-                        if (buffer[len-1] ==  '\n')
-                            buffer[len-1] = '\0';
-                    }
-                    return MakeString(buffer);
+                    throw std::runtime_error("PipeLine: Cannot cannot have a read in a seconadry stage of a pipeline");
                 }
                 else
                 {
