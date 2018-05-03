@@ -51,6 +51,14 @@ namespace fsh
             return byte_codes.size() - 1;
         }
 
+        size_t code(uintptr_t n, uintptr_t n2, uintptr_t n3)
+        {
+            byte_codes.push_back(n);
+            byte_codes.push_back(n2);
+            byte_codes.push_back(n3);
+            return byte_codes.size() - 1;
+        }
+
         void set_jump_location(size_t idx)
         {
             byte_codes[idx] = byte_codes.size()-1;
@@ -60,5 +68,5 @@ namespace fsh
         size_t ip;
     };
 
-    void Execute(Machine&, ByteCode&);
+    bool Execute(Machine&, ByteCode&);
 }

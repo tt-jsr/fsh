@@ -289,13 +289,12 @@ namespace fsh
                 return rtn;
             }
             break;
-            /*
-        case ELEMENT_TYPE_FUNCTION_DEFINITION:
+        case ELEMENT_TYPE_FUNCTION_DEF_ID:
             {
-                return "FunctionDefinition";
+                FunctionDefIdPtr fd = e.cast<FunctionDefId>();
+                return std::to_string(fd->funcid);
             }
             break;
-            */
         default:
             {
                 std::stringstream strm;
@@ -324,6 +323,19 @@ namespace fsh
         }
         if (addnl)
             std::cout << std::endl;
+        return MakeNone();
+    }
+
+    ElementPtr Log(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        bool addnl(true);
+        machine.get_variable("addnl", addnl);
+        for (auto& e : args)
+        {
+            machine.log() << toString(machine, e);
+        }
+        if (addnl)
+            machine.log() << std::endl;
         return MakeNone();
     }
 
@@ -375,11 +387,16 @@ namespace fsh
             machine.store_variable(arg_names[idx], MakeNone());
         }
         shellFunction.ip = 0;
+
+        machine.log() << "Function: Start code" << std::endl;
         while(shellFunction.ip < shellFunction.size())
         {
-            fsh::Execute(machine, shellFunction);
+            if (!fsh::Execute(machine, shellFunction))
+                break;
             ++shellFunction.ip;
         }
+        machine.log() << "Function: End code" << std::endl;
+        assert(machine.size_data() > 0);
         return machine.pop_data();
     }
 
@@ -388,7 +405,6 @@ namespace fsh
     ElementPtr BoundFunction::CallImpl(Machine& machine, std::vector<ElementPtr>& args)
     {
         std::vector<ElementPtr> target_args;
-        std::reverse(bound_args.begin(), bound_args.end());
         for (ElementPtr& ba : bound_args)
         {
             if (ba->IsIdentifier())
@@ -398,7 +414,7 @@ namespace fsh
                 {
                     size_t dst = strtol(&id->value[1], nullptr, 10);
                     if (dst-1 >= args.size())
-                        throw std::runtime_error("Bind: Invalie position arguments");
+                        throw std::runtime_error("Bind: Invalid position arguments");
                     target_args.push_back(args[dst-1]);
                 }
                 else
@@ -459,6 +475,19 @@ namespace fsh
         return pr->second;
     }
 
+    ElementPtr MachineProperty(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        StringPtr sp = GetString(machine, args, 0);
+        if (sp && sp->value == "log_enable")
+        {
+            BooleanPtr bp = GetBoolean(machine, args, 1);
+            if (bp)
+            {
+                //machine.log_enabled(bp->value);
+            }
+        }
+    }
+
     void RegisterBuiltInImpl(Machine& machine, const std::string& name, std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> f)
     {
         BuiltInFunction *fd = new BuiltInFunction();
@@ -472,6 +501,7 @@ namespace fsh
     {
         // IO
         RegisterBuiltInImpl(machine, "Print", fsh::Print);
+        RegisterBuiltInImpl(machine, "Log", fsh::Log);
         RegisterBuiltInImpl(machine, "Input", fsh::Input);
         RegisterBuiltInImpl(machine, "ReadFile", fsh::ReadFile);
         RegisterBuiltInImpl(machine, "OpenFile", fsh::OpenFile);
@@ -523,6 +553,7 @@ namespace fsh
         RegisterBuiltInImpl(machine, "Copy", fsh::Copy);
         RegisterBuiltInImpl(machine, "First", fsh::First);
         RegisterBuiltInImpl(machine, "Second", fsh::Second);
+        RegisterBuiltInImpl(machine, "MachineProperty", fsh::MachineProperty);
 
         // Ers
         RegisterBuiltInImpl(machine, "ParseExecutionReport", fsh::ParseExecutionReport);

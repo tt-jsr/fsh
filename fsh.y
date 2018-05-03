@@ -35,6 +35,7 @@ typedef fsh::ASTExpressionList el_t;
 %token IF WHILE THEN ELSE
 %token TRY CATCH
 %token FOR IN
+%token KW_RETURN
 %token DOUBLE_BRACKET_OPEN
 %token DOUBLE_BRACKET_CLOSE
 %token SYSTEM
@@ -504,6 +505,17 @@ call_expression_list
 expression_statement
     :';' 
     | expression ';' { $$ = $1;}
+    | KW_RETURN ';' {
+        fsh::ASTReturn *pRtn = new fsh::ASTReturn(lineno);
+        $$ = pRtn;
+    }
+    | KW_RETURN expression ';' {
+        fsh::ASTReturn *pRtn = new fsh::ASTReturn(lineno);
+        pRtn->expression.reset((ast_t *)$2);
+        $$ = pRtn;
+    }
+    ;
+
     ;
 
 statement

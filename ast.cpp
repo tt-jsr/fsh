@@ -158,6 +158,7 @@ namespace fsh
         // Allocate a spot for the iterator key
         size_t iterator = bc.code(BC_DATA, 0);
 
+        bc.code(BC_DELETE_ITERATOR, iterator);
         size_t begin = bc.current_location();
 
         // The container
@@ -265,6 +266,20 @@ namespace fsh
         uintptr_t id = machine.registerFunction(fd);
 
         bc.code(BC_LOAD_FUNCTION_DEF, id);
+    }
+    /***************************************************/
+    void ASTReturn::GenerateCode(Machine& machine, ByteCode& bc)
+    {
+        if (expression)
+        {
+            expression->GenerateCode(machine, bc);
+            bc.code(BC_RESOLVE);
+        }
+        else
+        {
+            bc.code(BC_LOAD_NONE);
+        }
+        bc.code(BC_RETURN);
     }
 
     /***************************************************/

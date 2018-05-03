@@ -71,6 +71,7 @@ and             {column += 3;return AND;}
 or              {column += 2;return OR;}
 in              {column += 2;return IN;}
 For             {column += 3;return FOR;}
+Return          {column += 6;return KW_RETURN;}
 exit            {column += 4;exit(-1);}
 \"              {quotedstring.clear(); BEGIN(str);}
 <str>\"         {

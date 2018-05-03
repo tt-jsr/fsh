@@ -195,6 +195,18 @@ namespace fsh
         std::unique_ptr<ASTExpressionList> attributes;
     };
 
+    class ASTReturn : public Ast
+    {
+    public:
+        ASTReturn(size_t l)
+        :Ast(l)
+        {}
+        ~ASTReturn() {}
+        void GenerateCode(Machine&, ByteCode&);
+        AstType type() {return AST_RETURN;}
+        std::unique_ptr<Ast> expression;
+    };
+
     class ASTSystem : public Ast
     {
     public:

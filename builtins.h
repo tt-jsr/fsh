@@ -14,6 +14,7 @@ namespace fsh
      * Attributes: addnl->Boolean
      */
     ElementPtr Print(Machine&, std::vector<ElementPtr>&);
+    ElementPtr Log(Machine&, std::vector<ElementPtr>&);
 
     /* Converts to an Integer
      * Throws exception if argument is not a String, Float or Int
@@ -197,6 +198,7 @@ namespace fsh
 
     ElementPtr Subscript(Machine&, std::vector<ElementPtr>&);
     ElementPtr UnitTest(Machine&, std::vector<ElementPtr>&);
+    ElementPtr MachineProperty(Machine&, std::vector<ElementPtr>&);
 
     ElementPtr GetElement(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     StringPtr GetString(Machine& machine, std::vector<ElementPtr>& args, size_t index);

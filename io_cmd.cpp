@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <algorithm>
 #include <sstream>
+#include <signal.h>
 #include "common.h"
 #include "element.h"
 #include "machine.h"
@@ -306,7 +307,7 @@ namespace fsh
             break;
         case ELEMENT_TYPE_FUNCTION_DEF_ID:
             {
-                    //std::cout << "stage function" << std::endl;
+                machine.log() << "stage function" << std::endl;
                 FunctionDefIdPtr fdid = stage.cast<FunctionDefId>();
                 int64_t funcid = fdid->funcid;
                 FunctionDefinition *fd = machine.getFunction(fdid->funcid);
@@ -317,7 +318,7 @@ namespace fsh
             break;
         case ELEMENT_TYPE_FILE_HANDLE:
             {
-                    //std::cout << "stage file" << std::endl;
+                machine.log() << "stage file" << std::endl;
                 FileHandlePtr file = stage.cast<FileHandle>();
                 
                 if (file->bRead)
@@ -332,7 +333,7 @@ namespace fsh
                         file->fp = nullptr;
                         return MakeBoolean(false);
                     }
-                    //std::cout << buffer << std::endl;
+                    machine.log() << buffer << std::endl;
                     if (file->stripnl)
                     {
                         int len = strlen(buffer);
@@ -391,12 +392,12 @@ namespace fsh
             break;
         case ELEMENT_TYPE_FILE_HANDLE:
             {
-                    //std::cout << "stage file" << std::endl;
+                machine.log() << "stage file" << std::endl;
                 FileHandlePtr file = stage.cast<FileHandle>();
                 
                 if (file->bRead)
                 {
-                    throw std::runtime_error("PipeLine: Cannot cannot have a read in a seconadry stage of a pipeline");
+                    throw std::runtime_error("PipeLine: Cannot cannot have a read in a secondary stage of a pipeline");
                 }
                 else
                 {
@@ -443,10 +444,13 @@ namespace fsh
 
         while (true)
         {
+            machine.clear_stack();
+            machine.log() << "pl: " << idx << ": Start of stage" << std::endl;
             if (idx == 0)
                 data = PipelineHead(machine, args[idx], ctx);
             else
                 data = PipelineStage(machine, args[idx], data);
+            machine.log() << "pl: " << idx << ": Stage returned: " << toString(machine, data) << std::endl;
             if (data->IsBoolean())
             {
                 if (data.cast<Boolean>()->value == false)

@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include <functional>
+#include <fstream>
 #include "element.h"
 #include "execution_context.h"
 #include "bytecode.h"
@@ -29,6 +30,8 @@ namespace fsh
 
         void set_gp_register(bool b) {gp_register = b;}
         bool get_gp_register() {return gp_register;}
+
+        std::ostream& log();
 
         void register_unittest(std::function<void (int)>&);
         // Register a function.
@@ -62,7 +65,7 @@ namespace fsh
         bool get_list_field(const std::string& name, ElementPtr& out);
         FieldMap_t * get_field_map(const std::string&);
     private:
-        static thread_local std::vector<ElementPtr> datastack;
+        std::vector<ElementPtr> datastack;
         ExecutionContextPtr executionContext;
         RecordMap_t record_fields;
     private_impl:
@@ -70,12 +73,14 @@ namespace fsh
         ElementPtr pop_data();
         ElementPtr peek_data();
         size_t size_data();
+        void clear_stack() {datastack.clear();}
         void push_data(ElementPtr);
         void push_context();
         void pop_context();
     private_impl:
         bool gp_register;
         ByteCode byte_code;
+
         std::unordered_map<int64_t, std::string> string_table_by_id;
         std::unordered_map<std::string, int64_t> string_table_by_string;
         int64_t next_string_id;
@@ -87,6 +92,7 @@ namespace fsh
         int64_t next_element_id;
         std::function<void (int)> unittest_callback;
         std::function<void (const char *)> unittest_exception;
+        std::ofstream logf;
     };
 }
 

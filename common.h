@@ -139,6 +139,14 @@ namespace fsh
         ,BC_BIND
 
         ,BC_INCREMENT_ITERATOR
+
+        ,BC_RETURN
+
+        // ip+1 location to store
+        // ip+2 value to be stored
+        ,BC_STORE_LOCATION
+
+        ,BC_DELETE_ITERATOR
     };
 
     enum AstType
@@ -159,6 +167,7 @@ namespace fsh
         ,AST_SUBSCRIPT
         ,AST_TRY_CATCH
         ,AST_BIND
+        ,AST_RETURN
     };
 
     struct FunctionDefinition

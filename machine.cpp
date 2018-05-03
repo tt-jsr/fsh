@@ -11,8 +11,6 @@
 
 namespace fsh
 {
-    thread_local std::vector<ElementPtr> Machine::datastack;
-
     Machine::Machine(void)
     :next_string_id(0)
     ,next_function_id(0)
@@ -20,11 +18,18 @@ namespace fsh
     ,next_element_id(0)
     {
         executionContext = MakeExecutionContext();
+        logf.open("fsh.log");
+        assert(logf.is_open());
     }
 
 
     Machine::~Machine(void)
     {
+    }
+
+    std::ostream& Machine::log()
+    {
+        return logf;
     }
 
     ElementPtr Machine::Execute(Ast *pAst)
@@ -33,12 +38,15 @@ namespace fsh
         pAst->GenerateCode(*this, get_byte_code());
         try
         {
+            log() << "Machine: start code"<< std::endl;
             datastack.clear();
             while(byte_code.ip < byte_code.size())
             {
-                fsh::Execute(*this, byte_code);
+                if (false == fsh::Execute(*this, byte_code))
+                    break;
                 ++byte_code.ip;
             }
+            log() << "Machine: end code"<< std::endl;
             assert(datastack.size() > 0);
             if (datastack.size() == 0)
             {
@@ -242,6 +250,8 @@ namespace fsh
             lp->items[idx] = d;
             return;
         }
+        if (name == "rejectList" && !d->IsList())
+            log() << "store rejectList" << std::endl;
         executionContext->AddVariable(name, d);
     }
 
