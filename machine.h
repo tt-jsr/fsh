@@ -64,11 +64,10 @@ namespace fsh
         // Given a name in dotted format, return the field of the list
         bool get_list_field(const std::string& name, ElementPtr& out);
         FieldMap_t * get_field_map(const std::string&);
-    private:
+    private_impl:
         std::vector<ElementPtr> datastack;
         ExecutionContextPtr executionContext;
         RecordMap_t record_fields;
-    private_impl:
         void reset();
         ElementPtr pop_data();
         ElementPtr peek_data();
@@ -88,8 +87,6 @@ namespace fsh
         int64_t next_function_id;
         std::unordered_map<int64_t, ByteCode> blocks;
         int64_t next_block_id;
-        std::unordered_map<int64_t, ElementPtr> elements;
-        int64_t next_element_id;
         std::function<void (int)> unittest_callback;
         std::function<void (const char *)> unittest_exception;
         std::ofstream logf;

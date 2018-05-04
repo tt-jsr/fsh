@@ -559,6 +559,8 @@ namespace fsh
                     fh->stripnl = true;
                     args.push_back(fh);
                 }
+                else
+                    args.push_back(sp);
             }
             else
                 args.push_back(e);

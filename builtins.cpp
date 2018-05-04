@@ -227,9 +227,7 @@ namespace fsh
             break;
         case ELEMENT_TYPE_STRING:
             {
-                ElementPtr r = machine.resolve(e);
-                assert(r->IsString());
-                return r.cast<String>()->value;
+                return e.cast<String>()->value;
             }
             break;
         case ELEMENT_TYPE_LIST:
@@ -506,14 +504,34 @@ namespace fsh
     ElementPtr MachineProperty(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr sp = GetString(machine, args, 0);
-        if (sp && sp->value == "log_enable")
+        if (sp && sp->value == "stats")
         {
-            BooleanPtr bp = GetBoolean(machine, args, 1);
-            if (bp)
+            std::stringstream strm;
+            strm << machine.string_table_by_id.size() << " strings in the string table" << std::endl;
+            strm << machine.functions.size() << " defined functions" << std::endl;
+            strm << machine.blocks.size() << " code blocks" << std::endl;
+            int n = 0;
+            for (auto& pr : machine.blocks)
             {
-                //machine.log_enabled(bp->value);
+                n += pr.second.size();
             }
+            n += machine.byte_code.size();
+            strm << n*8 << " total code bytes" << std::endl;
+            
+            ExecutionContextPtr ecxt = machine.executionContext;
+            while(ecxt)
+            {
+                strm << "Variables" << std::endl;
+                for (auto& pr : ecxt->variables_)
+                {
+                    strm << pr.first << " : " << pr.second->stype() << std::endl;
+                }
+                ExecutionContextPtr tmp = ecxt->parent;
+                ecxt = tmp;
+            }
+            return MakeString(strm.str());
         }
+        return MakeNone();
     }
 
     void RegisterBuiltInImpl(Machine& machine, const std::string& name, std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> f)

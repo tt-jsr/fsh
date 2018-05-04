@@ -33,6 +33,7 @@ namespace fsh
     struct Element : public instrusive_base
     {
         virtual ElementType type() const = 0;
+        virtual std::string stype() const = 0;
         bool IsInteger() const {return type() == ELEMENT_TYPE_INTEGER;}
         bool IsFloat() const {return type() == ELEMENT_TYPE_FLOAT;}
         bool IsString() const {return type() == ELEMENT_TYPE_STRING;}
@@ -57,6 +58,7 @@ namespace fsh
         {}
 
         virtual ElementType type() const {return ELEMENT_TYPE_PIPELINE_ACTION;}
+        virtual std::string stype() const {return "PipeLineAction";}
         enum Action {
             RESTART
             ,EXIT
@@ -73,6 +75,7 @@ namespace fsh
         {}
 
         virtual ElementType type() const {return ELEMENT_TYPE_ERROR;}
+        virtual std::string stype() const {return "Error";}
         std::string msg;
         bool bOk;
     };
@@ -84,6 +87,7 @@ namespace fsh
         None() {}
 
         virtual ElementType type() const {return ELEMENT_TYPE_NONE;}
+        virtual std::string stype() const {return "None";}
     };
     typedef instrusive_ptr<None> NonePtr;
 
@@ -95,6 +99,7 @@ namespace fsh
         {}
 
         virtual ElementType type() const {return ELEMENT_TYPE_STRING;}
+        virtual std::string stype() const {return "String";}
         std::string value;
     };
     typedef instrusive_ptr<String> StringPtr;
@@ -109,6 +114,7 @@ namespace fsh
         {}
         
         virtual ElementType type() const {return ELEMENT_TYPE_IDENTIFIER;}
+        virtual std::string stype() const {return "Identifier";}
         std::string value;
     };
     typedef instrusive_ptr<Identifier> IdentifierPtr;
@@ -120,6 +126,7 @@ namespace fsh
         {}
 
         virtual ElementType type() const {return ELEMENT_TYPE_INTEGER;}
+        virtual std::string stype() const {return "Integer";}
         int64_t value;
     };
     typedef instrusive_ptr<Integer> IntegerPtr;
@@ -131,6 +138,7 @@ namespace fsh
         {}
 
         virtual ElementType type() const {return ELEMENT_TYPE_BOOLEAN;}
+        virtual std::string stype() const {return "Boolean";}
         bool value;
     };
     typedef instrusive_ptr<Boolean> BooleanPtr;
@@ -142,6 +150,8 @@ namespace fsh
         {}
 
         virtual ElementType type() const {return ELEMENT_TYPE_FLOAT;}
+        virtual std::string stype() const {return "Float";}
+
         double value;
     };
     typedef instrusive_ptr<Float> FloatPtr;
@@ -152,6 +162,7 @@ namespace fsh
         {}
 
         virtual ElementType type() const {return ELEMENT_TYPE_ATTRIBUTE;}
+        virtual std::string stype() const {return "Attribute";}
         IdentifierPtr name;
         ElementPtr value;
     };
@@ -161,6 +172,7 @@ namespace fsh
     {
         size_t size() {return items.size();}
         virtual ElementType type() const {return ELEMENT_TYPE_LIST;}
+        virtual std::string stype() const {return "List";}
         std::vector<ElementPtr> items;
         std::string listtype;
     };
@@ -170,6 +182,7 @@ namespace fsh
     struct FunctionDefId : public Element
     {
         virtual ElementType type() const {return ELEMENT_TYPE_FUNCTION_DEF_ID;}
+        virtual std::string stype() const {return "FunctionDefId";}
         int64_t funcid;
     };
 
@@ -193,6 +206,7 @@ namespace fsh
             fp = nullptr;
         }
         virtual ElementType type() const {return ELEMENT_TYPE_FILE_HANDLE;}
+        virtual std::string stype() const {return "FileHandle";}
         FILE *fp;
         bool bRead;
         bool isPipe;
@@ -234,6 +248,7 @@ namespace fsh
     {
         size_t size() {return map.size();}
         virtual ElementType type() const {return ELEMENT_TYPE_MAP;}
+        virtual std::string stype() const {return "Map";}
         std::unordered_map<ElementPtr, ElementPtr, MyHash, ElementEqual> map;
     };
 
@@ -242,6 +257,7 @@ namespace fsh
     struct Pair : public Element
     {
         virtual ElementType type() const {return ELEMENT_TYPE_PAIR;}
+        virtual std::string stype() const {return "Pair";}
         ElementPtr first;
         ElementPtr second;
     };
