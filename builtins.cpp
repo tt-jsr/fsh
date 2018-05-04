@@ -475,6 +475,18 @@ namespace fsh
         return pr->second;
     }
 
+    PairPtr CreatePair(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr f = GetElement(machine, args, 0);
+        if (!f)
+            throw std::runtime_error("Pair expects a first arg");
+        ElementPtr s = GetElement(machine, args, 1);
+        if (!s)
+            throw std::runtime_error("Pair expects a second arg");
+
+        return MakePair(f, s);
+    }
+
     ElementPtr MachineProperty(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr sp = GetString(machine, args, 0);
@@ -553,6 +565,7 @@ namespace fsh
         RegisterBuiltInImpl(machine, "Copy", fsh::Copy);
         RegisterBuiltInImpl(machine, "First", fsh::First);
         RegisterBuiltInImpl(machine, "Second", fsh::Second);
+        RegisterBuiltInImpl(machine, "CreatePair", fsh::CreatePair);
         RegisterBuiltInImpl(machine, "MachineProperty", fsh::MachineProperty);
 
         // Ers

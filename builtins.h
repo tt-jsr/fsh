@@ -76,6 +76,7 @@ namespace fsh
     ElementPtr Copy(Machine&, std::vector<ElementPtr>&);
     ElementPtr First(Machine&, std::vector<ElementPtr>&);
     ElementPtr Second(Machine&, std::vector<ElementPtr>&);
+    PairPtr MakePair(Machine&, std::vector<ElementPtr>&);
 
     /********* List ****************************************/
     /* Returns an item from a list

@@ -390,6 +390,19 @@ namespace fsh
                 return data;
             }
             break;
+        case ELEMENT_TYPE_MAP:
+            {
+                MapPtr m = stage.cast<Map>();
+                if (data->IsPair())
+                {
+                    PairPtr pp = data.cast<Pair>();
+                    m->map.emplace(pp->first, pp->second);
+                }
+                else
+                    throw std::runtime_error("PipeLine: Map stage must receive a Pair");
+                return data;
+            }
+            break;
         case ELEMENT_TYPE_FILE_HANDLE:
             {
                 machine.log() << "stage file" << std::endl;
