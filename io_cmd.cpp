@@ -295,14 +295,14 @@ namespace fsh
                     if (it == m->map.end())
                         return MakeBoolean(false);
                     ctx.mapKey = it->first;
-                    return it->second;
+                    return MakePair(it->first, it->second);
                 }
                 auto it = m->map.find(ctx.mapKey);
                 ++it;
                 if (it == m->map.end())
                     return MakeBoolean(false);
                 ctx.mapKey = it->first;
-                return it->second;
+                return MakePair(it->first, it->second);
             }
             break;
         case ELEMENT_TYPE_FUNCTION_DEF_ID:
@@ -403,6 +403,11 @@ namespace fsh
                 {
                     std::string s = toString(machine, data);
                     fputs(s.c_str(), file->fp);
+                    if (ferror(file->fp))
+                    {
+                        machine.log() << "PipeLine: fputs error, stopping pipeline" << std::endl;
+                        return MakeBoolean(false);
+                    }
                     if (file->addnl)
                         fputs("\n", file->fp);
                     return data;
@@ -468,8 +473,65 @@ namespace fsh
         return MakeNone();
     }
 
-    ElementPtr PipeLine(Machine& machine, std::vector<ElementPtr>& args)
+    ElementPtr PipeLine(Machine& machine, std::vector<ElementPtr>& args_)
     {
+        std::vector<ElementPtr> args;
+        for (ElementPtr e : args_)
+        {
+            if (e->IsString())
+            {
+                StringPtr sp = e.cast<String>();
+                if (sp->value[0] == '>' && sp->value[1] == '>')
+                {
+                    FileHandlePtr fh = MakeFileHandle();
+                    fh->fp = fopen(&sp->value[2], "a");
+                    fh->isPipe = false;
+                    fh->bRead = false;
+                    fh->addnl = true;
+                    args.push_back(fh);
+                }
+                else if (sp->value[0] == '>')
+                {
+                    FileHandlePtr fh = MakeFileHandle();
+                    fh->fp = fopen(&sp->value[1], "w");
+                    fh->isPipe = false;
+                    fh->bRead = false;
+                    fh->addnl = true;
+                    args.push_back(fh);
+                }
+                else if (sp->value.back() == '>')
+                {
+                    FileHandlePtr fh = MakeFileHandle();
+                    sp->value.pop_back();
+                    fh->fp = fopen(sp->value.c_str(), "r");
+                    fh->isPipe = false;
+                    fh->bRead = true;
+                    fh->stripnl = true;
+                    args.push_back(fh);
+                }
+                else if (sp->value[0] == '|')
+                {
+                    FileHandlePtr fh = MakeFileHandle();
+                    fh->fp = popen(&sp->value[1], "w");
+                    fh->isPipe = true;
+                    fh->bRead = false;
+                    fh->addnl = true;
+                    args.push_back(fh);
+                }
+                else if (sp->value.back() == '|')
+                {
+                    FileHandlePtr fh = MakeFileHandle();
+                    sp->value.pop_back();
+                    fh->fp = popen(sp->value.c_str(), "r");
+                    fh->isPipe = true;
+                    fh->bRead = true;
+                    fh->stripnl = true;
+                    args.push_back(fh);
+                }
+            }
+            else
+                args.push_back(e);
+        }
         ElementPtr e = PipeLineImpl(machine, args);
         ClosePipeLine(machine, args);
         return e;

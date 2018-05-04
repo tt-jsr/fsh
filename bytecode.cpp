@@ -16,43 +16,43 @@ namespace fsh
         {
         case BC_BINARY_ADD:
             machine.push_data(MakeInteger(lhs->value + rhs->value));
-            machine.log() << "BC_BINARY_ADD:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_BINARY_ADD:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_BINARY_SUBTRACT:
             machine.push_data(MakeInteger(lhs->value - rhs->value));
-            machine.log() << "BC_BINARY_SUBTRACT:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_BINARY_SUBTRACT:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_BINARY_MULTIPLY:
             machine.push_data(MakeInteger(lhs->value * rhs->value));
-            machine.log() << "BC_BINARY_MULTIPLY:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_BINARY_MULTIPLY:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_BINARY_DIVIDE:
             machine.push_data(MakeInteger(lhs->value / rhs->value));
-            machine.log() << "BC_BINARY_DIVIDE:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_BINARY_DIVIDE:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_RELATIONAL_GT:
             machine.push_data(MakeBoolean(lhs->value > rhs->value));
-            machine.log() << "BC_RELATIONAL_GT:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_RELATIONAL_GT:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_RELATIONAL_GTE:
             machine.push_data(MakeBoolean(lhs->value >= rhs->value));
-            machine.log() << "BC_RELATIONAL_GTE:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_RELATIONAL_GTE:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_RELATIONAL_LT:
             machine.push_data(MakeBoolean(lhs->value < rhs->value));
-            machine.log() << "BC_RELATIONAL_LT:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_RELATIONAL_LT:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_RELATIONAL_LTE:
             machine.push_data(MakeBoolean(lhs->value <= rhs->value));
-            machine.log() << "BC_RELATIONAL_LTE:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_RELATIONAL_LTE:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_RELATIONAL_EQ:
             machine.push_data(MakeBoolean(lhs->value == rhs->value));
-            machine.log() << "BC_RELATIONAL_EQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_RELATIONAL_EQ:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_RELATIONAL_NEQ:
             machine.push_data(MakeBoolean(lhs->value != rhs->value));
-            machine.log() << "BC_RELATIONAL_NEQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_RELATIONAL_NEQ:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         }
     }
@@ -63,43 +63,43 @@ namespace fsh
         {
         case BC_BINARY_ADD:
             machine.push_data(MakeFloat(lhs->value + rhs->value));
-            machine.log() << "BC_BINARY_ADD:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_BINARY_ADD:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_BINARY_SUBTRACT:
             machine.push_data(MakeFloat(lhs->value - rhs->value));
-            machine.log() << "BC_BINARY_SUBTRACT:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_BINARY_SUBTRACT:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_BINARY_MULTIPLY:
             machine.push_data(MakeFloat(lhs->value * rhs->value));
-            machine.log() << "BC_BINARY_MULTIPLY:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_BINARY_MULTIPLY:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_BINARY_DIVIDE:
             machine.push_data(MakeFloat(lhs->value / rhs->value));
-            machine.log() << "BC_BINARY_DIVIDE:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_BINARY_DIVIDE:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_RELATIONAL_GT:
             machine.push_data(MakeBoolean(lhs->value > rhs->value));
-            machine.log() << "BC_RELATIONAL_GT:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_RELATIONAL_GT:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_RELATIONAL_GTE:
             machine.push_data(MakeBoolean(lhs->value >= rhs->value));
-            machine.log() << "BC_RELATIONAL_GTE:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_RELATIONAL_GTE:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_RELATIONAL_LT:
             machine.push_data(MakeBoolean(lhs->value < rhs->value));
-            machine.log() << "BC_RELATIONAL_LT:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_RELATIONAL_LT:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_RELATIONAL_LTE:
             machine.push_data(MakeBoolean(lhs->value <= rhs->value));
-            machine.log() << "BC_RELATIONAL_LTE:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_RELATIONAL_LTE:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_RELATIONAL_EQ:
             machine.push_data(MakeBoolean(lhs->value == rhs->value));
-            machine.log() << "BC_RELATIONAL_EQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_RELATIONAL_EQ:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_RELATIONAL_NEQ:
             machine.push_data(MakeBoolean(lhs->value != rhs->value));
-            machine.log() << "BC_RELATIONAL_NEQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_RELATIONAL_NEQ:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         }
     }
@@ -110,15 +110,15 @@ namespace fsh
         {
         case BC_BINARY_ADD:
             machine.push_data(MakeString(lhs->value + rhs->value));
-            machine.log() << "BC_BINARY_ADD:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_BINARY_ADD:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_RELATIONAL_EQ:
             machine.push_data(MakeBoolean(lhs->value == rhs->value));
-            machine.log() << "BC_RELATIONAL_EQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_RELATIONAL_EQ:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_RELATIONAL_NEQ:
             machine.push_data(MakeBoolean(lhs->value != rhs->value));
-            machine.log() << "BC_RELATIONAL_NEQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_RELATIONAL_NEQ:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         default:
             throw std::runtime_error("Invalid operator with strings");
@@ -130,43 +130,43 @@ namespace fsh
         if (lhs->type() != rhs->type())
         {
             machine.push_data(MakeBoolean(false));
-            machine.log() << "EQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "EQ:" << toString(machine, machine.peek_data()) << std::endl;
             return true;
         }
         if(lhs->IsNone() && rhs->IsNone())
         {
             machine.push_data(MakeBoolean(true));
-            machine.log() << "EQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "EQ:" << toString(machine, machine.peek_data()) << std::endl;
             return true;
         }
         if(!lhs->IsNone() && rhs->IsNone())
         {
             machine.push_data(MakeBoolean(false));
-            machine.log() << "EQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "EQ:" << toString(machine, machine.peek_data()) << std::endl;
             return true;
         }
         if(lhs->IsNone() && !rhs->IsNone())
         {
             machine.push_data(MakeBoolean(false));
-            machine.log() << "EQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "EQ:" << toString(machine, machine.peek_data()) << std::endl;
             return true;
         }
         if(lhs->IsBoolean() && rhs->IsBoolean())
         {
             machine.push_data(MakeBoolean(lhs.cast<Boolean>()->value == rhs.cast<Boolean>()->value));
-            machine.log() << "EQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "EQ:" << toString(machine, machine.peek_data()) << std::endl;
             return true;
         }
         if(lhs->IsBoolean() && !rhs->IsBoolean())
         {
             machine.push_data(MakeBoolean(false));
-            machine.log() << "EQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "EQ:" << toString(machine, machine.peek_data()) << std::endl;
             return true;
         }
         if(!lhs->IsBoolean() && rhs->IsBoolean())
         {
             machine.push_data(MakeBoolean(false));
-            machine.log() << "EQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "EQ:" << toString(machine, machine.peek_data()) << std::endl;
             return true;
         }
         return false;
@@ -177,43 +177,43 @@ namespace fsh
         if (lhs->type() != rhs->type())
         {
             machine.push_data(MakeBoolean(true));
-            machine.log() << "NEQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "NEQ:" << toString(machine, machine.peek_data()) << std::endl;
             return true;
         }
         if(lhs->IsNone() && rhs->IsNone())
         {
             machine.push_data(MakeBoolean(false));
-            machine.log() << "NEQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "NEQ:" << toString(machine, machine.peek_data()) << std::endl;
             return true;
         }
         if(!lhs->IsNone() && rhs->IsNone())
         {
             machine.push_data(MakeBoolean(true));
-            machine.log() << "NEQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "NEQ:" << toString(machine, machine.peek_data()) << std::endl;
             return true;
         }
         if(lhs->IsNone() && !rhs->IsNone())
         {
             machine.push_data(MakeBoolean(true));
-            machine.log() << "NEQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "NEQ:" << toString(machine, machine.peek_data()) << std::endl;
             return true;
         }
         if(lhs->IsBoolean() && rhs->IsBoolean())
         {
             machine.push_data(MakeBoolean(lhs.cast<Boolean>()->value != rhs.cast<Boolean>()->value));
-            machine.log() << "NEQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "NEQ:" << toString(machine, machine.peek_data()) << std::endl;
             return true;
         }
         if(lhs->IsBoolean() && !rhs->IsBoolean())
         {
             machine.push_data(MakeBoolean(true));
-            machine.log() << "NEQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "NEQ:" << toString(machine, machine.peek_data()) << std::endl;
             return true;
         }
         if(!lhs->IsBoolean() && rhs->IsBoolean())
         {
             machine.push_data(MakeBoolean(true));
-            machine.log() << "NEQ:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "NEQ:" << toString(machine, machine.peek_data()) << std::endl;
             return true;
         }
         return false;
@@ -225,6 +225,21 @@ namespace fsh
         ElementPtr rhs = machine.pop_data();
         ElementPtr ldata = machine.resolve(lhs);
         ElementPtr rdata = machine.resolve(rhs);
+        if (ldata->IsIdentifier())
+        {
+            IdentifierPtr id = ldata.cast<Identifier>();
+            std::stringstream strm;
+            strm << "Unknown identifier \"" << id->value << "\"";
+            throw std::runtime_error(strm.str());
+        }
+        if (rdata->IsIdentifier())
+        {
+            IdentifierPtr id = rdata.cast<Identifier>();
+            std::stringstream strm;
+            strm << "Unknown identifier \"" << id->value << "\"";
+            throw std::runtime_error(strm.str());
+        }
+
         if (op == BC_LOGICAL_AND)
         {
             bool b = machine.ConvertToBool(ldata);
@@ -232,7 +247,7 @@ namespace fsh
             {
                 ElementPtr e = MakeBoolean(false);
                 machine.push_data(e);
-                machine.log() << "BC_LOGICAL_AND:" << toString(machine, machine.peek_data()) << std::endl;
+                //machine.log() << "BC_LOGICAL_AND:" << toString(machine, machine.peek_data()) << std::endl;
                 return;
             }
             b = machine.ConvertToBool(rdata);
@@ -240,12 +255,12 @@ namespace fsh
             {
                 ElementPtr e = MakeBoolean(false);
                 machine.push_data(e);
-                machine.log() << "BC_LOGICAL_AND:" << toString(machine, machine.peek_data()) << std::endl;
+                //machine.log() << "BC_LOGICAL_AND:" << toString(machine, machine.peek_data()) << std::endl;
                 return;
             }
             ElementPtr e = MakeBoolean(true);
             machine.push_data(e);
-            machine.log() << "BC_LOGICAL_AND:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_LOGICAL_AND:" << toString(machine, machine.peek_data()) << std::endl;
             return;
         }
         if (op == BC_LOGICAL_OR)
@@ -255,7 +270,7 @@ namespace fsh
             {
                 ElementPtr e = MakeBoolean(true);
                 machine.push_data(e);
-                machine.log() << "BC_LOGICAL_OR:" << toString(machine, machine.peek_data()) << std::endl;
+                //machine.log() << "BC_LOGICAL_OR:" << toString(machine, machine.peek_data()) << std::endl;
                 return;
             }
             b = machine.ConvertToBool(rdata);
@@ -263,12 +278,12 @@ namespace fsh
             {
                 ElementPtr e = MakeBoolean(false);
                 machine.push_data(e);
-                machine.log() << "BC_LOGICAL_OR:" << toString(machine, machine.peek_data()) << std::endl;
+                //machine.log() << "BC_LOGICAL_OR:" << toString(machine, machine.peek_data()) << std::endl;
                 return;
             }
             ElementPtr e = MakeBoolean(true);
             machine.push_data(e);
-            machine.log() << "BC_LOGICAL_OR:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_LOGICAL_OR:" << toString(machine, machine.peek_data()) << std::endl;
             return;
         }
         if (op == BC_RELATIONAL_EQ)
@@ -309,14 +324,14 @@ namespace fsh
         {
             std::stringstream strm;
             strm << "Binary Operator: Invalid types lhs: " << ldata->type() << " rhs: " << rdata->type();
-            machine.log() << strm.str() << std::endl;
+            //machine.log() << strm.str() << std::endl;
             throw std::runtime_error(strm.str());
         }
     }
 
     bool ExecuteImpl(Machine& machine, ByteCode& bc)
     {
-        machine.log() << bc.ip << ": ";
+        //machine.log() << bc.ip << ": ";
         switch(bc[bc.ip])
         {
         case BC_BINARY_ADD:
@@ -366,32 +381,32 @@ namespace fsh
                 else
                     throw std::runtime_error("Unary minus: Invalid operand");
                 machine.push_data(e);
-                machine.log() << "BC_UNARY_NEGATE:" << toString(machine, machine.peek_data()) << std::endl;
+                //machine.log() << "BC_UNARY_NEGATE:" << toString(machine, machine.peek_data()) << std::endl;
             }
             break;
         case BC_LOAD_NONE:
             {
                 machine.push_data(MakeNone());
-                machine.log() << "BC_LOAD_NONE:" << toString(machine, machine.peek_data()) << std::endl;
+                //machine.log() << "BC_LOAD_NONE:" << toString(machine, machine.peek_data()) << std::endl;
             }
             break;
         case BC_LOAD_TRUE:
             {
                 machine.push_data(MakeBoolean(true));
-                machine.log() << "BC_LOAD_TRUE:" << toString(machine, machine.peek_data()) << std::endl;
+                //machine.log() << "BC_LOAD_TRUE:" << toString(machine, machine.peek_data()) << std::endl;
             }
             break;
         case BC_LOAD_FALSE:
             {
                 machine.push_data(MakeBoolean(false));
-                machine.log() << "BC_LOAD_FALSE:" << toString(machine, machine.peek_data()) << std::endl;
+                //machine.log() << "BC_LOAD_FALSE:" << toString(machine, machine.peek_data()) << std::endl;
             }
             break;
         case BC_LOAD_INTEGER:
             {
                 ++bc.ip;
                 machine.push_data(MakeInteger(bc[bc.ip]));
-                machine.log() << "BC_LOAD_INTEGER:" << toString(machine, machine.peek_data()) << std::endl;
+                //machine.log() << "BC_LOAD_INTEGER:" << toString(machine, machine.peek_data()) << std::endl;
             }
             break;
         case BC_LOAD_FLOAT:
@@ -399,7 +414,7 @@ namespace fsh
                 ++bc.ip;
                 double *d = (double *)&bc.byte_codes[bc.ip];
                 machine.push_data(MakeFloat(*d));
-                machine.log() << "BC_LOAD_FLOAT:" << toString(machine, machine.peek_data()) << std::endl;
+                //machine.log() << "BC_LOAD_FLOAT:" << toString(machine, machine.peek_data()) << std::endl;
             }
             break;
         case BC_LOAD_STRING:
@@ -407,7 +422,7 @@ namespace fsh
                 ++bc.ip;
                 std::string *ps = (std::string *)bc[bc.ip];
                 machine.push_data(MakeString(*ps));
-                machine.log() << "BC_LOAD_STRING:" << toString(machine, machine.peek_data()) << std::endl;
+                //machine.log() << "BC_LOAD_STRING:" << toString(machine, machine.peek_data()) << std::endl;
             }
             break;
         case BC_LOAD_IDENTIFIER:
@@ -415,7 +430,7 @@ namespace fsh
                 ++bc.ip;
                 std::string *ps = (std::string *)bc[bc.ip];
                 machine.push_data(MakeIdentifier(*ps));
-                machine.log() << "BC_LOAD_IDENTIFIER: " << *ps << " as " << toString(machine, machine.peek_data()) << std::endl;
+                //machine.log() << "BC_LOAD_IDENTIFIER: " << *ps << " as " << toString(machine, machine.peek_data()) << std::endl;
             }
             break;
         case BC_RESOLVE:
@@ -423,7 +438,7 @@ namespace fsh
                 ElementPtr e = machine.pop_data();
                 e = machine.resolve(e);
                 machine.push_data(e);
-                machine.log() << "BC_RESOLVE: type=" << e->type() << " val: " << toString(machine, machine.peek_data()) << std::endl;
+                //machine.log() << "BC_RESOLVE: type=" << e->type() << " val: " << toString(machine, machine.peek_data()) << std::endl;
             }
             break;
         case BC_INCREMENT_LOCATION:
@@ -431,7 +446,7 @@ namespace fsh
                 ++bc.ip;
                 size_t location = bc[bc.ip];
                 ++bc[location];
-                machine.log() << "BC_INCREMENT_LOCATION" << std::endl;
+                //machine.log() << "BC_INCREMENT_LOCATION" << std::endl;
             }
             break;
         case BC_STORE_LOCATION:
@@ -441,7 +456,7 @@ namespace fsh
                 ++bc.ip;
                 int64_t value = bc[bc.ip];
                 bc[location] = value;
-                machine.log() << "BC_STORE_LOCATION" << std::endl;
+                //machine.log() << "BC_STORE_LOCATION" << std::endl;
             }
             break;
         case BC_LOAD_INTEGER_LOCATION:
@@ -449,7 +464,7 @@ namespace fsh
                 ++bc.ip;
                 size_t location = bc[bc.ip];
                 machine.push_data(MakeInteger(bc[location]));
-                machine.log() << "BC_LOAD_INTEGER_LOCATION:" << toString(machine, machine.peek_data()) << std::endl;
+                //machine.log() << "BC_LOAD_INTEGER_LOCATION:" << toString(machine, machine.peek_data()) << std::endl;
             }
             break;
         case BC_DELETE_ITERATOR:
@@ -460,7 +475,7 @@ namespace fsh
                 if (pElement)
                     pElement->dec_ref();
                 bc[location] = 0;
-                machine.log() << "BC_DELETE_ITERATOR:" << std::endl;
+                //machine.log() << "BC_DELETE_ITERATOR:" << std::endl;
             }
             break;
         case BC_INCREMENT_ITERATOR:
@@ -484,12 +499,12 @@ namespace fsh
                         ++raw->value;
                     }
                     machine.push_data(cont);
-                    machine.log() << "BC_INCREMENT_ITERATOR list cont:" << toString(machine, machine.peek_data()) << std::endl;
+                    //machine.log() << "BC_INCREMENT_ITERATOR list cont:" << toString(machine, machine.peek_data()) << std::endl;
                     IntegerPtr ip(raw);
                     machine.push_data(ip);
-                    machine.log() << "BC_INCREMENT_ITERATOR list idx:" << toString(machine, machine.peek_data()) << std::endl;
+                    //machine.log() << "BC_INCREMENT_ITERATOR list idx:" << toString(machine, machine.peek_data()) << std::endl;
                 }
-                if (cont->IsMap())
+                else if (cont->IsMap())
                 {
                     ElementPtr key;
                     MapPtr m = cont.cast<Map>();
@@ -525,9 +540,13 @@ namespace fsh
                         }
                     }
                     machine.push_data(m);
-                    machine.log() << "BC_INCREMENT_ITERATOR map cont:" << toString(machine, machine.peek_data()) << std::endl;
+                    //machine.log() << "BC_INCREMENT_ITERATOR map cont:" << toString(machine, machine.peek_data()) << std::endl;
                     machine.push_data(key);
-                    machine.log() << "BC_INCREMENT_ITERATOR map key:" << toString(machine, machine.peek_data()) << std::endl;
+                    //machine.log() << "BC_INCREMENT_ITERATOR map key:" << toString(machine, machine.peek_data()) << std::endl;
+                }
+                else
+                {
+                    throw std::runtime_error("Iterator requires list or map");
                 }
             }
             break;
@@ -539,8 +558,8 @@ namespace fsh
                     throw std::runtime_error("Expected identifier");
                 machine.store_variable(id.cast<Identifier>()->value, v);
                 machine.push_data(v);
-                machine.log() << "BC_STORE_VAR:" << toString(machine, machine.peek_data()) << " to " << 
-                    id.cast<Identifier>()->value << std::endl;
+                //machine.log() << "BC_STORE_VAR:" << toString(machine, machine.peek_data()) << " to " << 
+                    //id.cast<Identifier>()->value << std::endl;
             }
             break;
         case BC_LOAD_CONTAINER_ITEM:
@@ -557,13 +576,13 @@ namespace fsh
                     {
                         machine.set_gp_register(false);
                         machine.push_data(MakeNone());
-                        machine.log() << "BC_LOAD_CONRTAINER_ITEM (list):" << toString(machine, machine.peek_data()) << std::endl;
+                        //machine.log() << "BC_LOAD_CONRTAINER_ITEM (list):" << toString(machine, machine.peek_data()) << std::endl;
                     }
                     else
                     {
                         machine.set_gp_register(true);
                         machine.push_data(vec[n]);
-                        machine.log() << "BC_LOAD_CONRTAINER_ITEM (list):" << toString(machine, machine.peek_data()) << std::endl;
+                        //machine.log() << "BC_LOAD_CONRTAINER_ITEM (list):" << toString(machine, machine.peek_data()) << std::endl;
                     }
                 }
                 else if (C->IsMap())
@@ -574,14 +593,14 @@ namespace fsh
                     {
                         machine.set_gp_register(false);
                         machine.push_data(MakeNone());
-                        machine.log() << "BC_LOAD_CONRTAINER_ITEM (map):" << toString(machine, machine.peek_data()) << std::endl;
+                        //machine.log() << "BC_LOAD_CONRTAINER_ITEM (map):" << toString(machine, machine.peek_data()) << std::endl;
                     }
                     else
                     {
                         machine.set_gp_register(true);
                         ElementPtr pr = MakePair(it->first, it->second);
                         machine.push_data(pr);
-                        machine.log() << "BC_LOAD_CONRTAINER_ITEM (map):" << toString(machine, machine.peek_data()) << std::endl;
+                        //machine.log() << "BC_LOAD_CONRTAINER_ITEM (map):" << toString(machine, machine.peek_data()) << std::endl;
                     }
                 }
                 else
@@ -594,10 +613,10 @@ namespace fsh
                 if (machine.get_gp_register() == false)
                 {
                     bc.ip = bc[bc.ip];
-                    machine.log() << "BC_JUMP_GP_FALSE, jump taken, jump to " << bc.ip << std::endl;
+                    //machine.log() << "BC_JUMP_GP_FALSE, jump taken, jump to " << bc.ip << std::endl;
                 }
-                else
-                    machine.log() << "BC_JUMP_GP_FALSE, jump not taken:" << std::endl;
+                //else
+                    //machine.log() << "BC_JUMP_GP_FALSE, jump not taken:" << std::endl;
             }
             break;
         case BC_JUMP_IF_FALSE:
@@ -608,24 +627,24 @@ namespace fsh
                 if (!b)
                 {
                     bc.ip = bc[bc.ip];
-                    machine.log() << "BC_JUMP_IF_FALSE, jump taken, jump to " << bc.ip << std::endl;
+                    //machine.log() << "BC_JUMP_IF_FALSE, jump taken, jump to " << bc.ip << std::endl;
                 }
-                else 
-                    machine.log() << "BC_JUMP_IF_FALSE, jump not taken:" << std::endl;
+                //else 
+                    //machine.log() << "BC_JUMP_IF_FALSE, jump not taken:" << std::endl;
             }
             break;
         case BC_JUMP:
             {
                 ++bc.ip;
                 bc.ip = bc[bc.ip];
-                machine.log() << "BC_JUMP to " << bc.ip << std::endl;
+                //machine.log() << "BC_JUMP to " << bc.ip << std::endl;
             }
             break;
         case BC_RETURN:
-            machine.log() << "BC_RETURN" << std::endl;
+            //machine.log() << "BC_RETURN" << std::endl;
             return false;
         case BC_DATA:
-            machine.log() << "BC_DATA" << std::endl;
+            //machine.log() << "BC_DATA" << std::endl;
             ++bc.ip;  // skip data, don't do anything
             break;
         case BC_CALL:
@@ -647,10 +666,10 @@ namespace fsh
                 if (fd == nullptr)
                     throw std::runtime_error("Function not found");
                 
-                machine.log() << "BC_CALL:" << std::endl;
+                //machine.log() << "BC_CALL:" << std::endl;
                 ElementPtr rtn = fd->Call(machine, num);
                 machine.push_data(rtn);
-                machine.log() << "BC_CALL rtn:" << toString(machine, machine.peek_data()) << std::endl;
+                //machine.log() << "BC_CALL rtn:" << toString(machine, machine.peek_data()) << std::endl;
             }
             break;
         case BC_BIND:
@@ -687,7 +706,7 @@ namespace fsh
                     pbf->attributes = *(ByteCode *)bc[bc.ip];
                 id = machine.registerFunction(pbf);
                 machine.push_data(MakeFunctionDefId(id));
-                machine.log() << "BC_BIND:" << toString(machine, machine.peek_data()) << std::endl;
+                //machine.log() << "BC_BIND:" << toString(machine, machine.peek_data()) << std::endl;
             }
             break;
         case BC_LOAD_FUNCTION_DEF:
@@ -695,7 +714,7 @@ namespace fsh
                 ++bc.ip;
                 uintptr_t id = bc[bc.ip];
                 machine.push_data(MakeFunctionDefId(id));
-                machine.log() << "BC_LOAD_FUNCTION_DEF:" << toString(machine, machine.peek_data()) << std::endl;
+                //machine.log() << "BC_LOAD_FUNCTION_DEF:" << toString(machine, machine.peek_data()) << std::endl;
             }
             break;
         case BC_SYSTEM:
@@ -705,16 +724,16 @@ namespace fsh
                 std::string cmd = machine.string_table_get(id);
                 system(cmd.c_str());
                 machine.push_data(MakeNone());
-                machine.log() << "BC_SYSTEM:" << toString(machine, machine.peek_data()) << std::endl;
+                //machine.log() << "BC_SYSTEM:" << toString(machine, machine.peek_data()) << std::endl;
             }
             break;
         case BC_PUSH_CONTEXT:
             machine.push_context();
-            machine.log() << "BC_PUSH_CONTEXT:" << std::endl;
+            //machine.log() << "BC_PUSH_CONTEXT:" << std::endl;
             break;
         case BC_POP:
             machine.pop_data();
-            machine.log() << "BC_POP:" << toString(machine, machine.peek_data()) << std::endl;
+            //machine.log() << "BC_POP:" << toString(machine, machine.peek_data()) << std::endl;
             break;
         case BC_TRY:
             {
@@ -724,7 +743,7 @@ namespace fsh
                 ByteCode *bccatch = machine.getBlock(catch_id);
                 assert(bctry);
                 assert(bccatch);
-                machine.log() << "BC_TRY enter try"  << std::endl;
+                //machine.log() << "BC_TRY enter try"  << std::endl;
                 try
                 {
                     bctry->ip = 0;
@@ -734,21 +753,21 @@ namespace fsh
                             return true;
                         ++bctry->ip;
                     }
-                    machine.log() << "BC_TRY return from try"  << std::endl;
+                    //machine.log() << "BC_TRY return from try"  << std::endl;
                 }
                 catch (std::exception& e)
                 {
                     ElementPtr ex = MakeString(e.what());
                     machine.store_variable("_exception", ex);
                     bccatch->ip = 0;
-                    machine.log() << "BC_TRY enter catch"  << std::endl;
+                    //machine.log() << "BC_TRY enter catch"  << std::endl;
                     while(bccatch->ip < bccatch->size())
                     {
                         if (false == fsh::Execute(machine, *bccatch))
                             return true;
                         ++bccatch->ip;
                     }
-                    machine.log() << "BC_TRY return catch"  << std::endl;
+                    //machine.log() << "BC_TRY return catch"  << std::endl;
                 }
             }
             break;

@@ -18,7 +18,8 @@ namespace fsh
     ,next_element_id(0)
     {
         executionContext = MakeExecutionContext();
-        logf.open("fsh.log");
+        //logf.open("fsh.log");
+        logf.open("/dev/null");
         assert(logf.is_open());
     }
 
