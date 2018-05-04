@@ -21,6 +21,16 @@ namespace fsh
         //logf.open("fsh.log");
         logf.open("/dev/null");
         assert(logf.is_open());
+
+        PipeLineActionPtr pl = MakePipeLineAction();
+        pl->action = PipeLineAction::RESTART;
+        store_variable("PIPELINE_RESTART", pl);
+
+        pl = MakePipeLineAction();
+        pl->action = PipeLineAction::EXIT;
+        store_variable("PIPELINE_EXIT", pl);
+
+        store_variable("Pass", MakeNone());
     }
 
 

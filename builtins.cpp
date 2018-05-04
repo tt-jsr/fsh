@@ -295,6 +295,22 @@ namespace fsh
                 return std::to_string(fd->funcid);
             }
             break;
+        case ELEMENT_TYPE_PIPELINE_ACTION:
+            {
+                PipeLineActionPtr pla = e.cast<PipeLineAction>();
+                switch (pla->action)
+                {
+                case PipeLineAction::RESTART:
+                    return std::string("PIPELINE_RESTART");
+                    break;
+                case PipeLineAction::EXIT:
+                    return std::string("PIPELINE_EXIT");
+                    break;
+                default:
+                    return "PIPELINE_UNDEFINED";
+                }
+            }
+            break;
         default:
             {
                 std::stringstream strm;

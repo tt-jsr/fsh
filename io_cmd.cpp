@@ -275,6 +275,9 @@ namespace fsh
 
     ElementPtr PipelineHead(Machine& machine, ElementPtr stage, LoopContext& ctx)
     {
+        PipeLineActionPtr plExit = MakePipeLineAction();
+        plExit->action = PipeLineAction::EXIT;
+
         stage = machine.resolve(stage);
         switch (stage->type())
         {
@@ -282,7 +285,9 @@ namespace fsh
             {
                 ListPtr lp = stage.cast<List>();
                 if (ctx.listIndex == lp->items.size())
-                    return MakeBoolean(false);
+                {
+                    return plExit;
+                }
                 return lp->items[ctx.listIndex++];
             }
             break;
@@ -293,14 +298,14 @@ namespace fsh
                 {
                     auto it = m->map.begin();
                     if (it == m->map.end())
-                        return MakeBoolean(false);
+                        return plExit;
                     ctx.mapKey = it->first;
                     return MakePair(it->first, it->second);
                 }
                 auto it = m->map.find(ctx.mapKey);
                 ++it;
                 if (it == m->map.end())
-                    return MakeBoolean(false);
+                    return plExit;
                 ctx.mapKey = it->first;
                 return MakePair(it->first, it->second);
             }
@@ -331,7 +336,7 @@ namespace fsh
                         else
                             fclose(file->fp);
                         file->fp = nullptr;
-                        return MakeBoolean(false);
+                        return plExit;
                     }
                     machine.log() << buffer << std::endl;
                     if (file->stripnl)
@@ -351,17 +356,20 @@ namespace fsh
         default:
             {
                 if (ctx.loopCount > 0)
-                    return MakeBoolean(false);
+                    return plExit;
                 std::string s = toString(machine, stage);
                 return MakeString(s);
             }
             break;
         }
-        return MakeBoolean(false);
+        return plExit;
     }
 
     ElementPtr PipelineStage(Machine& machine, ElementPtr stage, ElementPtr data)
     {
+        PipeLineActionPtr plExit = MakePipeLineAction();
+        plExit->action = PipeLineAction::EXIT;
+
         stage = machine.resolve(stage);
         switch (stage->type())
         {
@@ -419,7 +427,7 @@ namespace fsh
                     if (ferror(file->fp))
                     {
                         machine.log() << "PipeLine: fputs error, stopping pipeline" << std::endl;
-                        return MakeBoolean(false);
+                        return plExit;
                     }
                     if (file->addnl)
                         fputs("\n", file->fp);
@@ -435,7 +443,7 @@ namespace fsh
             }
             break;
         }
-        return MakeBoolean(false);
+        return plExit;
     }
 
     void ClosePipeLine(Machine& machine, std::vector<ElementPtr>& args)
@@ -465,16 +473,26 @@ namespace fsh
             machine.clear_stack();
             machine.log() << "pl: " << idx << ": Start of stage" << std::endl;
             if (idx == 0)
-                data = PipelineHead(machine, args[idx], ctx);
-            else
-                data = PipelineStage(machine, args[idx], data);
-            machine.log() << "pl: " << idx << ": Stage returned: " << toString(machine, data) << std::endl;
-            if (data->IsBoolean())
             {
-                if (data.cast<Boolean>()->value == false)
+                data = PipelineHead(machine, args[idx], ctx);
+                // If we get a PipeLine action at the head (RESTART or EXIT), we should exit.
+                if (data->IsPipeLineAction())
+                {
                     return MakeNone();
-                else
+                }
+            }
+            else
+            {
+                data = PipelineStage(machine, args[idx], data);
+            }
+            machine.log() << "pl: " << idx << ": Stage returned: " << toString(machine, data) << std::endl;
+            if (data->IsPipeLineAction())
+            {
+                PipeLineActionPtr pla = data.cast<PipeLineAction>();
+                if (pla->action == PipeLineAction::RESTART)
                     idx = args.size();
+                if (pla->action == PipeLineAction::EXIT)
+                    return MakeNone();
             }
             ++idx;
             if (idx >= args.size())

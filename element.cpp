@@ -77,4 +77,10 @@ namespace fsh
         p->funcid = id;
         return p;
     }
+
+    PipeLineActionPtr MakePipeLineAction()
+    {
+        PipeLineActionPtr pl(new PipeLineAction());
+        return pl;
+    }
 }

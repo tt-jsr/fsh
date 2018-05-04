@@ -27,6 +27,7 @@ namespace fsh
         ,ELEMENT_TYPE_ATTRIBUTE
         ,ELEMENT_TYPE_FUNCTION_DEF_ID
         ,ELEMENT_TYPE_PAIR
+        ,ELEMENT_TYPE_PIPELINE_ACTION
     };
 
     struct Element : public instrusive_base
@@ -45,9 +46,25 @@ namespace fsh
         bool IsAttribute() const {return type() == ELEMENT_TYPE_ATTRIBUTE;}
         bool IsFunctionDefId() const {return type() == ELEMENT_TYPE_FUNCTION_DEF_ID;}
         bool IsPair() const {return type() == ELEMENT_TYPE_PAIR;}
+        bool IsPipeLineAction() const {return type() == ELEMENT_TYPE_PIPELINE_ACTION;}
     };
 
     typedef instrusive_ptr<Element> ElementPtr;
+
+    struct PipeLineAction : public Element
+    {
+        PipeLineAction()
+        {}
+
+        virtual ElementType type() const {return ELEMENT_TYPE_PIPELINE_ACTION;}
+        enum Action {
+            RESTART
+            ,EXIT
+        };
+        Action action;
+    };
+
+    typedef instrusive_ptr<PipeLineAction> PipeLineActionPtr;
 
     struct Error : public Element
     {
@@ -246,5 +263,6 @@ namespace fsh
     ErrorPtr MakeError(const std::string&, bool);
     FunctionDefIdPtr MakeFunctionDefId(int64_t id);
     PairPtr MakePair(ElementPtr f, ElementPtr s);
+    PipeLineActionPtr MakePipeLineAction();
 }
 
