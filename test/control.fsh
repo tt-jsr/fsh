@@ -40,9 +40,10 @@ DefineRecord["fruit", apple, banana, kiwi, orange];
 lst = CreateRecord["fruit"];
 
 count = 0;
-rtn = For[item in lst
+For[item in lst
 then
     count = count + 1;
+    rtn = count;
 ];
 
 UnitTest[4];
