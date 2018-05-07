@@ -2,10 +2,13 @@ CC=gcc
 CDEBUG = -g -O0
 CPPFLAGS = $(CDEBUG) -std=c++11 -I.
 LDFLAGS=-g
-LIBS = -lstdc++ 
-DEPS=common.h element.h execution_context.h machine.h ast.h bytecodes.h builtins.h fsh.y fsh.l shell.h
+LIBS = -lstdc++ -lreadline
+DEPS=common.h element.h execution_context.h machine.h ast.h bytecode.h builtins.h fsh.y fsh.l shell.h
 
-SRC	= main.cpp execution_context.cpp element.cpp machine.cpp ast.cpp bytescode.cpp fsh.tab.cpp lex.yy.cpp err_cmd.cpp io_cmd.cpp builtins.cpp string_cmd.cpp list_cmd.cpp shell.cpp map_cmd.cpp
+SRC	= main.cpp execution_context.cpp element.cpp machine.cpp ast.cpp fsh.tab.cpp lex.yy.cpp err_cmd.cpp io_cmd.cpp builtins.cpp string_cmd.cpp list_cmd.cpp shell.cpp map_cmd.cpp bytecode.cpp
+
+SRC += oclog_cmd.cpp
+DEPS += oclog_cmd.h
 
 fsh.tab.o : fsh.y
 	#bison -d fsh.y
