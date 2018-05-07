@@ -8,39 +8,32 @@ namespace fsh
         return ExecutionContextPtr(new ExecutionContext());
     }
 
-    ElementPtr GetVariableImpl(ExecutionContextPtr ctx, const std::string& s)
+    bool ExecutionContext::GetVariable(const std::string& s, ElementPtr& out)
     {
-        if (ctx.get() == nullptr)
-            return ElementPtr();
-
-        auto it = ctx->variables_.find(s);
-        if (it == ctx->variables_.end())
-            return GetVariableImpl(ctx->parent, s);
-        return it->second;
-    }
-
-    bool AddVariableImpl(ExecutionContextPtr ctx, const std::string& s, ElementPtr value)
-    {
-        if (ctx.get() == nullptr)
+        auto it = variables_.find(s);
+        if (it == variables_.end())
             return false;
-
-        auto it = ctx->variables_.find(s);
-        if (it == ctx->variables_.end())
-            return AddVariableImpl(ctx->parent, s, value);
-        it->second = value;
+        out = it->second;
+        if (out.get() == nullptr)
+            return false;
         return true;
     }
 
-    ElementPtr ExecutionContext::GetVariable(const std::string& s)
+    bool ExecutionContext::AddVariable(const std::string& name, ElementPtr value)
     {
-        return GetVariableImpl(ExecutionContextPtr(this), s);
-    }
-
-    void ExecutionContext::AddVariable(const std::string& name, ElementPtr value)
-    {
-        if (AddVariableImpl(ExecutionContextPtr(this), name, value) == false)
+        // 1. If the variable does not exist, create it.
+        // 2. If the variable exists as a null, return false. Varriable
+        //    has been marked as global
+        // 3. If variable exists, set it.
+        auto it = variables_.find(name);
+        if (it == variables_.end())
         {
             variables_[name] = value;
+            return true;
         }
+        if (!it->second)
+            return false;
+        it->second = value;
+        return true;
     }
 }

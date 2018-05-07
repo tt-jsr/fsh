@@ -131,7 +131,10 @@ namespace fsh
         IntegerPtr n = GetInteger(machine, args, 0);
         if (n)
         {
+            ExecutionContextPtr ctx = machine.executionContexts.back();
+            machine.executionContexts.pop_back();
             machine.unittest_callback(n->value);
+            machine.executionContexts.push_back(ctx);
         }
         return MakeNone();
     }
@@ -441,6 +444,13 @@ namespace fsh
                 target_args.push_back(ba);
             }
         }
+
+        while(attributes.ip < attributes.size())
+        {
+            if (!fsh::Execute(machine, attributes))
+                break;
+            ++attributes.ip;
+        }
         
         return target->CallImpl(machine, target_args);
     }
@@ -518,16 +528,20 @@ namespace fsh
             n += machine.byte_code.size();
             strm << n*8 << " total code bytes" << std::endl;
             
-            ExecutionContextPtr ecxt = machine.executionContext;
-            while(ecxt)
+            for (size_t idx = 0; idx < machine.executionContexts.size(); ++idx)
             {
-                strm << "Variables" << std::endl;
-                for (auto& pr : ecxt->variables_)
+                ExecutionContextPtr ctx = machine.executionContexts[idx];
+                strm << "** Variables in context " << idx << std::endl;
+                for (auto& pr : ctx->variables_)
                 {
-                    strm << pr.first << " : " << pr.second->stype() << std::endl;
+                    if (pr.second->IsString())
+                    {
+                        StringPtr sp = pr.second.cast<String>();
+                        strm << pr.first << " : " << pr.second->stype() << " : " << sp->value.substr(0, 40) << std::endl;
+                    }
+                    else
+                        strm << pr.first << " : " << pr.second->stype() << std::endl;
                 }
-                ExecutionContextPtr tmp = ecxt->parent;
-                ecxt = tmp;
             }
             return MakeString(strm.str());
         }

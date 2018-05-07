@@ -147,6 +147,8 @@ namespace fsh
         ,BC_STORE_LOCATION
 
         ,BC_DELETE_ITERATOR
+
+        ,BC_GLOBAL
     };
 
     enum AstType
@@ -168,6 +170,7 @@ namespace fsh
         ,AST_TRY_CATCH
         ,AST_BIND
         ,AST_RETURN
+        ,AST_GLOBAL
     };
 
     struct FunctionDefinition

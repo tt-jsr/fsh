@@ -250,7 +250,6 @@ void Test1::UnitTestFunctions(int n)
         CPPUNIT_ASSERT(machine.get_variable("attr2",  svalue));
         CPPUNIT_ASSERT(svalue == "world");
         break;
-        /*
     case 8:
         CPPUNIT_ASSERT(machine.get_variable("arg1",  svalue));
         CPPUNIT_ASSERT(svalue == "hello");
@@ -277,7 +276,18 @@ void Test1::UnitTestFunctions(int n)
         CPPUNIT_ASSERT(machine.get_variable("attr",  svalue));
         CPPUNIT_ASSERT(svalue == "value");
         break;
-        */
+    case 11:
+        CPPUNIT_ASSERT(machine.get_variable("gf_global",  svalue) == true);
+        CPPUNIT_ASSERT(svalue == "gf_hello");
+        break;
+    case 12:
+        CPPUNIT_ASSERT(machine.get_variable("gf_global",  svalue));
+        CPPUNIT_ASSERT(svalue == "junk");
+        break;
+    case 13:
+        CPPUNIT_ASSERT(machine.get_variable("gf_global",  svalue));
+        CPPUNIT_ASSERT(svalue == "junk");
+        break;
     }
 }
 

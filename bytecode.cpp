@@ -643,6 +643,14 @@ namespace fsh
         case BC_RETURN:
             //machine.log() << "BC_RETURN" << std::endl;
             return false;
+        case BC_GLOBAL:
+            {
+                ElementPtr e = machine.pop_data();
+                assert(e->IsIdentifier());
+                IdentifierPtr id = e.cast<Identifier>();
+                machine.store_variable(id->value, ElementPtr());
+            }
+            break;
         case BC_DATA:
             //machine.log() << "BC_DATA" << std::endl;
             ++bc.ip;  // skip data, don't do anything

@@ -8,11 +8,10 @@ namespace fsh
 
     struct ExecutionContext : instrusive_base
     {
-        ExecutionContextPtr parent;
         std::unordered_map<std::string, ElementPtr> variables_;
 
-        ElementPtr GetVariable(const std::string& s);
-        void AddVariable(const std::string& name, ElementPtr value);
+        bool GetVariable(const std::string& s, ElementPtr&);
+        bool AddVariable(const std::string& name, ElementPtr value);
     };
 
     ExecutionContextPtr MakeExecutionContext();

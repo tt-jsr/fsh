@@ -73,6 +73,7 @@ in              {column += 2;return IN;}
 For             {column += 3;return FOR;}
 Return          {column += 6;return KW_RETURN;}
 exit            {column += 4;exit(-1);}
+global          {column += 6;return GLOBAL;}
 \"              {quotedstring.clear(); BEGIN(str);}
 <str>\"         {
                     BEGIN(INITIAL);

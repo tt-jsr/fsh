@@ -52,7 +52,6 @@ namespace fsh
         bool get_variable(const std::string& name, int64_t& out);
         bool get_variable(const std::string& name, double& out);
         bool ConvertToBool(ElementPtr);
-        ExecutionContextPtr GetContext();
         // Given a listtype and an Identifier of the fieldname, return the index into the list
         size_t get_record_field(const std::string& list, ElementPtr);
 
@@ -66,7 +65,7 @@ namespace fsh
         FieldMap_t * get_field_map(const std::string&);
     private_impl:
         std::vector<ElementPtr> datastack;
-        ExecutionContextPtr executionContext;
+        std::vector<ExecutionContextPtr> executionContexts;
         RecordMap_t record_fields;
         void reset();
         ElementPtr pop_data();

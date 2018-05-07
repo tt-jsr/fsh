@@ -243,7 +243,6 @@ namespace fsh
         }
         function->GenerateCode(machine, bc);
         bc.code(BC_RESOLVE);
-        bc.code(BC_PUSH_CONTEXT);
         ByteCode *pAttr = nullptr;
         if (attributes)
         {
@@ -280,6 +279,14 @@ namespace fsh
             bc.code(BC_LOAD_NONE);
         }
         bc.code(BC_RETURN);
+    }
+
+    /***************************************************/
+    void ASTGlobal::GenerateCode(Machine& machine, ByteCode& bc)
+    {
+        assert(identifier);
+        identifier->GenerateCode(machine, bc);
+        bc.code(BC_GLOBAL);
     }
 
     /***************************************************/

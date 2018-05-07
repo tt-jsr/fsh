@@ -16,7 +16,7 @@ namespace fsh
     ,next_function_id(0)
     ,next_block_id(0)
     {
-        executionContext = MakeExecutionContext();
+        executionContexts.push_back(MakeExecutionContext());
         //logf.open("fsh.log");
         logf.open("/dev/null");
         assert(logf.is_open());
@@ -77,7 +77,8 @@ namespace fsh
     void Machine::reset()
     {
         datastack.clear();
-        executionContext = MakeExecutionContext();
+        executionContexts.clear();
+        executionContexts.push_back(MakeExecutionContext());
     }
 
     bool Machine::ConvertToBool(ElementPtr e)
@@ -203,11 +204,6 @@ namespace fsh
         return &itRecord->second;
     }
 
-    ExecutionContextPtr Machine::GetContext()
-    {
-        return executionContext;
-    }
-
     ByteCode& Machine::get_byte_code()
     {
         return byte_code;
@@ -233,7 +229,6 @@ namespace fsh
 
     void Machine::store_variable(const std::string& name, ElementPtr d)
     {
-        assert(d);
         size_t pos = name.find_first_of('.');
         if (pos != std::string::npos)
         {
@@ -260,9 +255,8 @@ namespace fsh
             lp->items[idx] = d;
             return;
         }
-        if (name == "rejectList" && !d->IsList())
-            log() << "store rejectList" << std::endl;
-        executionContext->AddVariable(name, d);
+        if (executionContexts.back()->AddVariable(name, d) == false)
+            executionContexts.front()->AddVariable(name, d);
     }
 
     bool Machine::get_list_field(const std::string& name, ElementPtr& out)
@@ -290,10 +284,13 @@ namespace fsh
     {
         if (get_list_field(name, out))
             return true;
-        out = executionContext->GetVariable(name);
-        if (out)
+
+        // try the local context first
+        if (executionContexts.back()->GetVariable(name, out))
             return true;
-        return false;
+
+        // Then the global...
+        return executionContexts.front()->GetVariable(name, out);
     }
 
     bool Machine::get_variable(const std::string& name, bool& out)
@@ -382,15 +379,14 @@ namespace fsh
 
     void Machine::push_context()
     {
-        ExecutionContextPtr ctx = MakeExecutionContext();
-        ctx->parent = executionContext;
-        executionContext = ctx;
+        executionContexts.push_back(MakeExecutionContext());
+        //std::cout << "=== push " << executionContexts.size() << std::endl;
     }
 
     void Machine::pop_context()
     {
-        ExecutionContextPtr ec = executionContext->parent;
-        executionContext = ec;
+        //std::cout << "=== pop " << executionContexts.size() << std::endl;
+        executionContexts.pop_back();
     }
 
     void Machine::register_unittest(std::function<void (int)>& f)

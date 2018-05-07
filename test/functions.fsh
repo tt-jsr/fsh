@@ -69,7 +69,6 @@ foo = &[line:
 
 foo["hello" : attr1->"cruel", attr2->"world"];
 
-
 ############################
 #test bind
 foo = &[testno, arg1, arg2, arg3:
@@ -81,10 +80,35 @@ f2[8, "hello", "cruel"];
 
 f2 = [9, _2, _1, "world"] -> foo;
 f2["hello", "cruel"];
+
 #
 ####################################
 ## Test bind with an attribute
 f2 = [ 10, _2, _1, "world" : attr->"value"] -> foo;
 f2["hello", "cruel"];
 
+
+###################################
+# Test global
+
+
+gf_global = "gf_hello";
+
+fg1 = &[
+    UnitTest[11];
+];
+
+fg1[];
+
+fg2 = &[
+    global gf_global;
+    gf_global = "junk";
+    UnitTest[12];
+];
+
+fg2[];
+
+UnitTest[13];
+
+Print["functions done"];
 

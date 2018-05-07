@@ -207,6 +207,18 @@ namespace fsh
         std::unique_ptr<Ast> expression;
     };
 
+    class ASTGlobal : public Ast
+    {
+    public:
+        ASTGlobal(size_t l)
+        :Ast(l)
+        {}
+        ~ASTGlobal() {}
+        void GenerateCode(Machine&, ByteCode&);
+        AstType type() {return AST_GLOBAL;}
+        std::unique_ptr<Ast> identifier;
+    };
+
     class ASTSystem : public Ast
     {
     public:
