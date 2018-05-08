@@ -310,8 +310,20 @@ namespace fsh
                 return MakePair(it->first, it->second);
             }
             break;
+            /*
+        I have commented this out because there are two use cases.
+        1. User passes in a function that knows how to iterator through it's
+           data and return PIPELINE_EXIT when done.
+        2. The user passes in a lambda or function that will repeatedly return
+           the same data.
+        It's this second case I don't know how it should be handled. I could 
+        handle like I do a string, but then case #1 will be broken. What to do, what to do...
+        */
+
         case ELEMENT_TYPE_FUNCTION_DEF_ID:
             {
+                throw std::runtime_error("Function cannot be head of pipeline");
+                /*
                 machine.log() << "stage function" << std::endl;
                 FunctionDefIdPtr fdid = stage.cast<FunctionDefId>();
                 int64_t funcid = fdid->funcid;
@@ -319,6 +331,7 @@ namespace fsh
                 assert(fd);
                 machine.push_context();
                 return fd->Call(machine, 0);
+                */
             }
             break;
         case ELEMENT_TYPE_FILE_HANDLE:

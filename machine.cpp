@@ -268,7 +268,17 @@ namespace fsh
         std::string fieldName = name.substr(pos+1);
         ElementPtr e;
         if (get_variable(var, e) == false)
+        {
+            try
+            {
+                size_t idx = get_record_field(var, fieldName);
+                out = MakeInteger(idx);
+                return true;
+            }
+            catch(std::exception)
+            {}
             return false;
+        }
         if (e->IsList() == false)
             return false;
         ListPtr lp = e.cast<List>();

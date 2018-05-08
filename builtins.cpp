@@ -617,7 +617,7 @@ namespace fsh
         RegisterBuiltInImpl(machine, "MachineProperty", fsh::MachineProperty);
 
         // Ers
-        RegisterBuiltInImpl(machine, "ParseExecutionReport", fsh::ParseExecutionReport);
+        RegisterBuiltInImpl(machine, "ParseProtobuf", fsh::ParseProtobuf);
     }
 
 }

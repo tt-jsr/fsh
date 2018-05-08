@@ -3,5 +3,5 @@
 
 namespace fsh
 {
-    ElementPtr ParseExecutionReport(Machine& machine, std::vector<ElementPtr>& args);
+    ElementPtr ParseProtobuf(Machine& machine, std::vector<ElementPtr>& args);
 }
