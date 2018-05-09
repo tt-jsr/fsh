@@ -229,6 +229,12 @@ namespace fsh
 
     void Machine::store_variable(const std::string& name, ElementPtr d)
     {
+        if (name.size() == 2 && name[0] == '_' && name[1] >= '1' && name[1] <= '9')
+        {
+            std::stringstream strm;
+            strm << "Cann use " << name << " as an identifier";
+            throw std::runtime_error(strm.str());
+        }
         size_t pos = name.find_first_of('.');
         if (pos != std::string::npos)
         {

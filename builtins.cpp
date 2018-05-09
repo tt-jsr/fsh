@@ -356,6 +356,80 @@ namespace fsh
         return MakeNone();
     }
 
+    StringPtr Type(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr e = GetElement(machine, args, 0);
+        if (!e)
+            throw std::runtime_error("Type[] requires argument");
+        return MakeString(e->stype());
+    }
+
+    BooleanPtr IsString(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr e = GetElement(machine, args, 0);
+        if (!e)
+            throw std::runtime_error("IsString[] requires argument");
+        e = machine.resolve(e);
+        return MakeBoolean(e->IsString());
+    }
+
+    BooleanPtr IsInteger(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr e = GetElement(machine, args, 0);
+        if (!e)
+            throw std::runtime_error("IsInteger[] requires argument");
+        return MakeBoolean(e->IsInteger());
+    }
+
+    BooleanPtr IsFloat(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr e = GetElement(machine, args, 0);
+        if (!e)
+            throw std::runtime_error("IsFloat[] requires argument");
+        return MakeBoolean(e->IsFloat());
+    }
+
+    BooleanPtr IsList(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr e = GetElement(machine, args, 0);
+        if (!e)
+            throw std::runtime_error("IsList[] requires argument");
+        return MakeBoolean(e->IsList());
+    }
+
+    BooleanPtr IsMap(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr e = GetElement(machine, args, 0);
+        if (!e)
+            throw std::runtime_error("IsPap[] requires argument");
+        return MakeBoolean(e->IsMap());
+    }
+
+    BooleanPtr IsFileHandle(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr e = GetElement(machine, args, 0);
+        if (!e)
+            throw std::runtime_error("IsFileHandle[] requires argument");
+        return MakeBoolean(e->IsFileHandle());
+    }
+
+    BooleanPtr IsPair(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr e = GetElement(machine, args, 0);
+        if (!e)
+            throw std::runtime_error("IsSPair[] requires argument");
+        return MakeBoolean(e->IsPair());
+    }
+
+    BooleanPtr IsFunction(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ElementPtr e = GetElement(machine, args, 0);
+        if (!e)
+            throw std::runtime_error("IsFunction[] requires argument");
+        return MakeBoolean(e->IsFunctionDefId());
+    }
+
+
     /*****************************************************************/
 
     ElementPtr FunctionDefinition::Call(Machine& machine, int64_t nArgsOnStack)
@@ -615,6 +689,15 @@ namespace fsh
         RegisterBuiltInImpl(machine, "Second", fsh::Second);
         RegisterBuiltInImpl(machine, "CreatePair", fsh::CreatePair);
         RegisterBuiltInImpl(machine, "MachineProperty", fsh::MachineProperty);
+        RegisterBuiltInImpl(machine, "Type", fsh::Type);
+        RegisterBuiltInImpl(machine, "IsString", fsh::IsString);
+        RegisterBuiltInImpl(machine, "IsIntege", fsh::IsInteger);
+        RegisterBuiltInImpl(machine, "IsFloat", fsh::IsFloat);
+        RegisterBuiltInImpl(machine, "IsList", fsh::IsList);
+        RegisterBuiltInImpl(machine, "IsMap", fsh::IsMap);
+        RegisterBuiltInImpl(machine, "IsFileHandle", fsh::IsFileHandle);
+        RegisterBuiltInImpl(machine, "IsPair", fsh::IsPair);
+        RegisterBuiltInImpl(machine, "IsFunction", fsh::IsFunction);
 
         // Ers
         RegisterBuiltInImpl(machine, "ParseProtobuf", fsh::ParseProtobuf);

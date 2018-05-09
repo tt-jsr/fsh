@@ -36,10 +36,22 @@ namespace fsh
      */
     StringPtr ToString(Machine&, std::vector<ElementPtr>&);
 
+    StringPtr Type(Machine&, std::vector<ElementPtr>&);
+    BooleanPtr IsString(Machine&, std::vector<ElementPtr>&);
+    BooleanPtr IsInteger(Machine&, std::vector<ElementPtr>&);
+    BooleanPtr IsFloat(Machine&, std::vector<ElementPtr>&);
+    BooleanPtr IsList(Machine&, std::vector<ElementPtr>&);
+    BooleanPtr IsMap(Machine&, std::vector<ElementPtr>&);
+    BooleanPtr IsFileHandle(Machine&, std::vector<ElementPtr>&);
+    BooleanPtr IsPair(Machine&, std::vector<ElementPtr>&);
+    BooleanPtr IsFunction(Machine&, std::vector<ElementPtr>&);
+
     /*
      * Bind arguments
      * f[_1, arg2, ...];
-     * Binds arguments to the function f. Returns a new function.
+     * When a function is call with positional arguments _1 thru _9, a
+     * new function is returned.
+     *
      * The arguments to bind define the arguments to the target function, (the function
      * being bound to). Position arguments _1, _2, ... define which arguments will be 
      * taken from the caller
