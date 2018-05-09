@@ -149,6 +149,8 @@ namespace fsh
         {}
         ~ASTFunctionCall() {}
         void GenerateCode(Machine&, ByteCode&);
+        void GenerateCall(Machine&, ByteCode&);
+        void GenerateBind(Machine&, ByteCode&);
         AstType type() {return AST_FUNCTION_CALL;}
         std::unique_ptr<Ast> call;
         std::unique_ptr<ASTExpressionList> arguments;
@@ -181,6 +183,7 @@ namespace fsh
         std::unique_ptr<Ast> functionBody;
     };
 
+    /*
     class ASTBind : public Ast
     {
     public:
@@ -194,6 +197,7 @@ namespace fsh
         std::unique_ptr<ASTExpressionList> arguments;
         std::unique_ptr<ASTExpressionList> attributes;
     };
+    */
 
     class ASTReturn : public Ast
     {

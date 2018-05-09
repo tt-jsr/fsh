@@ -38,7 +38,7 @@ namespace fsh
 
     /*
      * Bind arguments
-     * [arg1, arg2, ...] -> f
+     * f[_1, arg2, ...];
      * Binds arguments to the function f. Returns a new function.
      * The arguments to bind define the arguments to the target function, (the function
      * being bound to). Position arguments _1, _2, ... define which arguments will be 
@@ -48,25 +48,21 @@ namespace fsh
      *          Print[arg1, arg2, arg3];
      *     ];
      *
-     *     foo = ["hello", _1, _2] -> f;
+     *     foo = f["hello", _1, _2];
      *     foo Is a function that takes two arguments represented by_1, _2.
      *     f will be called as f["hello", _1, _2];
      *
-     *     foo = [_2, _1]->f;
+     *     foo = f[_2, _1];
      *     foo Is a function that takes two arguments represented by_1, _2.
      *     f will be called as f[_2, __1];
      *     Notice the arguments have been swapped.
      *
-     *     foo = ["hello", "world"] -> f;
-     *     foo Is a function that takes no arguments.
-     *     f will be called as f["hello", "world"];
-     *
-     *     foo = ["hello", _1, "world"] -> f;
+     *     foo = f["hello", _1, "world"];
      *     foo Is a function that takes one argument.
      *     f will be called as f["hello", _1, "world"];
      *
      *   You can also bind a function attribute
-     *     foo = [_1, _2, _3, attr->value] -> f;
+     *     foo = f[_1, _2, _3, attr->value];
      *     foo Is a function that takes three arguments.
      *     f will be called as f[_1, _2, _3, attr->value];
      *

@@ -168,7 +168,7 @@ namespace fsh
         ,AST_SYSTEM
         ,AST_SUBSCRIPT
         ,AST_TRY_CATCH
-        ,AST_BIND
+        //,AST_BIND
         ,AST_RETURN
         ,AST_GLOBAL
     };

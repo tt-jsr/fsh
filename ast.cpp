@@ -201,6 +201,30 @@ namespace fsh
         {
             for (auto& a : arguments->expressions)
             {
+                if (a->type() == AST_CONSTANT)
+                {
+                    ASTConstant *p = (ASTConstant *)a.get();
+                    if (p->ctype == ASTConstant::CTYPE_IDENTIFIER && p->svalue.size() == 2)
+                    {
+                        if (p->svalue[0] == '_' && p->svalue[1] >= '1' && p->svalue[1] <= '9')
+                        {
+                            GenerateBind(machine, bc);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        GenerateCall(machine, bc);
+    }
+
+    void ASTFunctionCall::GenerateCall(Machine& machine, ByteCode& bc)
+    {
+        ASTExpressionList *el = (ASTExpressionList *)arguments.get();
+        if (arguments)
+        {
+            for (auto& a : arguments->expressions)
+            {
                 a->GenerateCode(machine, bc);
                 bc.code(BC_RESOLVE);
             }
@@ -225,7 +249,7 @@ namespace fsh
     }
 
     /***************************************************/
-    void ASTBind::GenerateCode(Machine& machine, ByteCode& bc)
+    void ASTFunctionCall::GenerateBind(Machine& machine, ByteCode& bc)
     {
         ASTExpressionList *el = (ASTExpressionList *)arguments.get();
         if (arguments)
@@ -241,7 +265,7 @@ namespace fsh
         {
             bc.code(BC_LOAD_INTEGER, 0);
         }
-        function->GenerateCode(machine, bc);
+        call->GenerateCode(machine, bc);
         bc.code(BC_RESOLVE);
         ByteCode *pAttr = nullptr;
         if (attributes)
