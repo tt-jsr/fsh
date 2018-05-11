@@ -1,0 +1,15 @@
+Map - Map data type
+
+Description
+    Map is an associative container implemented with std::unordered_map
+
+See Also
+    CreateMap       Create a map
+    Delete          Delete an element
+    Insert          Insert an element
+    Lookup          Lookup (find) an item
+    Len             Number of items in map
+    CreatePair      Create a Pair
+    First           First element of pair
+    Second          Second element of pair
+

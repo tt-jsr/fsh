@@ -2,6 +2,7 @@ Types
 
 Type information
 
+
     Type[x] - Return type
     IsString[x]
     IsInteger[x]
@@ -12,7 +13,26 @@ Type information
     IsPair[x]
     IsFunction[x]
 
+    ToString    Convert to a string
+    ToInt       Convert to an Integer
+    ToFloat     Convert to a Float
+    Copy        Deep copy of a type
+
 Description
+    fsh supports the following data types
+
+    List        A list container
+    Map         Associative container
+    String      A string
+    Integer     An 64bit signed integer
+    Float       Floating point number
+    Pair        Contains two elements
+    None        Represents no value
+    Boolean     Represents a boolean value
+    True        A true value
+    False       A false value
+    FileHandle  Handle to an open file
+
     The Is* function return True if the argument is if that type
 
 Attributes

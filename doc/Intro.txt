@@ -1,0 +1,10 @@
+Introduction
+
+Talk about some stuff here
+
+More help on these sections:
+    Types       fsh's data types and type functions
+    List        List container functions
+    Map         Map container functions
+    String      String functions
+    IO          IO functions

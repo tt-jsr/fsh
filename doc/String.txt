@@ -1,0 +1,15 @@
+String - String data type
+
+Description
+    String is implemented with std::string
+
+See Also
+    Find            Find a string in a string
+    Len             Length of string
+    SubString       Return substring
+    Strcmp          Compare strings
+    Split           Split a string into a list of words
+    Subscript       Returns a range of chars from a string
+    Trim            Trim whitespace
+    Format          Format a string
+    +               Concatenate strings

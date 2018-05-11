@@ -1,0 +1,15 @@
+IO - IO functions
+
+Description
+    Functions to perform Input/Output
+
+See Also
+    PipeLine        Execute a pipeline
+    OpenFile        Open a file
+    OpenProcess     Open a process
+    ReadFile        Read contents of a file
+    WriteFile       Write to a file or process
+    ReadProcess     Read from a process
+    CloseFile       Close a file
+
+

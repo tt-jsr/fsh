@@ -1,0 +1,20 @@
+List - List data type
+
+Description
+    List is a container sequence implemented with std::vector
+
+See Also
+    CreateList      Create a list
+    DefineRecord    Define a record
+    CreateRecord    Create a record
+    Delete          Delete an element
+    Insert          Insert an element
+    Set             Set an element
+    Append          Append an items to a list
+    Len             Lenhth of list
+    Part            Get an element
+    Pop             Pop (stack)
+    Push            Push item (stack)
+    Split           Split a sting into a list of words
+    Subscripts      Get elements og a list
+

@@ -27,6 +27,7 @@ H           [a-fA-F0-9]
 %x          str
 %x          cmd
 %x          sys
+%x          help
 
 %%
             std::string quotedstring;
@@ -74,6 +75,29 @@ For             {column += 3;return FOR;}
 Return          {column += 6;return KW_RETURN;}
 exit            {column += 4;exit(-1);}
 global          {column += 6;return GLOBAL;}
+help            { BEGIN(help);}
+<help>[ \t]*    /* eat whitespace */
+<help>[a-zA-Z0-9_]+ {
+                    std::string command;
+                    command = "cat doc/";
+                    if (*yytext == '\0')
+                    {
+                        command += "Intro.txt";
+                    }
+                    else
+                    {
+                        command += yytext;
+                        command += ".txt";
+                    }
+                    system(command.c_str());
+                    BEGIN(INITIAL);
+                }
+<help>\n        {
+                    std::string command;
+                    command = "cat doc/Intro.txt";
+                    system(command.c_str());
+                    BEGIN(INITIAL);
+                }
 \"              {quotedstring.clear(); BEGIN(str);}
 <str>\"         {
                     BEGIN(INITIAL);
