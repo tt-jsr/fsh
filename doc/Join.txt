@@ -1,0 +1,19 @@
+Join - Joing a list into a string
+
+Description
+    Join[list, delim];
+
+    Joins the list into a string. Each element of thge list will be separated by
+    the string in delim.
+
+Returns
+    The create String
+
+Attributes
+
+Notes
+    The elements in the list will be converted to a string
+
+Examples
+
+See Also

@@ -1,0 +1,17 @@
+SetRecordType - Set the type of a list to match an existing record defined by DefineRecord
+
+Description
+    SetRecordType[list, "name"];
+
+Returns
+    The list
+
+Attributes
+
+Notes
+
+Examples
+
+See Also
+    DefineRecord
+    CreateRecord

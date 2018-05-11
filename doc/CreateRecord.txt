@@ -10,7 +10,7 @@ Description
     Each field of the list will initialized to None
 
 Returns
-    Function returns a list
+    Function returns the created list
 
 Attributes
     None
@@ -19,4 +19,5 @@ Notes
     None
 
 See Also:
-    CreateRecord
+    DefineRecord
+    SetRecordType

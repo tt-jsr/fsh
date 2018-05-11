@@ -166,6 +166,32 @@ namespace fsh
         return lst;
     }
 
+    StringPtr Join(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ListPtr lst = GetList(machine, args, 0);
+        if (!lst)
+            throw std::runtime_error("Join expects a list as the first argument");
+
+        StringPtr delim = GetString(machine, args, 1);
+        if (!delim)
+            throw std::runtime_error("Join expects a delimiter as the second argument");
+
+        std::stringstream strm;
+        auto it = lst->items.begin();
+        if (it == lst->items.end())
+        {
+            return MakeString("");
+        }
+        strm << toString(machine, *it);
+        ++it;
+        for (; it != lst->items.end(); ++it)
+        {
+            strm << delim->value;
+            strm << toString(machine, *it);
+        }
+        return MakeString(strm.str());
+    }
+
     IntegerPtr Strcmp(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr s1 = GetString(machine, args, 0);

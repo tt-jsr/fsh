@@ -9,6 +9,7 @@ See Also
     SubString       Return substring
     Strcmp          Compare strings
     Split           Split a string into a list of words
+    Join            Join a list into a string
     Subscript       Returns a range of chars from a string
     Trim            Trim whitespace
     Format          Format a string

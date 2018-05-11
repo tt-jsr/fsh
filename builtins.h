@@ -192,6 +192,7 @@ namespace fsh
     StringPtr TrimRight(Machine&, std::vector<ElementPtr>&);
     // Split["", chars];
     ListPtr Split(Machine&, std::vector<ElementPtr>&);
+    StringPtr Join(Machine&, std::vector<ElementPtr>&);
     IntegerPtr Strcmp(Machine&, std::vector<ElementPtr>&);
     ElementPtr RegMatch(Machine&, std::vector<ElementPtr>&);
     ElementPtr RegSearch(Machine&, std::vector<ElementPtr>&);

@@ -6,6 +6,7 @@ Description
 See Also
     CreateList      Create a list
     DefineRecord    Define a record
+    SetRecordType   Set the type of a record
     CreateRecord    Create a record
     Delete          Delete an element
     Insert          Insert an element

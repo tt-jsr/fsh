@@ -650,6 +650,7 @@ namespace fsh
         RegisterBuiltInImpl(machine, "TrimLeft", fsh::TrimLeft);
         RegisterBuiltInImpl(machine, "TrimRight", fsh::TrimRight);
         RegisterBuiltInImpl(machine, "Split", fsh::Split);
+        RegisterBuiltInImpl(machine, "Join", fsh::Join);
         RegisterBuiltInImpl(machine, "Strcmp", fsh::Strcmp);
         RegisterBuiltInImpl(machine, "RegMatch", fsh::RegMatch);
         RegisterBuiltInImpl(machine, "RegSearch", fsh::RegSearch);
