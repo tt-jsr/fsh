@@ -1,0 +1,14 @@
+First - Return the first element of a Pair
+
+
+Description
+    Return the first element of a pair
+
+Returns
+    The first element of the pair
+
+Attributes
+    None
+
+Note
+    Throws exception if argument is not a pair

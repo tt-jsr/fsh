@@ -1,0 +1,19 @@
+Push - Push data to a list
+
+Description
+    Push[list, data];
+
+    Pushes an item to the back of the list. Used in conjunction
+    with Pop[], stack operations can be used
+
+Returns
+    The list
+
+Attributes
+
+Notes
+
+Examples
+
+See Also
+    Pop

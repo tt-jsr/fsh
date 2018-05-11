@@ -1,0 +1,16 @@
+OpenProcess - Open a Process
+
+
+Description
+    handle OpenProcess[procname, mode : attributes..];
+
+    OpenProcess opens a process for reading from or writing to.
+    Mode is "r", "w" or one of the other mode in popen(3)
+
+
+Attributes
+    stripnl->True - If opened for reading, will remove trailing newlines (Default False)
+    addnl->True - If opened for Writing, will add a newline (Default False)
+
+Note
+    Opens a shell to process the command. See popen(3) for more information

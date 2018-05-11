@@ -1,0 +1,14 @@
+WriteFile - Write to a file
+
+Description
+    WriteFile[handle, data];
+
+Returns
+
+Attributes
+
+Notes
+
+Examples
+
+See Also

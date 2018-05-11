@@ -1,0 +1,20 @@
+CreateList - Create a list
+
+Description
+    CreateList[item1, item2, item3, ...];
+
+    Create a new list. If aruments are supplied, initialize the list.
+
+Returns
+    Returns a new list
+
+Attributes
+    None
+
+Notes
+    None
+
+Examples
+    None
+
+See Also

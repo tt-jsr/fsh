@@ -1,0 +1,19 @@
+Delete - Delete an item from a container
+
+Description
+    Delete[Map, key];
+    Delete[List, index];
+
+    For a map, removes the item with the given key
+    For List, removes the item at the given index.
+
+Returns
+    The Map or List
+
+Attributes
+
+Notes
+
+Examples
+
+See Also

@@ -1,0 +1,20 @@
+Pop - Pop data from a list
+
+Description
+    Pop[list];
+
+    Pops an item to the back of the list. Used in conjunction
+    with Push[], stack operations can be used.
+
+Returns
+    The item popped
+
+Attributes
+
+Notes
+    throws an exception if the list is empty
+
+Examples
+
+See Also
+    Push

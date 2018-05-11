@@ -1,0 +1,21 @@
+Len - Get the length of an object
+
+Description
+    Len[object]
+
+    Returns the length or size of an object. Valid object types are
+    String
+    List
+    Map
+
+
+Returns
+    Integer
+
+Attributes
+
+Notes
+
+Examples
+
+See Also

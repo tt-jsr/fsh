@@ -1,0 +1,19 @@
+Split - Split a string
+
+Description
+    Split[String, sep];
+
+    Return a list of the words in the string, using sep as the delimiter string.
+
+Returns
+    A list
+
+Attributes
+
+Notes
+
+Examples
+    s = "Hello cruel world";
+    lst = Split[s, " "];
+
+See Also

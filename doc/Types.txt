@@ -1,0 +1,22 @@
+Types
+
+Type information
+
+    Type[x] - Return type
+    IsString[x]
+    IsInteger[x]
+    IsFloat[x]
+    IsList[x]
+    IsMap[x]
+    IsFileHandle[x]
+    IsPair[x]
+    IsFunction[x]
+
+Description
+    The Is* function return True if the argument is if that type
+
+Attributes
+    None
+
+Note
+    None

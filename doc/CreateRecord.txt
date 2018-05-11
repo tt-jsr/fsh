@@ -1,0 +1,22 @@
+CreateRecord - Create a list record
+
+
+Description
+    CreateRecord["name"]
+
+    A list will be created using the record defintion specified by "name".
+    This must have been created using DefineRecord[]
+
+    Each field of the list will initialized to None
+
+Returns
+    Function returns a list
+
+Attributes
+    None
+
+Notes
+    None
+
+See Also:
+    CreateRecord

@@ -1,0 +1,18 @@
+MachineProperty - Access properties of the virtual machine
+
+Description
+    MachineProperty allowes access to certain state and information about
+    the virtual machine.
+
+    The argument is a property name. Currently there is only one property,
+    "stats", that will return information about code size, and variables.
+
+Returns
+    None
+
+Attributes
+
+Example
+    s = MachineProperty["stats"];
+    Print[s];
+

@@ -1,0 +1,19 @@
+Print - Print to console
+
+Description
+    Print takes a variable number of arguments of any type and prints
+    to the console
+
+Returns
+    None
+
+Attributes
+    addln->True Append newline to output (default)
+    addnl->False - Do not print newline
+
+Example
+    foo = "Hello ";
+    foo2 = "cruel ";
+    foo3 = "world;
+    Print[foo, foo1, foo2];
+

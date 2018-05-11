@@ -1,0 +1,29 @@
+ReadProcess - read from a process
+
+
+Description
+    ReadProcess[procname, func];
+
+    Read from a process
+    procname is a command to execute.
+    func - A function that will be called to pass the data to.
+
+    func has the signiture of 
+    Boolean func[line];
+
+    It will be called for each line read from the process
+    If the function returns False, the read will be stopped.
+
+Attributes
+    stripnl->True - Strip trailing newlines from the input. Default is False
+
+Note
+    None
+
+Example
+    foo = &[line:
+        Print[line];
+        Return True;
+    ];
+    
+    ReadProcess["grep account *.log | cut -c -80", foo];

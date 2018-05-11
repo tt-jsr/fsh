@@ -1,0 +1,12 @@
+ToFloat - Convert argument to a Float
+
+Description
+    ToFloat converts (if possible) a single argument to an float
+
+Attributes
+    None
+
+Note
+    Only String, Integer anf Float may be converted
+    Exception will be thrown for all other types
+

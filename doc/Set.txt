@@ -1,0 +1,17 @@
+Set - set an item in a list
+
+Description
+    Set[list, index, data];
+
+    Sets an item in a list at the given index. 
+
+Returns
+
+Attributes
+
+Notes
+    If the list is not large enough to contain the index, an exception will be thrown.
+
+Examples
+
+See Also

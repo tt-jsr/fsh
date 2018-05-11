@@ -1,0 +1,20 @@
+DefineRecord - Define a list record
+
+
+Description
+    DefineRecord["name", name1, name2, name3];
+
+    DefineRecord provides a mechanism to define names to each index in a list.  
+
+    name: The name of the record to be defined
+    args: Unquoted names for each list index
+
+Returns
+    None
+
+Attributes
+
+Notes
+
+See Also:
+    CreateRecord

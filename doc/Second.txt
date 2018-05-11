@@ -1,0 +1,14 @@
+Second - Return the second element of a Pair
+
+
+Description
+    Return the second element of a pair
+
+Returns
+    The second element of the pair
+
+Attributes
+    None
+
+Note
+    Throws exception if argument is not a pair

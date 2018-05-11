@@ -1,0 +1,18 @@
+Strcmp - String compare
+
+Description
+    Strcmp[String, String]
+
+    Compare two strings.
+
+Returns
+    Integer, <0, 0, >0
+
+Attributes
+    nocase->True for case insensitive compare.
+
+Notes
+
+Examples
+
+See Also

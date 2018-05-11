@@ -554,7 +554,7 @@ namespace fsh
             StringPtr rtn = MakeString(src->value);
             return rtn;
         }
-        return e;
+        throw std::runtime_error("Cannot copy type");
     }
 
     ElementPtr First(Machine& machine, std::vector<ElementPtr>& args)

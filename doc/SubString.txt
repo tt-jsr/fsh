@@ -1,0 +1,17 @@
+SubString - Return a substring
+
+Description
+    SubString[s, start, len];
+
+    Returns a substring
+
+Returns
+    A String
+
+Attributes
+
+Notes
+
+Examples
+
+See Also

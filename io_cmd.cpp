@@ -25,8 +25,10 @@ namespace fsh
 
     FileHandlePtr OpenFile(Machine& machine, std::vector<ElementPtr>& args)
     {
-        bool stripnl;
+        bool stripnl(false);
+        bool addnl(false);
         machine.get_variable("stripnl", stripnl);
+        machine.get_variable("addnl", addnl);
 
         StringPtr filename = GetString(machine, args, 0);
         if (filename.get() == nullptr)
@@ -51,6 +53,7 @@ namespace fsh
             throw std::runtime_error(strm.str());
         }
         fh->stripnl= stripnl;
+        fh->addnl = addnl;
         return fh;
     }
 
@@ -132,7 +135,7 @@ namespace fsh
 
     ElementPtr ReadFile(Machine& machine, std::vector<ElementPtr>& args)
     {
-        bool stripnl;
+        bool stripnl(false);
         machine.get_variable("stripnl", stripnl);
 
         FunctionDefIdPtr fdid = GetFunctionDefId(machine, args, 0);

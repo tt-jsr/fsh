@@ -1,0 +1,12 @@
+[[ ]] - Subscript of a list
+
+Description
+    Return itemns from a list
+
+    Syntax and behavior is the same as python's subscript operator
+
+Attributes
+    None
+
+Note
+    None

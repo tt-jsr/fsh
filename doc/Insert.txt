@@ -1,0 +1,24 @@
+Insert - Insert a value
+
+Description
+    Insert[Map, key, value];
+    Insert[List, index, value];
+    Insert[String, index, String];
+
+    Inserts a value.
+
+    Map: Insert the value using the given key
+    List: Insert the value at the given index. Items subsequent to the index
+          will be moved over
+    String: Insert the string at the given position
+
+Returns
+    The Map, List or String
+
+Attributes
+
+Notes
+
+Examples
+
+See Also

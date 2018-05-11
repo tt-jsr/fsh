@@ -1,0 +1,15 @@
+Copy - Make a copy of the argument
+
+Description
+    Copy[object];
+
+    Make a deep copy of an object.
+
+Returns
+    A copy of the object
+
+Attributes
+    None
+
+Note
+    Only String, Map and List can be copied

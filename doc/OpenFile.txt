@@ -1,0 +1,18 @@
+OpenFile - Open a file
+
+
+Description
+    handle OpenFile[filepath, mode : attributes..];
+
+    OpenFile opens a file for reading or writing.
+    Mode is "r", "w", "rw", "a" or one of the other modes available in fopen(3)
+
+Returns
+    FileHandle
+
+Attributes
+    stripnl->True - If opened for reading, will remove trailing newlines (Default False)
+    addnl->True - If opened for Writing, will add a newline (Default False)
+
+Note
+    None

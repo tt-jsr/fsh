@@ -1,0 +1,17 @@
+Append - Append to a list
+
+Description
+    Append[list, data];
+
+    Append data to a list
+
+Returns
+    Integer - The index of the items added
+
+Attributes
+
+Notes
+
+Examples
+
+See Also

@@ -1,0 +1,10 @@
+ToString - Convert argument to a String
+
+Description
+    ToString converts (if possible) a single argument to an string
+
+Attributes
+    ToHex->True Convert to hexidecimal notation
+
+Note
+    All types may be converted to a string

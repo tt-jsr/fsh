@@ -1,0 +1,17 @@
+CreateMap - Create a map
+
+Description
+    CreateMap[];
+
+    Creates a new map
+
+Returns
+    The map
+
+Attributes
+
+Notes
+
+Examples
+
+See Also

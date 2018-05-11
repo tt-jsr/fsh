@@ -1,0 +1,17 @@
+Lookup - Lookup a valu in a map
+
+Description
+    Lookup[map, key];
+
+    Lookup an item with the given key
+
+Returns
+    The found item on success, None on failure
+
+Attributes
+
+Notes
+
+Examples
+
+See Also

@@ -1,0 +1,28 @@
+ReadFile - read from a file
+
+Description
+    ReadFile[filepath, func];
+
+    Read from a file
+    filepath is a path to a file
+    func - A function that will be called to pass the data to.
+
+    func has the signiture of 
+    Boolean func[line];
+
+    It will be called for each line in the file.
+    If the function returns False, the read will be stopped
+
+Returns
+    None
+
+Attributes
+    stripnl->True - Strip trailing newlines from the input. Default is False
+
+Example
+    foo = &[line:
+        Print[line];
+        Return True;
+    ];
+    
+    ReadFile["mytextfile.txt", foo];

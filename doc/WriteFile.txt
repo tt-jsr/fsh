@@ -1,0 +1,16 @@
+WriteFile - Write to a file
+
+
+Description
+    WriteFile[handle, data];
+
+    Write to a file. 
+    handle is a handle returned from OpenFile[].
+    data will be converted to a string before writing. See ToString[]
+    
+
+Attributes
+    None
+
+Note
+    None

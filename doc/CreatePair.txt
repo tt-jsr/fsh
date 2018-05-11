@@ -1,0 +1,17 @@
+CreatePair - Craete a pair
+
+
+Description
+    Create a new Pair from two arguments
+
+Returns
+    Returns a Pair
+
+Attributes
+    None
+
+Example
+    p = CreatePair["apple", "red"];
+
+Note
+    Throws exception if argument is not a pair

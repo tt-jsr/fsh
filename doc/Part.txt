@@ -1,0 +1,16 @@
+Part - Get an item from a list
+
+Description
+    Part[list, index];
+
+    From the given list, return the item at the given index.
+    Throws exception if out of bounds.
+
+Returns
+    The selected object
+
+Attributes
+    None
+
+Note
+    None

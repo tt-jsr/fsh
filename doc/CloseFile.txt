@@ -1,0 +1,13 @@
+CloseFile - Close an open File
+
+Description
+    CloseFile[handle];
+
+    Close an open file or process.
+    handle - A handle returned from OpenFile[]
+
+Attributes
+    None
+
+Note
+    None

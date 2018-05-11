@@ -1,0 +1,12 @@
+ToInt - Convert argument to an integer
+
+Description
+    ToInt converts (if possible) a single argument to an integer
+
+Attributes
+    None
+
+Note
+    Only String, Integer anf Float may be converted
+    Exception will be thrown for all other types
+

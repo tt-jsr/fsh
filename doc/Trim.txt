@@ -1,0 +1,19 @@
+Trim - Trim whitspace from a string
+
+Description
+    Trim[String]
+    TrimLeft[String]
+    TrimRight[String]
+
+    Trim whitespace
+
+Returns
+    A new String. The existing string is not modified.
+
+Attributes
+
+Notes
+
+Examples
+
+See Also

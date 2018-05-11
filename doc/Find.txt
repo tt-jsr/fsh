@@ -1,0 +1,17 @@
+Find - Find a string in a string
+
+Description
+    Find[String, s]
+
+    Find the string s in the String
+
+Returns
+    Integer - The position where the string is found. Return -1 if not found
+
+Attributes
+
+Notes
+
+Examples
+
+See Also
