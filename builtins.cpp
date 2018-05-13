@@ -702,6 +702,7 @@ namespace fsh
 
         // Ers
         RegisterBuiltInImpl(machine, "ParseProtobuf", fsh::ParseProtobuf);
+        RegisterBuiltInImpl(machine, "OCLogFilter", fsh::OCLogFilter);
     }
 
 }

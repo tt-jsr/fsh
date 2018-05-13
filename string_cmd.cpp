@@ -138,11 +138,11 @@ namespace fsh
     ListPtr Split(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr sp = GetString(machine, args, 0);
+        if (!sp)
+            throw std::runtime_error("Split requires a string to be split");
         StringPtr separators = GetString(machine, args, 1);
-        if (!(sp && separators))
-        {
-            return MakeList("__list__");
-        }
+        if (!separators)
+            separators = MakeString(" ");
         ListPtr lst = MakeList("__list__");
         std::string s;
         for (auto it = sp->value.begin(); it != sp->value.end(); ++it)
@@ -174,7 +174,7 @@ namespace fsh
 
         StringPtr delim = GetString(machine, args, 1);
         if (!delim)
-            throw std::runtime_error("Join expects a delimiter as the second argument");
+            delim = MakeString(" ");
 
         std::stringstream strm;
         auto it = lst->items.begin();

@@ -38,9 +38,8 @@ Description
 
         Function
             A function that takes a single argument is called with data from 
-            the previous stage. The function should return some data to be 
-            passed to the next stage.
-            The function can return PIPELINE_RESTART if the function does not
+            the previous stage. The returned data will be passed on to the next stage.
+            The function can also return PIPELINE_RESTART if the function does not
             want to pass the data (such as a filter or select function).
             PIPELINE_RESTART will cause the pipeline to go back to the head for the
             next data. The function can also return PIPELINE_EXIT to stop the pipeline.

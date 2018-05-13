@@ -4,6 +4,7 @@ Description
     Split[String, sep];
 
     Return a list of the words in the string, using sep as the delimiter string.
+    If sep does not exist, " " will be used by default.
 
 Returns
     A list

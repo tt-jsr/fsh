@@ -6,6 +6,8 @@ Description
     Joins the list into a string. Each element of thge list will be separated by
     the string in delim.
 
+    If delim is not specified, " " will be used.
+
 Returns
     The create String
 
