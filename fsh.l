@@ -1,5 +1,6 @@
 %{
 #include <iostream>
+#include <sstream>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "fsh.tab.h"
@@ -17,6 +18,9 @@ extern fsh::Machine machine;
 extern "C" int yywrap() {
     return 1;
 }
+
+std::vector<YY_BUFFER_STATE> import_stack;
+
 %}
 
 D           [0-9]
@@ -24,10 +28,11 @@ L           [a-zA-Z_]
 E           [Ee][+-]?{D}+
 H           [a-fA-F0-9]
 
-%x          str
+%x          qstr
 %x          cmd
 %x          sys
 %x          help
+%x          import
 
 %%
             std::string quotedstring;
@@ -75,6 +80,34 @@ For             {column += 3;return FOR;}
 Return          {column += 6;return KW_RETURN;}
 exit            {column += 4;exit(-1);}
 global          {column += 6;return GLOBAL;}
+import          {column += 6;BEGIN(import);}
+<import>[ \t]*  /* eat white space */
+<import>[^ \t\n]+ { /* Include file name*/
+                    interactive = false;
+                    import_stack.push_back(YY_CURRENT_BUFFER);
+                    yyin = fopen(yytext, "r");
+                    if (!yyin)
+                    {
+                        std::stringstream strm;
+                        strm << "Cannot open " << yytext;
+                        throw std::runtime_error(strm.str()); 
+                    }
+                    yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
+                    BEGIN(INITIAL);
+                }
+<<EOF>>         {
+                    if (import_stack.size() == 0)
+                    {
+                        interactive = true;
+                        yyterminate();
+                    }
+                    else
+                    {
+                        yy_delete_buffer(YY_CURRENT_BUFFER);
+                        yy_switch_to_buffer(import_stack.back());
+                        import_stack.pop_back();
+                    }
+                }
 help            { BEGIN(help);}
 <help>[ \t]*    /* eat whitespace */
 <help>[a-zA-Z0-9_]+ {
@@ -98,8 +131,8 @@ help            { BEGIN(help);}
                     system(command.c_str());
                     BEGIN(INITIAL);
                 }
-\"              {quotedstring.clear(); BEGIN(str);}
-<str>\"         {
+\"              {quotedstring.clear(); BEGIN(qstr);}
+<qstr>\"         {
                     BEGIN(INITIAL);
                     fsh::ASTConstant *bc = new fsh::ASTConstant(lineno);
                     bc->ctype = fsh::ASTConstant::CTYPE_STRING;
@@ -108,15 +141,15 @@ help            { BEGIN(help);}
                     column += 1;
                     return STRING_LITERAL;
                 }
-<str>\n         { /* Unterminated string - error */
+<qstr>\n         { /* Unterminated string - error */
                     ++lineno;
                     column = 1;
                 }
 
-<str>\\n        {quotedstring.push_back('\n');++lineno;column=1;}
-<str>\\t        quotedstring.push_back('\t');
-<str>\\(.|\n)   quotedstring.push_back(yytext[1]);
-<str>[^\\\n\"]+  {
+<qstr>\\n        {quotedstring.push_back('\n');++lineno;column=1;}
+<qstr>\\t        quotedstring.push_back('\t');
+<qstr>\\(.|\n)   quotedstring.push_back(yytext[1]);
+<qstr>[^\\\n\"]+  {
                     char *yptr = yytext;
                     while(*yptr)
                     {

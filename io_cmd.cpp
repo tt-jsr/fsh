@@ -532,6 +532,12 @@ namespace fsh
                 {
                     FileHandlePtr fh = MakeFileHandle();
                     fh->fp = fopen(&sp->value[2], "a");
+                    if (!fh->fp)
+                    {
+                        std::stringstream strm;
+                        strm << "Pipeline: Cannot open " << sp->value;
+                        throw std::runtime_error(strm.str());
+                    }
                     fh->isPipe = false;
                     fh->bRead = false;
                     fh->addnl = true;
@@ -541,6 +547,12 @@ namespace fsh
                 {
                     FileHandlePtr fh = MakeFileHandle();
                     fh->fp = fopen(&sp->value[1], "w");
+                    if (!fh->fp)
+                    {
+                        std::stringstream strm;
+                        strm << "Pipeline: Cannot open " << sp->value;
+                        throw std::runtime_error(strm.str());
+                    }
                     fh->isPipe = false;
                     fh->bRead = false;
                     fh->addnl = true;
@@ -551,6 +563,12 @@ namespace fsh
                     FileHandlePtr fh = MakeFileHandle();
                     sp->value.pop_back();
                     fh->fp = fopen(sp->value.c_str(), "r");
+                    if (!fh->fp)
+                    {
+                        std::stringstream strm;
+                        strm << "Pipeline: Cannot open " << sp->value;
+                        throw std::runtime_error(strm.str());
+                    }
                     fh->isPipe = false;
                     fh->bRead = true;
                     fh->stripnl = true;
@@ -560,6 +578,12 @@ namespace fsh
                 {
                     FileHandlePtr fh = MakeFileHandle();
                     fh->fp = popen(&sp->value[1], "w");
+                    if (!fh->fp)
+                    {
+                        std::stringstream strm;
+                        strm << "Pipeline: Cannot open " << sp->value;
+                        throw std::runtime_error(strm.str());
+                    }
                     fh->isPipe = true;
                     fh->bRead = false;
                     fh->addnl = true;
@@ -570,6 +594,12 @@ namespace fsh
                     FileHandlePtr fh = MakeFileHandle();
                     sp->value.pop_back();
                     fh->fp = popen(sp->value.c_str(), "r");
+                    if (!fh->fp)
+                    {
+                        std::stringstream strm;
+                        strm << "Pipeline: Cannot open " << sp->value;
+                        throw std::runtime_error(strm.str());
+                    }
                     fh->isPipe = true;
                     fh->bRead = true;
                     fh->stripnl = true;
