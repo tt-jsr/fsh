@@ -225,6 +225,32 @@ namespace fsh
         ElementPtr rhs = machine.pop_data();
         ElementPtr ldata = machine.resolve(lhs);
         ElementPtr rdata = machine.resolve(rhs);
+        if (op == BC_BINARY_DOT)
+        {
+            if (!rdata->IsIdentifier())
+            {
+                std::stringstream strm;
+                strm << "dot operator requires identifier on rhs";
+                throw std::runtime_error(strm.str());
+            }
+            if (ldata->IsList())
+            {
+                ListPtr lp = ldata.cast<List>();
+                size_t idx = machine.get_record_field(lp->listtype, rdata);
+                if (idx >= lp->items.size())
+                    throw std::runtime_error("Dot operator index out of range");
+                machine.push_data(lp->items[idx]);
+                return;
+            }
+            if (ldata->IsIdentifier())
+            {
+                IdentifierPtr id = ldata.cast<Identifier>();
+                size_t idx = machine.get_record_field(id->value, rdata);
+                machine.push_data(MakeInteger(idx));
+                return;
+            }
+            throw std::runtime_error("Dot operator rhs invalid type");
+        }
         if (ldata->IsIdentifier())
         {
             IdentifierPtr id = ldata.cast<Identifier>();
@@ -334,6 +360,9 @@ namespace fsh
         //machine.log() << bc.ip << ": ";
         switch(bc[bc.ip])
         {
+        case BC_BINARY_DOT:
+            binary_operator(machine, bc[bc.ip]);
+            break;
         case BC_BINARY_ADD:
             binary_operator(machine, bc[bc.ip]);
             break;

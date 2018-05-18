@@ -56,6 +56,7 @@ namespace fsh
         ,BC_BINARY_SUBTRACT
         ,BC_BINARY_MULTIPLY
         ,BC_BINARY_DIVIDE
+        ,BC_BINARY_DOT
         ,BC_LOGICAL_AND
         ,BC_LOGICAL_OR
         ,BC_RELATIONAL_GT

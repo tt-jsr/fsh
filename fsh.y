@@ -189,6 +189,13 @@ relational_expression
         bop->rhs.reset((ast_t *)$3);
         $$ = bop;
     }
+    |expression '.' expression {
+        bop_t *bop = new bop_t(lineno);
+        bop->op = fsh::BC_BINARY_DOT;
+        bop->lhs.reset((ast_t *)$1);
+        bop->rhs.reset((ast_t *)$3);
+        $$ = bop;
+    }
     ;
 
 math_expression
