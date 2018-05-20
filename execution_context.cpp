@@ -1,4 +1,6 @@
+#include "instrusive_ptr.h"
 #include "common.h"
+#include "element.h"
 #include "execution_context.h"
 
 namespace fsh

@@ -8,8 +8,12 @@
 #include <wordexp.h>
 #include <dirent.h>
 #include <algorithm>
+#include "instrusive_ptr.h"
 #include "common.h"
-#include "shell.h"
+#include "element.h"
+#include "bytecode.h"
+#include "builtins.h"
+#include "machine.h"
 
 #define PERM_FILE		(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 

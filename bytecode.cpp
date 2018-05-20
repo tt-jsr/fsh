@@ -3,10 +3,12 @@
 #include <cstdio>
 #include <algorithm>
 #include <sstream>
+#include "instrusive_ptr.h"
 #include "common.h"
 #include "element.h"
-#include "machine.h"
+#include "bytecode.h"
 #include "builtins.h"
+#include "machine.h"
 
 namespace fsh
 {
@@ -223,34 +225,50 @@ namespace fsh
     {
         ElementPtr lhs = machine.pop_data();
         ElementPtr rhs = machine.pop_data();
-        ElementPtr ldata = machine.resolve(lhs);
-        ElementPtr rdata = machine.resolve(rhs);
         if (op == BC_BINARY_DOT)
         {
-            if (!rdata->IsIdentifier())
+            if (!rhs->IsIdentifier())
             {
                 std::stringstream strm;
-                strm << "dot operator requires identifier on rhs";
+                strm << "dot operator requires identifier on rhs, got " << toString(machine, rhs);
                 throw std::runtime_error(strm.str());
+            }
+            if (lhs->IsList())
+            {
+                ListPtr lp = lhs.cast<List>();
+                size_t idx = machine.get_record_field(lp->listtype, rhs);
+                if (idx >= lp->items.size())
+                    throw std::runtime_error("Dot operator index out of range");
+                ListItemPtr li = MakeListItem();
+                li->list = lp;
+                li->idx = idx;
+                machine.push_data(li);
+                return;
+            }
+            ElementPtr ldata = machine.resolve(lhs);
+            if (ldata->IsIdentifier())
+            {
+                IdentifierPtr id = ldata.cast<Identifier>();
+                size_t idx = machine.get_record_field(id->value, rhs);
+                machine.push_data(MakeInteger(idx));
+                return;
             }
             if (ldata->IsList())
             {
                 ListPtr lp = ldata.cast<List>();
-                size_t idx = machine.get_record_field(lp->listtype, rdata);
+                size_t idx = machine.get_record_field(lp->listtype, rhs);
                 if (idx >= lp->items.size())
                     throw std::runtime_error("Dot operator index out of range");
-                machine.push_data(lp->items[idx]);
-                return;
-            }
-            if (ldata->IsIdentifier())
-            {
-                IdentifierPtr id = ldata.cast<Identifier>();
-                size_t idx = machine.get_record_field(id->value, rdata);
-                machine.push_data(MakeInteger(idx));
+                ListItemPtr li = MakeListItem();
+                li->list = lp;
+                li->idx = idx;
+                machine.push_data(li);
                 return;
             }
             throw std::runtime_error("Dot operator rhs invalid type");
         }
+        ElementPtr ldata = machine.resolve(lhs);
+        ElementPtr rdata = machine.resolve(rhs);
         if (ldata->IsIdentifier())
         {
             IdentifierPtr id = ldata.cast<Identifier>();
@@ -583,10 +601,21 @@ namespace fsh
             {
                 ElementPtr id = machine.pop_data();
                 ElementPtr v = machine.pop_data();
-                if (!id->IsIdentifier())
-                    throw std::runtime_error("Expected identifier");
-                machine.store_variable(id.cast<Identifier>()->value, v);
-                machine.push_data(v);
+                if (id->IsIdentifier())
+                {
+                    machine.store_variable(id.cast<Identifier>()->value, v);
+                    machine.push_data(v);
+                }
+                else if (id->IsListItem())
+                {
+                    ListItemPtr li = id.cast<ListItem>();
+                    if (li->idx >= li->list->items.size())
+                        throw std::runtime_error("Index out of range");
+                    li->list->items[li->idx] = v;
+                    machine.push_data(v);
+                }
+                else
+                    throw std::runtime_error("Expected identifier or list.field");
                 //machine.log() << "BC_STORE_VAR:" << toString(machine, machine.peek_data()) << " to " << 
                     //id.cast<Identifier>()->value << std::endl;
             }
@@ -687,11 +716,17 @@ namespace fsh
         case BC_CALL:
             {
                 ElementPtr callId = machine.pop_data();
-                if (callId->type() != ELEMENT_TYPE_FUNCTION_DEF_ID)
-                    throw std::runtime_error("Function call requires name/id");
+                if (!callId)
+                    throw std::runtime_error("Function call requires argument");
 
+                uintptr_t id = 0;
                 // Function id
-                uintptr_t id = callId.cast<FunctionDefId>()->funcid;
+                if (callId->IsFunctionDefId())
+                    id = callId.cast<FunctionDefId>()->funcid;
+                else if (callId->IsInteger())
+                    id = callId.cast<Integer>()->value;
+                else
+                    throw std::runtime_error("Function call requires name/id");
 
                 ElementPtr numargs = machine.pop_data();
                 assert (numargs->type() == ELEMENT_TYPE_INTEGER);
@@ -806,6 +841,12 @@ namespace fsh
                     }
                     //machine.log() << "BC_TRY return catch"  << std::endl;
                 }
+            }
+            break;
+        case BC_DEBUG_MSG:
+            {
+                ++bc.ip;
+                std::cout << (const char *)bc[bc.ip] << std::endl;
             }
             break;
         default:

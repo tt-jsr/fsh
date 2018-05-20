@@ -183,22 +183,6 @@ namespace fsh
         std::unique_ptr<Ast> functionBody;
     };
 
-    /*
-    class ASTBind : public Ast
-    {
-    public:
-        ASTBind(size_t l)
-        :Ast(l)
-        {}
-        ~ASTBind() {}
-        void GenerateCode(Machine&, ByteCode&);
-        AstType type() {return AST_BIND;}
-        std::unique_ptr<Ast> function;
-        std::unique_ptr<ASTExpressionList> arguments;
-        std::unique_ptr<ASTExpressionList> attributes;
-    };
-    */
-
     class ASTReturn : public Ast
     {
     public:

@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include "oclog_cmd.h"
 
 namespace fsh
 {
@@ -220,4 +219,35 @@ namespace fsh
     FunctionDefIdPtr GetFunctionDefId(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     PairPtr GetPair(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     std::string toString(Machine& machine, ElementPtr e);
+
+    /*****************************************************************/
+    struct FunctionDefinition
+    {
+        ElementPtr Call(Machine& machine, int64_t nArgsOnStack);
+        virtual ElementPtr CallImpl(Machine&, std::vector<ElementPtr>& args) = 0;
+    };
+    
+    struct BuiltInFunction : public FunctionDefinition
+    {
+        ElementPtr CallImpl(Machine&, std::vector<ElementPtr>& args);
+
+        std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> builtIn;
+    };
+
+    struct ShellFunction : public FunctionDefinition
+    {
+        ElementPtr CallImpl(Machine&, std::vector<ElementPtr>& args);
+
+        std::vector<std::string> arg_names;
+        ByteCode shellFunction;
+    };
+
+    struct BoundFunction : public FunctionDefinition
+    {
+        ElementPtr CallImpl(Machine&, std::vector<ElementPtr>& args);
+
+        FunctionDefinition *target;
+        std::vector<ElementPtr> bound_args;
+        ByteCode attributes;
+    };
 }

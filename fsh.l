@@ -3,10 +3,14 @@
 #include <sstream>
 #include <readline/readline.h>
 #include <readline/history.h>
-#include "fsh.tab.h"
+#include "instrusive_ptr.h"
 #include "common.h"
-#include "ast.h"
+#include "element.h"
+#include "bytecode.h"
+#include "builtins.h"
 #include "machine.h"
+#include "ast.h"
+#include "fsh.tab.h"
 using namespace std;
 #define YY_DECL extern int yylex()
 uint64_t lineno = 1;
@@ -41,6 +45,7 @@ H           [a-fA-F0-9]
 [\n]            {++lineno;column = 0;}
 \+              {++column;return '+';}
 -               {++column;return '-';}
+\.              {++column;return DOT;}
 \*              {++column;return '*';}
 \/              {++column;return '/';}
 =               {++column;return '=';}
@@ -53,7 +58,6 @@ H           [a-fA-F0-9]
 \]              {++column;return ']';}
 &               {++column;return '&';}
 :               {++column;return ':';}
-\.              {++column;return '.';}
 \;              {++column;return ';';}
 \>              {++column;return GT;}
 \>=             {column += 2;return GTE;}
@@ -228,7 +232,7 @@ help            { BEGIN(help);}
     return FLOAT; 
 }
 
-[a-zA-Z_][a-zA-Z0-9_\.]*   { 
+[a-zA-Z_][a-zA-Z0-9_]*   { 
     column += strlen(yytext);
     int64_t id = machine.string_table_add(yytext);
     fsh::ASTConstant *bc = new fsh::ASTConstant(lineno);

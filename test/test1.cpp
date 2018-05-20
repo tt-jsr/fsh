@@ -1,7 +1,9 @@
 #include <iostream>
+#include "../instrusive_ptr.h"
 #include "../common.h"
-#include "../builtins.h"
 #include "../element.h"
+#include "../bytecode.h"
+#include "../builtins.h"
 #include "../machine.h"
 #include "../ast.h"
 #include "test1.h"

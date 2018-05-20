@@ -3,11 +3,14 @@
 #include <iostream>
 #include <cassert>
 #include <cctype>
+#include "instrusive_ptr.h"
 #include "common.h"
-#include "machine.h"
-#include "builtins.h"
-#include "ast.h"
+#include "element.h"
 #include "bytecode.h"
+#include "builtins.h"
+#include "machine.h"
+#include "ast.h"
+#include "execution_context.h"
 
 namespace fsh
 {
@@ -153,6 +156,14 @@ namespace fsh
                 assert(rtn);
                 return rtn;
             }
+            return e;
+        }
+        if (e->IsListItem())
+        {
+            ListItemPtr li = e.cast<ListItem>();
+            if (li->idx >= li->list->items.size())
+                throw std::runtime_error("Index out of range");
+            return li->list->items[li->idx];
         }
         return e;
     }
@@ -298,8 +309,8 @@ namespace fsh
 
     bool Machine::get_variable(const std::string& name, ElementPtr& out)
     {
-        if (get_list_field(name, out))
-            return true;
+        //if (get_list_field(name, out))
+            //return true;
 
         // try the local context first
         if (executionContexts.back()->GetVariable(name, out))

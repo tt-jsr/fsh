@@ -2,7 +2,10 @@
 #include <map>
 #include <sstream>
 #include <iostream>
+#include "instrusive_ptr.h"
 #include "common.h"
+#include "element.h"
+#include "bytecode.h"
 #include "builtins.h"
 #include "machine.h"
 

@@ -2,11 +2,13 @@
 #include <stdexcept>
 #include <iostream>
 #include <algorithm>
+#include "instrusive_ptr.h"
 #include "common.h"
-#include "common.h"
-#include "ast.h"
-#include "machine.h"
+#include "element.h"
+#include "bytecode.h"
 #include "builtins.h"
+#include "machine.h"
+#include "ast.h"
 
 namespace fsh
 {
@@ -17,7 +19,9 @@ namespace fsh
 
     void ASTBinaryOperator::GenerateCode(Machine& machine, ByteCode& bc)
     {
+        //bc.debug_msg("ASTBop generatiog rhs");
         rhs->GenerateCode(machine, bc);
+        //bc.debug_msg("ASTBop generatiog lhs");
         lhs->GenerateCode(machine, bc);
         bc.code(op);
     }
@@ -105,8 +109,10 @@ namespace fsh
     /*****************************************************/
     void ASTAssignment::GenerateCode(Machine& machine, ByteCode& bc)
     {
+        //bc.debug_msg("ASTAssign generating rhs");
         rhs->GenerateCode(machine, bc);
         bc.code(BC_RESOLVE);
+        //bc.debug_msg("ASTAssign generating lhs");
         lhs->GenerateCode(machine, bc);
         bc.code(BC_STORE_VAR);
     }

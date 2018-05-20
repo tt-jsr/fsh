@@ -3,10 +3,14 @@
 #include <cstdio>
 #include <algorithm>
 #include <sstream>
+#include "instrusive_ptr.h"
 #include "common.h"
 #include "element.h"
-#include "machine.h"
+#include "bytecode.h"
 #include "builtins.h"
+#include "machine.h"
+#include "execution_context.h"
+#include "oclog_cmd.h"
 
 namespace fsh
 {
