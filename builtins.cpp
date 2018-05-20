@@ -297,7 +297,7 @@ namespace fsh
         case ELEMENT_TYPE_FUNCTION_DEF_ID:
             {
                 FunctionDefIdPtr fd = e.cast<FunctionDefId>();
-                return std::to_string(fd->funcid);
+                return "f(" +std::to_string(fd->funcid) + ")";
             }
             break;
         case ELEMENT_TYPE_PIPELINE_ACTION:
@@ -316,10 +316,15 @@ namespace fsh
                 }
             }
             break;
+        case ELEMENT_TYPE_LIST_ITEM:
+            {
+                return std::string("LI");
+            }
+            break;
         default:
             {
                 std::stringstream strm;
-                strm << "(" << e->type() << ")";
+                strm << "?" << e->type() << "?";
                 return strm.str();
             }
             break;

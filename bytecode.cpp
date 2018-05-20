@@ -822,7 +822,7 @@ namespace fsh
                     while(bctry->ip < bctry->size())
                     {
                         if (false == fsh::Execute(machine, *bctry))
-                            return true;
+                            return false;
                         ++bctry->ip;
                     }
                     //machine.log() << "BC_TRY return from try"  << std::endl;
@@ -836,7 +836,7 @@ namespace fsh
                     while(bccatch->ip < bccatch->size())
                     {
                         if (false == fsh::Execute(machine, *bccatch))
-                            return true;
+                            return false;
                         ++bccatch->ip;
                     }
                     //machine.log() << "BC_TRY return catch"  << std::endl;
