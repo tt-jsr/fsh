@@ -373,6 +373,15 @@ namespace fsh
         return MakeNone();
     }
 
+    NonePtr System(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        StringPtr sp = GetString(machine, args, 0);
+        if (!sp)
+            throw std::runtime_error("System expects a string as first arg");
+        system(sp->value.c_str());
+        return MakeNone();
+    }
+
     StringPtr Type(Machine& machine, std::vector<ElementPtr>& args)
     {
         ElementPtr e = GetElement(machine, args, 0);
@@ -709,6 +718,7 @@ namespace fsh
         RegisterBuiltInImpl(machine, "Second", fsh::Second);
         RegisterBuiltInImpl(machine, "CreatePair", fsh::CreatePair);
         RegisterBuiltInImpl(machine, "MachineProperty", fsh::MachineProperty);
+        RegisterBuiltInImpl(machine, "System", fsh::System);
         RegisterBuiltInImpl(machine, "Type", fsh::Type);
         RegisterBuiltInImpl(machine, "IsString", fsh::IsString);
         RegisterBuiltInImpl(machine, "IsIntege", fsh::IsInteger);

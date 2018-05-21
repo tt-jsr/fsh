@@ -14,6 +14,7 @@ namespace fsh
      */
     ElementPtr Print(Machine&, std::vector<ElementPtr>&);
     ElementPtr Log(Machine&, std::vector<ElementPtr>&);
+    NonePtr System(Machine&, std::vector<ElementPtr>&);
 
     /* Converts to an Integer
      * Throws exception if argument is not a String, Float or Int
