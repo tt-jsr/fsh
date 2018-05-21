@@ -1,0 +1,10 @@
+OC - Functions for oc logfile data
+
+Description
+    Set of comands for parsing oc logfiles
+
+See Also
+    ParseErs        Returns a list of execution reports
+    StartDates      List all the startup times
+    BuildDates      List all the build versions
+

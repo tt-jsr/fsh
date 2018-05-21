@@ -132,6 +132,8 @@ namespace fsh
     /******** Map  *********************************/
     MapPtr CreateMap(Machine&, std::vector<ElementPtr>&);
 
+    MapPtr CreateMapFromList(Machine&, std::vector<ElementPtr>&);
+
     // Lookup[map, key];
     ElementPtr Lookup(Machine&, std::vector<ElementPtr>&);
 

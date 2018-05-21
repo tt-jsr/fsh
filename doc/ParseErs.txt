@@ -1,0 +1,17 @@
+ParseErs - Parse a logfile for execution reports
+
+Description
+    ParseErs["logfile"];
+
+Returns
+    A list of execution reports
+
+Attributes
+
+Notes
+    import ers.fsh
+
+Examples
+    lst = ParseErs["OC_cme.log"];
+
+See Also

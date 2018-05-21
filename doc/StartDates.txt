@@ -1,0 +1,18 @@
+StartDates - List all the start dates of logfiles
+
+Description
+    StartDates[pattern];
+    Prints to screen all log lines with "S T A R T"
+
+Returns
+    None
+
+Attributes
+
+Notes
+    import ers.fsh
+
+Examples
+    StartDates["OC*"];
+
+See Also

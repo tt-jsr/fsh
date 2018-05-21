@@ -691,6 +691,7 @@ namespace fsh
 
         // Map
         RegisterBuiltInImpl(machine, "CreateMap", fsh::CreateMap);
+        RegisterBuiltInImpl(machine, "CreateMapFromList", fsh::CreateMapFromList);
         RegisterBuiltInImpl(machine, "Insert", fsh::Insert);
         RegisterBuiltInImpl(machine, "Delete", fsh::Delete);
         RegisterBuiltInImpl(machine, "Lookup", fsh::Lookup);
