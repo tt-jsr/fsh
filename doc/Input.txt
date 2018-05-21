@@ -1,0 +1,18 @@
+Input - Read input from a user
+
+Description
+    StringPtr Input[];
+    StringPtr Input["prompt"];
+
+Returns
+    The inputed string
+
+Attributes
+
+Notes
+    The Prompt is optional
+
+Examples
+    s = Input["Please enter your name: "];
+
+See Also

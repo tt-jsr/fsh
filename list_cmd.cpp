@@ -124,13 +124,53 @@ namespace fsh
         throw std::runtime_error("Trying to [[]] non string or list");
     }
 
-    ElementPtr Part(Machine& machine, std::vector<ElementPtr>& args)
+    ListPtr SplitList(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        bool bySize(false);
+
+        ListPtr lp = GetList(machine, args, 0);
+        if (!lp)
+            throw std::runtime_error("SplitList expects list as first argument");
+        IntegerPtr np = GetInteger(machine, args, 1);
+        if (!np)
+            throw std::runtime_error("SplitList expects integer as second argument");
+        
+        machine.get_variable("bySize", bySize);
+
+        size_t sz = 0;
+        size_t nlists = 0;
+        if (bySize)
+        {
+            sz = np->value;
+            nlists = lp->items.size()/sz;
+        }
+        else
+        {
+            sz = lp->items.size()/np->value;
+            nlists = np->value;
+        }
+        ListPtr rtn = MakeList();
+        rtn->items.reserve(nlists);
+        size_t pos = 0;
+        for (int i = 0; i < nlists; ++i)
+        {
+            ListPtr l = MakeList();
+            l->items.insert(l->items.end(), lp->items.begin()+pos, lp->items.begin()+pos+sz);
+            rtn->items.push_back(l);
+            pos += sz;
+        }
+        ListPtr ll = rtn->items.back().cast<List>();
+        ll->items.insert(ll->items.end(), lp->items.begin()+pos, lp->items.end());
+        return rtn;
+    }
+
+    ElementPtr Item(Machine& machine, std::vector<ElementPtr>& args)
     {
         ElementPtr e = GetElement(machine, args, 0);
         IntegerPtr n = GetInteger(machine, args, 1);
         if (!n)
         {
-            throw std::runtime_error("Part an integer indicies");
+            throw std::runtime_error("Item an integer indicies");
         }
         int64_t idx = n->value;
         size_t size = GetListSize(e);
@@ -150,7 +190,7 @@ namespace fsh
             ListPtr p = e.cast<List>();
             return p->items[idx];
         }
-        throw std::runtime_error("Trying to part non string or list");
+        throw std::runtime_error("Trying to get item non string or list");
     }
 
 

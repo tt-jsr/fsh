@@ -179,7 +179,7 @@ namespace fsh
         }
     }
 
-    std::string toString(Machine& machine, ElementPtr e)
+    std::string toString(Machine& machine, ElementPtr e, bool asShort)
     {
         if (e.get() == nullptr)
             return "null";
@@ -242,6 +242,10 @@ namespace fsh
                 ListPtr lp = e.cast<List>();
                 std::string rtn;
                 rtn.push_back('[');
+                if (asShort)
+                {
+                    return std::string("[...]");
+                }
                 for (size_t idx = 0; idx < lp->items.size(); ++idx)
                 {
                     ElementPtr item = lp->items[idx];
@@ -261,6 +265,10 @@ namespace fsh
                 MapPtr mp = e.cast<Map>();
                 std::string rtn;
                 int count = 0;
+                if (asShort)
+                {
+                    return std::string("[()...]");
+                }
                 rtn.push_back('[');
                 for (auto& pr : mp->map)
                 {
@@ -668,7 +676,7 @@ namespace fsh
         RegisterBuiltInImpl(machine, "SubString", fsh::SubString);
 
         // List
-        RegisterBuiltInImpl(machine, "Part", fsh::Part);
+        RegisterBuiltInImpl(machine, "Item", fsh::Item);
         RegisterBuiltInImpl(machine, "Subscript", fsh::Subscript);
         RegisterBuiltInImpl(machine, "DefineRecord", fsh::DefineRecord);
         RegisterBuiltInImpl(machine, "CreateRecord", fsh::CreateRecord);
@@ -679,6 +687,7 @@ namespace fsh
         RegisterBuiltInImpl(machine, "Push", fsh::Push);
         RegisterBuiltInImpl(machine, "Pop", fsh::Pop);
         RegisterBuiltInImpl(machine, "SetRecordType", fsh::SetRecordType);
+        RegisterBuiltInImpl(machine, "SplitList", fsh::SplitList);
 
         // Map
         RegisterBuiltInImpl(machine, "CreateMap", fsh::CreateMap);

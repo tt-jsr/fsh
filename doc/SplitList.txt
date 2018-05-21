@@ -1,0 +1,20 @@
+SplitList - Split a list into a list of lists
+
+Description
+    SplitList[list, n];
+
+Returns
+    A list of lists
+
+Attributes
+    bySize->True
+        Split the list with n as the size of each list
+
+    bySize->False
+        Split the list n as the number of lists to create
+
+Notes
+
+Examples
+
+See Also

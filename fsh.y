@@ -560,7 +560,7 @@ void AstExecute(fsh::Ast *pAst)
             std::cout << ep->msg << std::endl;
     }
     if (interactive)
-        std::cout << fsh::toString(machine, e) << std::endl;
+        std::cout << fsh::toString(machine, e, true) << std::endl;
 }
 
 

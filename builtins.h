@@ -91,7 +91,7 @@ namespace fsh
      * Returns Element of the list
      * Example: Part[lst, 7];
      */
-    ElementPtr Part(Machine&, std::vector<ElementPtr>&);
+    ElementPtr Item(Machine&, std::vector<ElementPtr>&);
 
     /* DefineRecord[record_name, field1, field2, field3, ...];
      *    Creates a record
@@ -121,6 +121,8 @@ namespace fsh
     // ListPtr Set[list, index, item];
     // // Modifies and returns the existing list
     ListPtr Set(Machine&, std::vector<ElementPtr>&);
+
+    ListPtr SplitList(Machine&, std::vector<ElementPtr>&);
 
     // Push[list, item];
     ListPtr Push(Machine&, std::vector<ElementPtr>&);
@@ -218,7 +220,7 @@ namespace fsh
     BooleanPtr GetBoolean(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     FunctionDefIdPtr GetFunctionDefId(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     PairPtr GetPair(Machine& machine, std::vector<ElementPtr>& args, size_t index);
-    std::string toString(Machine& machine, ElementPtr e);
+    std::string toString(Machine& machine, ElementPtr e, bool asShort = false);
 
     /*****************************************************************/
     struct FunctionDefinition
