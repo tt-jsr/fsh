@@ -101,12 +101,12 @@ parseEr = &[line:
 ];
 
 BuildDates = &[pattern:
-    PipeLine[Format["ls -1rt {0}", pattern], Format["|grep -H \"build \" {0}", _1] ];
+    PipeLine[Format["ls -1rt {0}", pattern], Format["|zgrep -H \"build \" {0}", _1] ];
 ];
 
 StartDates = &[pattern:
     files = Format["ls -1rt {0}", pattern];
-    grepFunc = Format["|grep -H \"S T A R T\" {0}", _1];
+    grepFunc = Format["|zgrep -H \"S T A R T\" {0}", _1];
     PipeLine[files, grepFunc];
 ];
 
