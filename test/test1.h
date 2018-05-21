@@ -5,8 +5,6 @@
 #include <cppunit/TestRunner.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "../machine.h"
-
 class Test1 : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(Test1);

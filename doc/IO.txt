@@ -4,6 +4,7 @@ Description
     Functions to perform Input/Output
 
 See Also
+    Input           Read input from a user
     PipeLine        Execute a pipeline
     OpenFile        Open a file
     OpenProcess     Open a process

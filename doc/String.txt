@@ -13,4 +13,5 @@ See Also
     Subscript       Returns a range of chars from a string
     Trim            Trim whitespace
     Format          Format a string
+    Item            Get a character from a string
     +               Concatenate strings

@@ -1,10 +1,12 @@
 #include <vector>
 #include <iostream>
 #include <stdexcept>
+#include "instrusive_ptr.h"
 #include "common.h"
 #include "element.h"
-#include "machine.h"
+#include "bytecode.h"
 #include "builtins.h"
+#include "machine.h"
 
 namespace fsh
 {

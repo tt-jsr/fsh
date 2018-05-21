@@ -4,8 +4,6 @@
 #include <vector>
 #include <unordered_map>
 #include <functional>
-#include "instrusive_base.h"
-#include "instrusive_ptr.h"
 
 
 namespace fsh
@@ -28,6 +26,7 @@ namespace fsh
         ,ELEMENT_TYPE_FUNCTION_DEF_ID
         ,ELEMENT_TYPE_PAIR
         ,ELEMENT_TYPE_PIPELINE_ACTION
+        ,ELEMENT_TYPE_LIST_ITEM
     };
 
     struct Element : public instrusive_base
@@ -48,6 +47,7 @@ namespace fsh
         bool IsFunctionDefId() const {return type() == ELEMENT_TYPE_FUNCTION_DEF_ID;}
         bool IsPair() const {return type() == ELEMENT_TYPE_PAIR;}
         bool IsPipeLineAction() const {return type() == ELEMENT_TYPE_PIPELINE_ACTION;}
+        bool IsListItem() const {return type() == ELEMENT_TYPE_LIST_ITEM;}
     };
 
     typedef instrusive_ptr<Element> ElementPtr;
@@ -264,6 +264,16 @@ namespace fsh
 
     typedef instrusive_ptr<Pair> PairPtr;
 
+    struct ListItem : public Element
+    {
+        virtual ElementType type() const {return ELEMENT_TYPE_LIST_ITEM;}
+        virtual std::string stype() const {return "ListItem";}
+        ListPtr list;
+        size_t idx;
+    };
+
+    typedef instrusive_ptr<ListItem> ListItemPtr;
+
     struct ExecutionContext;
     typedef instrusive_ptr<ExecutionContext> ExecutionContextPtr;
 
@@ -280,5 +290,6 @@ namespace fsh
     FunctionDefIdPtr MakeFunctionDefId(int64_t id);
     PairPtr MakePair(ElementPtr f, ElementPtr s);
     PipeLineActionPtr MakePipeLineAction();
+    ListItemPtr MakeListItem();
 }
 

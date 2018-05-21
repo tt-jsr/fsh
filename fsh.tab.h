@@ -82,7 +82,8 @@ extern int yydebug;
     EQ = 292,
     NEQ = 293,
     RIGHT_ARROW = 294,
-    NEG = 295
+    DOT = 295,
+    NEG = 296
   };
 #endif
 

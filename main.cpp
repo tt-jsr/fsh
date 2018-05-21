@@ -1,9 +1,11 @@
 #include <iostream>
 #include <signal.h>
+#include "instrusive_ptr.h"
 #include "common.h"
-#include "machine.h"
-#include "ast.h"
+#include "element.h"
+#include "bytecode.h"
 #include "builtins.h"
+#include "machine.h"
 
 using namespace fsh;
 

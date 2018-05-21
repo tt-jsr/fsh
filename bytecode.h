@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <string.h>
 
 namespace fsh
 {
@@ -57,6 +58,12 @@ namespace fsh
             byte_codes.push_back(n2);
             byte_codes.push_back(n3);
             return byte_codes.size() - 1;
+        }
+
+        size_t debug_msg(const char *p)
+        {
+            const char *s = strdup(p);
+            code(BC_DEBUG_MSG, (uintptr_t)s);
         }
 
         void set_jump_location(size_t idx)

@@ -26,5 +26,5 @@ lex.yy.cpp : fsh.l
 
 
 clean: 
-	rm $(OBJS) lex.yy.cpp fsh
+	rm $(OBJS) lex.yy.cpp fsh.tab.cpp fsh
 

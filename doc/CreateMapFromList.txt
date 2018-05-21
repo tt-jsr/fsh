@@ -1,0 +1,23 @@
+CreateMapFromList = Create a map of lists from a list of lists
+
+Description
+    CreateMapFromList[listOfLists, fieldIdx];
+
+    Given a list of lists, this function will use the value at the given index position
+    as a key, and create a map of lists with that key.
+
+Returns
+    A Map of lists
+
+Attributes
+    abortOnError->True  
+        If field idx is out of bounds, throw exception (default)
+
+    abortOnError->False
+        If idx is out of bounds, silently skip
+
+Notes
+
+Examples
+
+See Also

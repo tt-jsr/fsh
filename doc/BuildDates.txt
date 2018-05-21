@@ -1,0 +1,18 @@
+BuildVersions - List all the build dates and versions of logfiles
+
+Description
+    BuildDates[pattern];
+    Prints to screen all log lines with "build "
+
+Returns
+    None
+
+Attributes
+
+Notes
+    import ers.fsh
+
+Examples
+    BuildDates["OC*"];
+
+See Also

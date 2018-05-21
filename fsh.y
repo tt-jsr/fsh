@@ -2,10 +2,13 @@
 %{
 #include <cstdio>
 #include <iostream>
+#include "instrusive_ptr.h"
 #include "common.h"
-#include "ast.h"
-#include "machine.h"
+#include "element.h"
+#include "bytecode.h"
 #include "builtins.h"
+#include "machine.h"
+#include "ast.h"
 #include "shell.h"
 
 using namespace std;
@@ -57,7 +60,7 @@ typedef fsh::ASTExpressionList el_t;
 %left '+' '-'
 %left '*' '/'
 %left RIGHT_ARROW
-%left '.'
+%left DOT
 %precedence NEG
 
 %start input
@@ -116,11 +119,18 @@ assignment_expression
         ass->lhs.reset((ast_t *)$1);
         $$ = ass;
     }
+    | dot_expression '=' expression {
+        fsh::ASTAssignment *ass = new fsh::ASTAssignment(lineno);
+        ass->rhs.reset((ast_t *)$3);
+        ass->lhs.reset((ast_t *)$1);
+        $$ = ass;
+    }
     ;
 
 expression
     : primary_expression        {$$ = $1;}
     | assignment_expression     {$$ = $1;}
+    | dot_expression            {$$ = $1;}
     | math_expression           {$$ = $1;}
     | relational_expression     {$$ = $1;}
     | function_call             {$$ = $1;}
@@ -130,6 +140,16 @@ expression
     | exception_expression      {$$ = $1;}
     | for_expression            {$$ = $1;}
     | subscript_expression      {$$ = $1;}
+    ;
+
+dot_expression
+    :expression DOT IDENTIFIER {
+        bop_t *bop = new bop_t(lineno);
+        bop->op = fsh::BC_BINARY_DOT;
+        bop->lhs.reset((ast_t *)$1);
+        bop->rhs.reset((ast_t *)$3);
+        $$ = bop;
+    }
     ;
 
 relational_expression
@@ -185,13 +205,6 @@ relational_expression
     |expression OR expression {
         bop_t *bop = new bop_t(lineno);
         bop->op = fsh::BC_LOGICAL_OR;
-        bop->lhs.reset((ast_t *)$1);
-        bop->rhs.reset((ast_t *)$3);
-        $$ = bop;
-    }
-    |expression '.' expression {
-        bop_t *bop = new bop_t(lineno);
-        bop->op = fsh::BC_BINARY_DOT;
         bop->lhs.reset((ast_t *)$1);
         bop->rhs.reset((ast_t *)$3);
         $$ = bop;
@@ -547,7 +560,7 @@ void AstExecute(fsh::Ast *pAst)
             std::cout << ep->msg << std::endl;
     }
     if (interactive)
-        std::cout << fsh::toString(machine, e) << std::endl;
+        std::cout << fsh::toString(machine, e, true) << std::endl;
 }
 
 

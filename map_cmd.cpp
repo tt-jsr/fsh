@@ -4,16 +4,61 @@
 #include <algorithm>
 #include <sstream>
 #include <limits>
+#include "instrusive_ptr.h"
 #include "common.h"
 #include "element.h"
-#include "machine.h"
+#include "bytecode.h"
 #include "builtins.h"
+#include "machine.h"
 
 namespace fsh
 {
     MapPtr CreateMap(Machine& machine, std::vector<ElementPtr>& args)
     {
         return MakeMap();
+    }
+
+    MapPtr CreateMapFromList(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        bool abortOnError(false);
+
+        MapPtr rtn = MakeMap();
+        ListPtr lp = GetList(machine, args, 0);
+        if (!lp)
+            throw std::runtime_error("CreateMapOfList requires a list of lists as the first arg");
+        IntegerPtr ip = GetInteger(machine, args, 1);
+        if (!ip)
+            throw std::runtime_error("CreateMapFromList required list index as second arg");
+        machine.get_variable("abortOnError", abortOnError);
+        size_t idx = ip->value;
+        for (ElementPtr e : lp->items)
+        {
+            if (!e->IsList())
+                throw std::runtime_error("CreateMapFromList, requires a list of lists");
+            ListPtr l = e.cast<List>();
+            if (idx >= l->items.size())
+            {
+                if (abortOnError)
+                    throw std::runtime_error("CreateMapFromList index out of bounds");
+            }
+            else
+            {
+                ElementPtr k = l->items[idx];
+                auto it = rtn->map.find(k);
+                if (it == rtn->map.end())
+                {
+                    ListPtr x = MakeList();
+                    x->items.push_back(l);
+                    rtn->map.emplace(k, x);
+                }
+                else
+                {
+                    ListPtr x = it->second.cast<List>();
+                    x->items.push_back(l);
+                }
+            }
+        }
+        return rtn;
     }
 
     ElementPtr Lookup(Machine& machine, std::vector<ElementPtr>& args)

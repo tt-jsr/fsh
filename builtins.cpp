@@ -3,10 +3,14 @@
 #include <cstdio>
 #include <algorithm>
 #include <sstream>
+#include "instrusive_ptr.h"
 #include "common.h"
 #include "element.h"
-#include "machine.h"
+#include "bytecode.h"
 #include "builtins.h"
+#include "machine.h"
+#include "execution_context.h"
+#include "oclog_cmd.h"
 
 namespace fsh
 {
@@ -175,7 +179,7 @@ namespace fsh
         }
     }
 
-    std::string toString(Machine& machine, ElementPtr e)
+    std::string toString(Machine& machine, ElementPtr e, bool asShort)
     {
         if (e.get() == nullptr)
             return "null";
@@ -238,6 +242,10 @@ namespace fsh
                 ListPtr lp = e.cast<List>();
                 std::string rtn;
                 rtn.push_back('[');
+                if (asShort)
+                {
+                    return std::string("[...]");
+                }
                 for (size_t idx = 0; idx < lp->items.size(); ++idx)
                 {
                     ElementPtr item = lp->items[idx];
@@ -257,6 +265,10 @@ namespace fsh
                 MapPtr mp = e.cast<Map>();
                 std::string rtn;
                 int count = 0;
+                if (asShort)
+                {
+                    return std::string("[()...]");
+                }
                 rtn.push_back('[');
                 for (auto& pr : mp->map)
                 {
@@ -293,7 +305,7 @@ namespace fsh
         case ELEMENT_TYPE_FUNCTION_DEF_ID:
             {
                 FunctionDefIdPtr fd = e.cast<FunctionDefId>();
-                return std::to_string(fd->funcid);
+                return "f(" +std::to_string(fd->funcid) + ")";
             }
             break;
         case ELEMENT_TYPE_PIPELINE_ACTION:
@@ -312,10 +324,15 @@ namespace fsh
                 }
             }
             break;
+        case ELEMENT_TYPE_LIST_ITEM:
+            {
+                return std::string("LI");
+            }
+            break;
         default:
             {
                 std::stringstream strm;
-                strm << "(" << e->type() << ")";
+                strm << "?" << e->type() << "?";
                 return strm.str();
             }
             break;
@@ -659,7 +676,7 @@ namespace fsh
         RegisterBuiltInImpl(machine, "SubString", fsh::SubString);
 
         // List
-        RegisterBuiltInImpl(machine, "Part", fsh::Part);
+        RegisterBuiltInImpl(machine, "Item", fsh::Item);
         RegisterBuiltInImpl(machine, "Subscript", fsh::Subscript);
         RegisterBuiltInImpl(machine, "DefineRecord", fsh::DefineRecord);
         RegisterBuiltInImpl(machine, "CreateRecord", fsh::CreateRecord);
@@ -670,9 +687,11 @@ namespace fsh
         RegisterBuiltInImpl(machine, "Push", fsh::Push);
         RegisterBuiltInImpl(machine, "Pop", fsh::Pop);
         RegisterBuiltInImpl(machine, "SetRecordType", fsh::SetRecordType);
+        RegisterBuiltInImpl(machine, "SplitList", fsh::SplitList);
 
         // Map
         RegisterBuiltInImpl(machine, "CreateMap", fsh::CreateMap);
+        RegisterBuiltInImpl(machine, "CreateMapFromList", fsh::CreateMapFromList);
         RegisterBuiltInImpl(machine, "Insert", fsh::Insert);
         RegisterBuiltInImpl(machine, "Delete", fsh::Delete);
         RegisterBuiltInImpl(machine, "Lookup", fsh::Lookup);

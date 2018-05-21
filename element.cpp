@@ -1,7 +1,11 @@
 #include <cstdint>
 #include <cassert>
 #include <iostream>
+#include "instrusive_ptr.h"
 #include "common.h"
+#include "element.h"
+#include "bytecode.h"
+#include "builtins.h"
 #include "machine.h"
 #include "ast.h"
 
@@ -82,5 +86,11 @@ namespace fsh
     {
         PipeLineActionPtr pl(new PipeLineAction());
         return pl;
+    }
+
+    ListItemPtr MakeListItem()
+    {
+        ListItemPtr li(new ListItem());
+        return li;
     }
 }

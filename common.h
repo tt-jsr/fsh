@@ -1,14 +1,5 @@
 #pragma once
 
-#include <cassert>
-#include <cstring>
-#include <string>
-#include <stdexcept>
-#include <functional>
-#include "instrusive_ptr.h"
-#include "element.h"
-#include "bytecode.h"
-
 namespace fsh
 {
     enum ByteCodeType
@@ -150,6 +141,8 @@ namespace fsh
         ,BC_DELETE_ITERATOR
 
         ,BC_GLOBAL
+        
+        ,BC_DEBUG_MSG
     };
 
     enum AstType
@@ -173,36 +166,5 @@ namespace fsh
         ,AST_RETURN
         ,AST_GLOBAL
     };
-
-    struct FunctionDefinition
-    {
-        ElementPtr Call(Machine& machine, int64_t nArgsOnStack);
-        virtual ElementPtr CallImpl(Machine&, std::vector<ElementPtr>& args) = 0;
-    };
-    
-    struct BuiltInFunction : public FunctionDefinition
-    {
-        ElementPtr CallImpl(Machine&, std::vector<ElementPtr>& args);
-
-        std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> builtIn;
-    };
-
-    struct ShellFunction : public FunctionDefinition
-    {
-        ElementPtr CallImpl(Machine&, std::vector<ElementPtr>& args);
-
-        std::vector<std::string> arg_names;
-        ByteCode shellFunction;
-    };
-
-    struct BoundFunction : public FunctionDefinition
-    {
-        ElementPtr CallImpl(Machine&, std::vector<ElementPtr>& args);
-
-        FunctionDefinition *target;
-        std::vector<ElementPtr> bound_args;
-        ByteCode attributes;
-    };
 }
 
-#include "ast.h"

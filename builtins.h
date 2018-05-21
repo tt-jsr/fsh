@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include "oclog_cmd.h"
 
 namespace fsh
 {
@@ -92,7 +91,7 @@ namespace fsh
      * Returns Element of the list
      * Example: Part[lst, 7];
      */
-    ElementPtr Part(Machine&, std::vector<ElementPtr>&);
+    ElementPtr Item(Machine&, std::vector<ElementPtr>&);
 
     /* DefineRecord[record_name, field1, field2, field3, ...];
      *    Creates a record
@@ -123,6 +122,8 @@ namespace fsh
     // // Modifies and returns the existing list
     ListPtr Set(Machine&, std::vector<ElementPtr>&);
 
+    ListPtr SplitList(Machine&, std::vector<ElementPtr>&);
+
     // Push[list, item];
     ListPtr Push(Machine&, std::vector<ElementPtr>&);
     ElementPtr Pop(Machine&, std::vector<ElementPtr>&);
@@ -130,6 +131,8 @@ namespace fsh
 
     /******** Map  *********************************/
     MapPtr CreateMap(Machine&, std::vector<ElementPtr>&);
+
+    MapPtr CreateMapFromList(Machine&, std::vector<ElementPtr>&);
 
     // Lookup[map, key];
     ElementPtr Lookup(Machine&, std::vector<ElementPtr>&);
@@ -219,5 +222,36 @@ namespace fsh
     BooleanPtr GetBoolean(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     FunctionDefIdPtr GetFunctionDefId(Machine& machine, std::vector<ElementPtr>& args, size_t index);
     PairPtr GetPair(Machine& machine, std::vector<ElementPtr>& args, size_t index);
-    std::string toString(Machine& machine, ElementPtr e);
+    std::string toString(Machine& machine, ElementPtr e, bool asShort = false);
+
+    /*****************************************************************/
+    struct FunctionDefinition
+    {
+        ElementPtr Call(Machine& machine, int64_t nArgsOnStack);
+        virtual ElementPtr CallImpl(Machine&, std::vector<ElementPtr>& args) = 0;
+    };
+    
+    struct BuiltInFunction : public FunctionDefinition
+    {
+        ElementPtr CallImpl(Machine&, std::vector<ElementPtr>& args);
+
+        std::function<ElementPtr (Machine&, std::vector<ElementPtr>&)> builtIn;
+    };
+
+    struct ShellFunction : public FunctionDefinition
+    {
+        ElementPtr CallImpl(Machine&, std::vector<ElementPtr>& args);
+
+        std::vector<std::string> arg_names;
+        ByteCode shellFunction;
+    };
+
+    struct BoundFunction : public FunctionDefinition
+    {
+        ElementPtr CallImpl(Machine&, std::vector<ElementPtr>& args);
+
+        FunctionDefinition *target;
+        std::vector<ElementPtr> bound_args;
+        ByteCode attributes;
+    };
 }

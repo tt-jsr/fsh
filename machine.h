@@ -4,10 +4,6 @@
 #include <map>
 #include <functional>
 #include <fstream>
-#include "element.h"
-#include "execution_context.h"
-#include "bytecode.h"
-
 #define private_impl public
 
 namespace fsh

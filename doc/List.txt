@@ -12,10 +12,11 @@ See Also
     Insert          Insert an element
     Set             Set an element
     Append          Append an items to a list
-    Len             Lenhth of list
-    Part            Get an element
+    Len             Length of list
+    Item            Get an element
     Pop             Pop (stack)
     Push            Push item (stack)
     Split           Split a sting into a list of words
+    SplitList       Split a list into a ist of lists
     Subscripts      Get elements og a list
 
