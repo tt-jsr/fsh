@@ -43,6 +43,7 @@ H           [a-fA-F0-9]
 
 [ \t]           {++column;}
 [\n]            {++lineno;column = 0;}
+^!.*            {system(yytext+1);}
 \+              {++column;return '+';}
 -               {++column;return '-';}
 \.              {++column;return DOT;}
