@@ -503,6 +503,15 @@ namespace fsh
         {
             machine.store_variable(arg_names[idx], MakeNone());
         }
+
+        ListPtr lp = MakeList();
+        // Store any unnamed variables in a list
+        for (; idx < args.size(); ++idx)
+        {
+            lp->items.push_back(args[idx]);
+        }
+        machine.store_variable("_args_", lp);
+
         shellFunction.ip = 0;
 
         machine.log() << "Function: Start code" << std::endl;

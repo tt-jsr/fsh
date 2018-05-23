@@ -100,14 +100,34 @@ parseEr = &[line:
     ];
 ];
 
+Command = &[
+    r = CreateList[];
+    cmd = "";
+    For [c in _args_
+    then
+        cmd = cmd + ToString[c] + " ";
+    ];
+    PipeLine[cmd + "|", r];
+    Return r;
+];
+
+
 BuildDates = &[pattern:
-    PipeLine[Format["ls -1rt {0}", pattern], Format["|zgrep -H \"build \" {0}", _1] ];
+    files = Command["ls -1rt", If [pattern then pattern; else "";] ];
+    For [f in files
+    then
+        Print[f];
+        System[Format["zgrep \"build \" {0}", f] ];
+    ];
 ];
 
 StartDates = &[pattern:
-    files = Format["ls -1rt {0}", pattern];
-    grepFunc = Format["|zgrep -H \"S T A R T\" {0}", _1];
-    PipeLine[files, grepFunc];
+    files = Command["ls -1rt", pattern];
+    For [f in files
+    then
+        Print[f];
+        System[Format["zgrep \"S T A R T\"{0}", f] ];
+    ];
 ];
 
 ParseErs = &[logfile:
