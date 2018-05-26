@@ -4,7 +4,11 @@ Description
     Set of comands for parsing oc logfiles
 
 See Also
+    ParseProtobuf   Parse a protobuf line into a list
     ParseErs        Returns a list of execution reports
     StartDates      List all the startup times
     BuildDates      List all the build versions
+    CurrentBuild    Show the latest build version
+    CurrentStart    Show the latest start
+
 

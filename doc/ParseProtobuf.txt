@@ -1,0 +1,27 @@
+ParseProtobuf - Parse a protobuf logline into a list
+
+Description
+    ParseProtobuf[line, find, recorddef];
+
+    Given a line from a log file, 'find' exists will be parsed into
+    a list.
+
+    line: The input log line
+    find: A pattern to search for (non-regex). If not found None is returned.
+    recorddef: The name of a record definition
+
+Returns
+    A List
+
+Attributes
+
+Notes
+    If a field is defined named 'raw', the line will be assigned to that
+    index
+
+Examples
+    DefineRecord["execreport", order_id, account_id, user_id, raw];
+    lst = ParseProtobuf[line, "ExecutionReport", "execreport"];
+
+See Also
+    DefineRecord
