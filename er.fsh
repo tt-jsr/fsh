@@ -105,19 +105,48 @@ Command = &[
     cmd = "";
     For [c in _args_
     then
-        cmd = cmd + ToString[c] + " ";
+        cmd = cmd + " " + If[c then ToString[c]; else "";];
     ];
     PipeLine[cmd + "|", r];
     Return r;
 ];
 
+CurrentBuild = &[pattern:
+    files = Command["ls -1t", pattern];
+    For [f in files
+    then
+         Print[f];
+         r = System["zgrep \"build \"", f];
+         If [r == 0
+         then
+            Return None;
+         else
+            Pass;
+         ];
+    ];
+];
+
+CurrentStart = &[pattern:
+    files = Command["ls -1t", pattern];
+    For [f in files
+    then
+         Print[f];
+         r = System["zgrep \"S T A R T\"", f];
+         If [r == 0
+         then
+            Return None;
+         else
+            Pass;
+         ];
+    ];
+];
 
 BuildDates = &[pattern:
-    files = Command["ls -1rt", If [pattern then pattern; else "";] ];
+    files = Command["ls -1rt", pattern];
     For [f in files
     then
         Print[f];
-        System[Format["zgrep \"build \" {0}", f] ];
+        System["zgrep \"build \"", f];
     ];
 ];
 
@@ -126,7 +155,7 @@ StartDates = &[pattern:
     For [f in files
     then
         Print[f];
-        System[Format["zgrep \"S T A R T\"{0}", f] ];
+        System["zgrep \"S T A R T\"", f];
     ];
 ];
 

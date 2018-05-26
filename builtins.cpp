@@ -373,13 +373,18 @@ namespace fsh
         return MakeNone();
     }
 
-    NonePtr System(Machine& machine, std::vector<ElementPtr>& args)
+    IntegerPtr System(Machine& machine, std::vector<ElementPtr>& args)
     {
-        StringPtr sp = GetString(machine, args, 0);
-        if (!sp)
-            throw std::runtime_error("System expects a string as first arg");
-        system(sp->value.c_str());
-        return MakeNone();
+        std::stringstream strm;
+        if (args.size() == 0)
+            throw std::runtime_error("System requires arguments");
+        for (ElementPtr e : args)
+        {
+            strm << toString(machine, e);
+            strm << " ";
+        }
+        int r = system(strm.str().c_str());
+        return MakeInteger(r);
     }
 
     StringPtr Type(Machine& machine, std::vector<ElementPtr>& args)

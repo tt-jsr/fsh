@@ -1,0 +1,15 @@
+System - Execute a system command
+
+Description
+    System[arg1, arg2...];
+
+Returns
+    The return code of the executed command
+
+Attributes
+
+Notes
+
+Examples
+
+See Also
