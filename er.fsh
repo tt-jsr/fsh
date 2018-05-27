@@ -27,21 +27,16 @@ Append[LogCleanList, "session_manager_inl"];
 
 DefineRecord["execreport", order_id, exec_type, ord_status, user_id, account_id, raw];
 
-ordersById = CreateMap[];
-orders = CreateList[];
-ordersByAccount = CreateMap[];
-ordersByExecType = CreateMap[];
-
 
 ######################################
 # Protobuf print the ER
-prettyPrint = &[er:
+PrettyPrint = &[er:
     PipeLine[er.raw, "|pfmt"];
 ];
 
 ########################################
 # Format the ER
-formatEr = &[er:
+FormatEr = &[er:
     If [er != None
     then
         s = "";
@@ -53,62 +48,6 @@ formatEr = &[er:
     else
         Return PIPELINE_RESTART;
     ];
-];
-
-# Given a record, create a Pair (field, record)
-RecordPair = &[record, field:
-    Return CreatePair[record[[field]], record];
-];
-
-# Given an a Record, fieldid and value, reject records that match
-RecordFilter = &[record, field, value:
-    Try [
-        If [record[[field]] == value
-        then
-            Return PIPELINE_RESTART;
-        else
-            Return record;
-        ];
-    catch
-        Return PIPELINE_RESTART;
-    ];
-];
-
-# Given an a Record, fieldid and value, select records that match
-RecordSelect = &[record, field, value:
-    Try [
-        If [record[[field]] == value
-        then
-            Return record;
-        else
-            Return PIPELINE_RESTART;
-        ];
-    catch
-        Return PIPELINE_RESTART;
-    ];
-];
-
-
-# Parse execution reports
-parseEr = &[line:
-    er = ParseProtobuf[line, "ExecutionReport", "execreport"];
-    If [er != None
-    then
-        Return er;
-    else
-        Return PIPELINE_RESTART;
-    ];
-];
-
-Command = &[
-    r = CreateList[];
-    cmd = "";
-    For [c in _args_
-    then
-        cmd = cmd + " " + If[c then ToString[c]; else "";];
-    ];
-    PipeLine[cmd + "|", r];
-    Return r;
 ];
 
 CurrentBuild = &[pattern:
@@ -161,9 +100,10 @@ StartDates = &[pattern:
 
 ParseErs = &[logfile:
     lst = CreateList[];
-    PipeLine[logfile+">", parseEr, lst];
+    PipeLine[logfile+">", ParseProtobuf[_1, "ExecutionReport", "execreport"], lst];
     Return lst;
 ];
+
 
 
 

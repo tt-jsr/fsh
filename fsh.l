@@ -25,6 +25,20 @@ extern "C" int yywrap() {
 
 std::vector<YY_BUFFER_STATE> import_stack;
 
+void ImportImpl(const char *pFile)
+{
+    interactive = false;
+    import_stack.push_back(YY_CURRENT_BUFFER);
+    yyin = fopen(pFile, "r");
+    if (!yyin)
+    {
+        std::stringstream strm;
+        strm << "Cannot open " << pFile;
+        throw std::runtime_error(strm.str()); 
+    }
+    yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
+}
+
 %}
 
 D           [0-9]
@@ -88,17 +102,8 @@ global          {column += 6;return GLOBAL;}
 import          {column += 6;BEGIN(import);}
 <import>[ \t]*  /* eat white space */
 <import>[^ \t\n]+ { /* Include file name*/
-                    interactive = false;
-                    import_stack.push_back(YY_CURRENT_BUFFER);
-                    yyin = fopen(yytext, "r");
-                    if (!yyin)
-                    {
-                        std::stringstream strm;
-                        strm << "Cannot open " << yytext;
-                        throw std::runtime_error(strm.str()); 
-                    }
-                    yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
                     BEGIN(INITIAL);
+                    ImportImpl(yytext);
                 }
 <<EOF>>         {
                     if (import_stack.size() == 0)

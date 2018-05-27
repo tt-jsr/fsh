@@ -504,7 +504,11 @@ namespace fsh
                 data = PipelineStage(machine, args[idx], data);
             }
             machine.log() << "pl: " << idx << ": Stage returned: " << toString(machine, data) << std::endl;
-            if (data->IsPipeLineAction())
+            if (data->IsNone())
+            {
+                idx = args.size();
+            }
+            else if (data->IsPipeLineAction())
             {
                 PipeLineActionPtr pla = data.cast<PipeLineAction>();
                 if (pla->action == PipeLineAction::RESTART)

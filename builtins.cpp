@@ -12,6 +12,8 @@
 #include "execution_context.h"
 #include "oclog_cmd.h"
 
+extern void ImportImpl(const char *);
+
 namespace fsh
 {
     ElementPtr GetElement(Machine& machine, std::vector<ElementPtr>& args, size_t index)
@@ -370,6 +372,15 @@ namespace fsh
         }
         if (addnl)
             machine.log() << std::endl;
+        return MakeNone();
+    }
+
+    NonePtr LazyImport(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        StringPtr sp = GetString(machine, args,0);
+        if (!sp)
+            throw std::runtime_error("LazyImport requires import name");
+        ImportImpl(sp->value.c_str());
         return MakeNone();
     }
 
@@ -742,6 +753,7 @@ namespace fsh
         RegisterBuiltInImpl(machine, "IsFileHandle", fsh::IsFileHandle);
         RegisterBuiltInImpl(machine, "IsPair", fsh::IsPair);
         RegisterBuiltInImpl(machine, "IsFunction", fsh::IsFunction);
+        RegisterBuiltInImpl(machine, "LazyImport", fsh::LazyImport);
 
         // Ers
         RegisterBuiltInImpl(machine, "ParseProtobuf", fsh::ParseProtobuf);
