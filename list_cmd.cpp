@@ -124,6 +124,37 @@ namespace fsh
         throw std::runtime_error("Trying to [[]] non string or list");
     }
 
+    ListPtr Head(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ListPtr lp = GetList(machine, args, 0);
+        if (!lp)
+            throw std::runtime_error("Head requires list as first argument");
+
+        if (lp->items.size() == 0)
+            throw std::runtime_error("Head list is empty");
+
+        ListPtr rtn = MakeList();
+        rtn->items.push_back(lp->items[0]);
+        return rtn;
+    }
+
+    ListPtr Tail(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        ListPtr lp = GetList(machine, args, 0);
+        if (!lp)
+            throw std::runtime_error("Head requires list as first argument");
+
+        if (lp->items.size() == 0)
+            throw std::runtime_error("Head list is empty");
+
+        ListPtr rtn = MakeList();
+        for(size_t idx = 1; idx < lp->items.size(); ++idx)
+        {
+            rtn->items.push_back(lp->items[idx]);
+        }
+        return rtn;
+    }
+
     ListPtr SplitList(Machine& machine, std::vector<ElementPtr>& args)
     {
         bool bySize(false);

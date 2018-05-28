@@ -17,6 +17,8 @@ See Also
     Pop             Pop (stack)
     Push            Push item (stack)
     Split           Split a sting into a list of words
-    SplitList       Split a list into a ist of lists
+    SplitList       Split a list into a list of lists
+    Head            Get the head of a list
+    Tail            Get the tail of a list
     Subscripts      Get elements og a list
 

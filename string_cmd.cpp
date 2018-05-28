@@ -139,6 +139,9 @@ namespace fsh
 
     ListPtr Split(Machine& machine, std::vector<ElementPtr>& args)
     {
+        bool collapse(false);
+        machine.get_variable("collapse", collapse);
+
         StringPtr sp = GetString(machine, args, 0);
         if (!sp)
             throw std::runtime_error("Split requires a string to be split");
@@ -147,6 +150,7 @@ namespace fsh
             separators = MakeString(" ");
         ListPtr lst = MakeList("__list__");
         std::string s;
+        bool prevWasDelimiter(false);
         for (auto it = sp->value.begin(); it != sp->value.end(); ++it)
         {
             if (separators->value.find_first_of(*it) != std::string::npos)
@@ -154,6 +158,12 @@ namespace fsh
                 StringPtr item = MakeString(s);
                 lst->items.push_back(item);
                 s = "";
+                if (collapse)
+                {
+                    while (separators->value.find_first_of(*it) != std::string::npos)
+                        ++it;
+                    --it;
+                }
             }
             else
             {

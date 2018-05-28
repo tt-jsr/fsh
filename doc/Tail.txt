@@ -1,0 +1,16 @@
+Tail : Get the tail of the list
+
+Description
+    Tail[lst];
+
+Returns
+    Returns a list containing the last elements of a list
+
+Attributes
+
+Notes
+
+Examples
+
+See Also
+    Head

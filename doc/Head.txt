@@ -1,0 +1,16 @@
+Head : Get the head of the list
+
+Description
+    Head[lst];
+
+Returns
+    Returns a list containing the first element of a list
+
+Attributes
+
+Notes
+
+Examples
+
+See Also
+    Tail

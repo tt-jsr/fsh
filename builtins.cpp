@@ -476,6 +476,7 @@ namespace fsh
 
     ElementPtr FunctionDefinition::Call(Machine& machine, int64_t nArgsOnStack)
     {
+        //std::cout << "=== Call()" << std::endl;
         std::vector<ElementPtr> args;
         while(nArgsOnStack)
         {
@@ -502,6 +503,7 @@ namespace fsh
     
     ElementPtr BuiltInFunction::CallImpl(Machine& machine, std::vector<ElementPtr>& args)
     {
+        //std::cout << "=== Builtin::CallImpl()" << std::endl;
         return builtIn(machine, args);
     }
 
@@ -509,6 +511,7 @@ namespace fsh
 
     ElementPtr ShellFunction::CallImpl(Machine& machine, std::vector<ElementPtr>& args)
     {
+        //std::cout << "=== shell::CallImpl()" << std::endl;
         size_t end = std::min(arg_names.size(), args.size());
         size_t idx = 0;
         for (idx; idx < end; ++idx)
@@ -546,6 +549,7 @@ namespace fsh
 
     ElementPtr BoundFunction::CallImpl(Machine& machine, std::vector<ElementPtr>& args)
     {
+        //std::cout << "=== bound::CallImpl()" << std::endl;
         std::vector<ElementPtr> target_args;
         for (ElementPtr& ba : bound_args)
         {
@@ -570,8 +574,10 @@ namespace fsh
             }
         }
 
+        attributes.ip = 0;
         while(attributes.ip < attributes.size())
         {
+            //std::cout << "=== attributes" << std::endl;
             if (!fsh::Execute(machine, attributes))
                 break;
             ++attributes.ip;
@@ -722,6 +728,8 @@ namespace fsh
         RegisterBuiltInImpl(machine, "Pop", fsh::Pop);
         RegisterBuiltInImpl(machine, "SetRecordType", fsh::SetRecordType);
         RegisterBuiltInImpl(machine, "SplitList", fsh::SplitList);
+        RegisterBuiltInImpl(machine, "Head", fsh::Head);
+        RegisterBuiltInImpl(machine, "Tail", fsh::Tail);
 
         // Map
         RegisterBuiltInImpl(machine, "CreateMap", fsh::CreateMap);

@@ -126,6 +126,9 @@ namespace fsh
 
     ListPtr SplitList(Machine&, std::vector<ElementPtr>&);
 
+    ListPtr Head(Machine&, std::vector<ElementPtr>&);
+    ListPtr Tail(Machine&, std::vector<ElementPtr>&);
+
     // Push[list, item];
     ListPtr Push(Machine&, std::vector<ElementPtr>&);
     ElementPtr Pop(Machine&, std::vector<ElementPtr>&);

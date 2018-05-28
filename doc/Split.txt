@@ -6,10 +6,17 @@ Description
     Return a list of the words in the string, using sep as the delimiter string.
     If sep does not exist, " " will be used by default.
 
+    String: The string to be separated
+    sep:    A set of characters defining the delimiters
+
 Returns
     A list
 
 Attributes
+    collapse->True  Collapse multiple occurences of the delimiter
+                    into one split
+    collapse->False Each occurence of the delimiter results in a
+                    separate split (default)
 
 Notes
 
