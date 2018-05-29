@@ -127,7 +127,7 @@ help            { BEGIN(help);}
                     if (p)
                     {
                         command += p;
-                        command += "/doc/";
+                        command += "/";
                     }
                     else
                         command = "doc/";

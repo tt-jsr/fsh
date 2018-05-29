@@ -1202,7 +1202,7 @@ YY_RULE_SETUP
                     if (p)
                     {
                         command += p;
-                        command += "/doc/";
+                        command += "/";
                     }
                     else
                         command = "doc/";
