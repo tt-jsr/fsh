@@ -103,7 +103,19 @@ import          {column += 6;BEGIN(import);}
 <import>[ \t]*  /* eat white space */
 <import>[^ \t\n]+ { /* Include file name*/
                     BEGIN(INITIAL);
-                    ImportImpl(yytext);
+                    std::string path;
+                    char *p = getenv("FSH_SCRIPTDIR");
+                    if(p)
+                    {
+                        path = p;
+                        path += "/";
+                        path += yytext;
+                    }
+                    else
+                    {
+                        path = yytext;
+                    }
+                    ImportImpl(path.c_str());
                 }
 <<EOF>>         {
                     if (import_stack.size() == 0)
