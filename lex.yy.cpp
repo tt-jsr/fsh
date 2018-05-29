@@ -1237,19 +1237,28 @@ YY_RULE_SETUP
 #line 158 "fsh.l"
 {
                     std::string command;
-                    command = "cat doc/Intro.txt";
+                    command = "cat ";
+                    char *p = getenv("FSH_HELPDIR");
+                    if (p)
+                    {
+                        command += p;
+                        command += "/";
+                    }
+                    else
+                        command = "doc/";
+                    command += "Intro.txt";
                     system(command.c_str());
                     BEGIN(INITIAL);
                 }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 164 "fsh.l"
+#line 173 "fsh.l"
 {quotedstring.clear(); BEGIN(qstr);}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 165 "fsh.l"
+#line 174 "fsh.l"
 {
                     BEGIN(INITIAL);
                     fsh::ASTConstant *bc = new fsh::ASTConstant(lineno);
@@ -1263,7 +1272,7 @@ YY_RULE_SETUP
 case 54:
 /* rule 54 can match eol */
 YY_RULE_SETUP
-#line 174 "fsh.l"
+#line 183 "fsh.l"
 { /* Unterminated string - error */
                     ++lineno;
                     column = 1;
@@ -1271,23 +1280,23 @@ YY_RULE_SETUP
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 179 "fsh.l"
+#line 188 "fsh.l"
 {quotedstring.push_back('\n');++lineno;column=1;}
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 180 "fsh.l"
+#line 189 "fsh.l"
 quotedstring.push_back('\t');
 	YY_BREAK
 case 57:
 /* rule 57 can match eol */
 YY_RULE_SETUP
-#line 181 "fsh.l"
+#line 190 "fsh.l"
 quotedstring.push_back(yytext[1]);
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 182 "fsh.l"
+#line 191 "fsh.l"
 {
                     char *yptr = yytext;
                     while(*yptr)
@@ -1302,7 +1311,7 @@ case 59:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
-#line 190 "fsh.l"
+#line 199 "fsh.l"
 {column += 4;
                  BEGIN(sys);
                 }
@@ -1312,7 +1321,7 @@ case 60:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
-#line 193 "fsh.l"
+#line 202 "fsh.l"
 {column+=5;
                  BEGIN(INITIAL);
                  return ';';
@@ -1325,7 +1334,7 @@ YY_LINENO_REWIND_TO(yy_cp - 1);
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
-#line 197 "fsh.l"
+#line 206 "fsh.l"
 {column += strlen(yytext);
                  yylval = new fsh::ASTSystem(lineno, yytext); 
                  return SYSTEM; 
@@ -1334,7 +1343,7 @@ YY_RULE_SETUP
 case 62:
 /* rule 62 can match eol */
 YY_RULE_SETUP
-#line 201 "fsh.l"
+#line 210 "fsh.l"
 {
                  column = 0;
                  ++lineno;
@@ -1345,7 +1354,7 @@ case 63:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
-#line 207 "fsh.l"
+#line 216 "fsh.l"
 {column += 1;
                  BEGIN(cmd);
                  commandMode = true;
@@ -1354,7 +1363,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 212 "fsh.l"
+#line 221 "fsh.l"
 {column += 1;
                  BEGIN(INITIAL);
                  commandMode= false;
@@ -1363,7 +1372,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 217 "fsh.l"
+#line 226 "fsh.l"
 {column += strlen(yytext);
                  yylval = strdup(yytext);
                  return CMD_WORD;
@@ -1371,42 +1380,42 @@ YY_RULE_SETUP
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 221 "fsh.l"
+#line 230 "fsh.l"
 {column += 1;
                  return CMD_AMP;
                 }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 224 "fsh.l"
+#line 233 "fsh.l"
 {column += 1;
                  return CMD_SEMI;
                 }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 227 "fsh.l"
+#line 236 "fsh.l"
 {column += 1;
                  return CMD_BAR;
                 }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 230 "fsh.l"
+#line 239 "fsh.l"
 {column += 1;
                  return CMD_LT;
                 }
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 233 "fsh.l"
+#line 242 "fsh.l"
 {column += 1;
                  return CMD_GT;
                 }
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 236 "fsh.l"
+#line 245 "fsh.l"
 {column += 1;
                  return CMD_GTGT;
                 }
@@ -1414,7 +1423,7 @@ YY_RULE_SETUP
 case 72:
 /* rule 72 can match eol */
 YY_RULE_SETUP
-#line 239 "fsh.l"
+#line 248 "fsh.l"
 {lineno += 1;
                  column = 0;
                  return CMD_NL;
@@ -1422,7 +1431,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 243 "fsh.l"
+#line 252 "fsh.l"
 { 
     column += strlen(yytext);
     fsh::ASTConstant *bc = new fsh::ASTConstant(lineno);
@@ -1434,7 +1443,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 252 "fsh.l"
+#line 261 "fsh.l"
 { 
     column += strlen(yytext);
     fsh::ASTConstant *bc = new fsh::ASTConstant(lineno);
@@ -1446,7 +1455,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 261 "fsh.l"
+#line 270 "fsh.l"
 { 
     column += strlen(yytext);
     int64_t id = machine.string_table_add(yytext);
@@ -1462,15 +1471,15 @@ case 76:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
-#line 270 "fsh.l"
+#line 279 "fsh.l"
 ;
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 271 "fsh.l"
+#line 280 "fsh.l"
 ECHO;
 	YY_BREAK
-#line 1474 "lex.yy.c"
+#line 1483 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2472,7 +2481,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 271 "fsh.l"
+#line 280 "fsh.l"
 
 
 

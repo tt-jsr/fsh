@@ -157,7 +157,16 @@ help            { BEGIN(help);}
                 }
 <help>\n        {
                     std::string command;
-                    command = "cat doc/Intro.txt";
+                    command = "cat ";
+                    char *p = getenv("FSH_HELPDIR");
+                    if (p)
+                    {
+                        command += p;
+                        command += "/";
+                    }
+                    else
+                        command = "doc/";
+                    command += "Intro.txt";
                     system(command.c_str());
                     BEGIN(INITIAL);
                 }
