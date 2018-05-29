@@ -33,7 +33,3 @@ DoMenu = &[menu:
     ];
 ];
 
-m = CreateList[];
-AddMenu[m, "Option 1", &[Print["first"];] ];
-AddMenu[m, "Option 2", &[ Print["second"]; ] ];
-AddMenu[m, "Option 3", &[Print["third"];] ];
