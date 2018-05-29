@@ -15,6 +15,10 @@ OBJS	= $(SRC:.cpp=.o)
 fsh : $(OBJS) $(DEPS)
 	$(CC) $(CPPFLAGS) -o $@ $(OBJS) $(LIBS)
 
+install:
+	tar cvf fsh.tar fsh er.fsh menu.fsh std.fsh doc/*
+	mv fsh.tar ~/bin
+
 clean: 
 	rm $(OBJS) fsh
 
