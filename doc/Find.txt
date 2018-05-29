@@ -9,9 +9,16 @@ Returns
     Integer - The position where the string is found. Return -1 if not found
 
 Attributes
+    pipeline->True Make Find suitable for use in a PipeLine. Return None if no
+                   match is found, otherwise returns the string. This makes
+                   Find operate as a selection filter
+
+    reverse->True  If the pipeline attribute is true, reverse the return
+                   values. This makes Find operate as a reject filter.
 
 Notes
 
 Examples
 
 See Also
+    PipeLine

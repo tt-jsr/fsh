@@ -205,7 +205,7 @@ namespace fsh
     IntegerPtr Strcmp(Machine&, std::vector<ElementPtr>&);
     ElementPtr RegMatch(Machine&, std::vector<ElementPtr>&);
     ElementPtr RegSearch(Machine&, std::vector<ElementPtr>&);
-    IntegerPtr Find(Machine&, std::vector<ElementPtr>&);
+    ElementPtr Find(Machine&, std::vector<ElementPtr>&);
     StringPtr Format(Machine&, std::vector<ElementPtr>&);
 
     // SubString[String, pos, count]

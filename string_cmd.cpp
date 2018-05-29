@@ -68,18 +68,39 @@ namespace fsh
         throw std::runtime_error("Trim requires a string argument");
     }
 
-    IntegerPtr Find(Machine& machine, std::vector<ElementPtr>& args)
+    ElementPtr Find(Machine& machine, std::vector<ElementPtr>& args)
     {
+        bool pipeline(false);
+        bool reverse(false);
+
+        machine.get_variable("pipeline", pipeline);
+        machine.get_variable("reverse", reverse);
+
         StringPtr s = GetString(machine, args, 0);
         if (!s)
-            return MakeInteger(-1);
+            throw std::runtime_error("Find requires string as first argument");
+
         StringPtr search = GetString(machine, args, 1);
         if (!search)
-            return MakeInteger(-1);
+            throw std::runtime_error("Find requires string as second argument");
 
         size_t pos = s->value.find(search->value);
         if (pos == std::string::npos)
+        {
+            if (pipeline)
+            {
+                if (reverse)
+                    return s;
+                return MakeNone();
+            }
             return MakeInteger(-1);
+        }
+        if (pipeline)
+        {
+            if (reverse)
+                return MakeNone();
+            return s;
+        }
         return MakeInteger(pos);
     }
 
