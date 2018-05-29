@@ -642,6 +642,17 @@ namespace fsh
         return MakePair(f, s);
     }
 
+    StringPtr GetEnv(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        StringPtr sp = GetString(machine, args, 0);
+        if (!sp)
+            throw std::runtime_error("GetEnv requires name of the env variable");
+        char *p = getenv(sp->value.c_str());
+        if (p)
+            return MakeString(p);
+        return MakeNone();
+    }
+
     ElementPtr MachineProperty(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr sp = GetString(machine, args, 0);
@@ -762,6 +773,7 @@ namespace fsh
         RegisterBuiltInImpl(machine, "IsPair", fsh::IsPair);
         RegisterBuiltInImpl(machine, "IsFunction", fsh::IsFunction);
         RegisterBuiltInImpl(machine, "LazyImport", fsh::LazyImport);
+        RegisterBuiltInImpl(machine, "GetEnv", fsh::GetEnv);
 
         // Ers
         RegisterBuiltInImpl(machine, "ParseProtobuf", fsh::ParseProtobuf);

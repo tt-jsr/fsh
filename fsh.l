@@ -122,7 +122,15 @@ help            { BEGIN(help);}
 <help>[ \t]*    /* eat whitespace */
 <help>[a-zA-Z0-9_]+ {
                     std::string command;
-                    command = "cat doc/";
+                    command = "cat ";
+                    char *p = getenv("FSH_HELPDIR");
+                    if (p)
+                    {
+                        command += p;
+                        command += "/doc/";
+                    }
+                    else
+                        command = "doc/";
                     if (*yytext == '\0')
                     {
                         command += "Intro.txt";
