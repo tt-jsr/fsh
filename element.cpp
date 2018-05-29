@@ -1,9 +1,3 @@
-        StringPtr sp = GetString(machine, args, 0);
-if (!sp)
-throw std::runtime_error("GetEnv requires name of the env variable");
-char *p = getenv(sp->value.c_str());
-if (p)
-return MakeString(p);#include <cstdint>
 #include <cassert>
 #include <iostream>
 #include "instrusive_ptr.h"

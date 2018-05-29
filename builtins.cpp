@@ -642,7 +642,7 @@ namespace fsh
         return MakePair(f, s);
     }
 
-    StringPtr GetEnv(Machine& machine, std::vector<ElementPtr>& args)
+    ElementPtr GetEnv(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr sp = GetString(machine, args, 0);
         if (!sp)
