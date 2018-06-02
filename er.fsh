@@ -31,7 +31,15 @@ DefineRecord["execreport", order_id, exec_type, ord_status, user_id, account_id,
 ######################################
 # Protobuf print the ER
 PrettyPrint = &[er:
-    PipeLine[er.raw, "|pfmt"];
+    If [Type[er] == "list"
+    then
+        s="";
+        PipeLine[er.raw, "|pfmt", s];
+        Return s;
+    else
+        PipeLine[er, "|pfmt", s];
+        Return s;
+    ];
 ];
 
 ########################################

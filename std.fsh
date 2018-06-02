@@ -38,13 +38,20 @@ RecordSelect = &[record, field, value:
 ];
 
 Command = &[
-    r = CreateList[];
+    Attribute["asString", False];
     cmd = "";
     For [c in _args_
     then
         cmd = cmd + " " + If[c then ToString[c]; else "";];
     ];
-    PipeLine[cmd + "|", r];
+    If [asString == True
+    then
+        r = "";
+        PipeLine[cmd + "|", r];
+    else
+        r = CreateList[];
+        PipeLine[cmd + "|", r];
+    ];
     Return r;
 ];
 

@@ -11,3 +11,13 @@ More help on these sections:
     OC          OC log functions
 
 
+Need to write help for these
+LazyImport - Import a file when called, instead of the 'import' keyword which
+             imports when parsed
+
+GetEnv     - Get the value from an enviroenment variable
+Attribute  - Set the default value for an attribute variable
+global     - keyword to indicate a variable is iat global scope
+bind       - Bind syntax
+
+

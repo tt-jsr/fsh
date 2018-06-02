@@ -17,6 +17,7 @@ namespace fsh
     IntegerPtr System(Machine&, std::vector<ElementPtr>&);
     NonePtr    LazyImport(Machine&, std::vector<ElementPtr>&);
     ElementPtr GetEnv(Machine&, std::vector<ElementPtr>&);
+    ElementPtr Attribute(Machine&, std::vector<ElementPtr>&);
 
     /* Converts to an Integer
      * Throws exception if argument is not a String, Float or Int

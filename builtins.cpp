@@ -653,6 +653,29 @@ namespace fsh
         return MakeNone();
     }
 
+    ElementPtr Attribute(Machine& machine, std::vector<ElementPtr>& args)
+    {
+        StringPtr sp = GetString(machine, args, 0);
+        if (!sp)
+            throw std::runtime_error("Attribute requires name of the  variable");
+
+        ElementPtr ep = GetElement(machine, args, 1);
+        if (!ep)
+            throw std::runtime_error("Attribute requires the value of the variable");
+
+        size_t num_contexts = machine.executionContexts.size();
+        if (num_contexts <= 2)
+            throw std::runtime_error("Attributes must be called from a function");
+
+        ElementPtr e;
+        ExecutionContextPtr ctx = machine.executionContexts[num_contexts-2];
+        if (ctx->GetVariable(sp->value, e) == false)
+        {
+            ctx->AddVariable(sp->value, ep);
+        }
+        return MakeNone();
+    }
+
     ElementPtr MachineProperty(Machine& machine, std::vector<ElementPtr>& args)
     {
         StringPtr sp = GetString(machine, args, 0);
@@ -774,6 +797,7 @@ namespace fsh
         RegisterBuiltInImpl(machine, "IsFunction", fsh::IsFunction);
         RegisterBuiltInImpl(machine, "LazyImport", fsh::LazyImport);
         RegisterBuiltInImpl(machine, "GetEnv", fsh::GetEnv);
+        RegisterBuiltInImpl(machine, "Attribute", fsh::Attribute);
 
         // Ers
         RegisterBuiltInImpl(machine, "ParseProtobuf", fsh::ParseProtobuf);
