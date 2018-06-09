@@ -11,13 +11,36 @@ More help on these sections:
     OC          OC log functions
 
 
-Need to write help for these
+********   Need to write help for these *********
 LazyImport - Import a file when called, instead of the 'import' keyword which
              imports when parsed
 
-GetEnv     - Get the value from an enviroenment variable
+GetEnv     - Get the value from an environment variable
 Attribute  - Set the default value for an attribute variable
-global     - keyword to indicate a variable is iat global scope
+global     - keyword to indicate a variable is at global scope
 bind       - Bind syntax
+_args_     - Any unamed arguments to a command will be placed in local
+             variable _args_
+
+********* std.fsh ******************
+
+Edit[]     - Edits then imports junk.fsh
+
+RecordPair[fieldid, record]
+            Given a record, create a Pair (field, record)
+
+RecordFilter[record, fieldid, value]
+            Given an a Record, fieldid and value, reject records that match
+
+RecordSelect[record, field, value]
+            Given an a Record, fieldid and value, select records that match
+
+Command[arg1, ...]
+            Execute a command. Command can be a single string such as "ls -la"
+            or multiple arguments ["ls", "-l", "-a"];
+
+            Returns a list of the command output. 
+            Attribute asString->True
+                Returns a string of the output.
 
 
